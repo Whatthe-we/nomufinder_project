@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';  // 추가: GoRouter를 사용하기 위한 import
 import '../../widgets/indicator_bar.dart';
 import 'package:project_nomufinder/viewmodels/input_viewmodel.dart';
 
@@ -76,7 +77,8 @@ class InputFinalScreen extends ConsumerWidget {
                   padding: const EdgeInsets.only(bottom: 40),
                   child: GestureDetector(
                     onTap: () {
-                      // 시작하기 액션
+                      // 시작하기 버튼을 누르면 home_screen.dart로 이동
+                      context.go('/home');
                     },
                     child: Container(
                       height: 64,
