@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false, // ✅ 디버그 배너 제거
       routerConfig: router, // GoRouter 사용
       title: 'NomuFinder',
       theme: ThemeData(
