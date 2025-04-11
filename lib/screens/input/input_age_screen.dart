@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../viewmodels/input_viewmodel.dart';
 import '../../widgets/question_template.dart';
 
-class InputGenderScreen extends ConsumerWidget {
-  const InputGenderScreen({super.key});
+class InputAgeScreen extends ConsumerWidget {
+  const InputAgeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -12,12 +12,19 @@ class InputGenderScreen extends ConsumerWidget {
     final state = ref.watch(inputViewModelProvider);
 
     return QuestionTemplate(
-      currentIndex: 0,
+      currentIndex: 1, // 인디케이터 위치
       totalSteps: InputStep.values.length,
-      question: '당신의 성별을 선택해주세요!',
-      options: const ['여성', '남성', '제 3의 성'],
-      selectedOption: state.gender,
-      onSelect: vm.setGender,
+      question: '귀하의 연령대는 어떻게 되십니까?',
+      options: const [
+        '10대',
+        '20대',
+        '30대',
+        '40대',
+        '50대',
+        '60대 이상',
+      ],
+      selectedOption: state.age,
+      onSelect: vm.setAge,
       onBack: vm.prevStep,
       onNext: vm.nextStep,
     );
