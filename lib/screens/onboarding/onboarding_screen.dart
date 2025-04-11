@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/indicator_bar.dart';
+import '../../viewmodels/input_viewmodel.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -13,7 +14,8 @@ class OnboardingScreen extends StatelessWidget {
         child: Column(
           children: [
             IndicatorBarWithBack(
-              currentIndex: 0,
+              currentIndex: 9,
+              totalSteps: InputStep.values.length,
               onBack: () => context.pop(),
             ),
             const Padding(

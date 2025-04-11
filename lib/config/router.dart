@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../screens/splash/splash_screen.dart';
+<<<<<<< HEAD
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/input/input_screen.dart';
+=======
+import '../screens/onboarding/onboarding_screen.dart'; // Onboarding 화면 import
+>>>>>>> 29ffeda04d0a7f93d2ee20552ea24665f81d379a
 import '../screens/home/home_screen.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {

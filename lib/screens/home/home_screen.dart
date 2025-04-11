@@ -401,4 +401,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 29ffeda04d0a7f93d2ee20552ea24665f81d379a

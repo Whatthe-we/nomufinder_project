@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 /// 둥근 인디케이터 바
 class IndicatorBar extends StatelessWidget {
   final int currentIndex;
+  final int totalSteps; // 전체 스텝 수를 추가로 받음
 
-  const IndicatorBar({super.key, required this.currentIndex});
+  const IndicatorBar({
+    super.key,
+    required this.currentIndex,
+    required this.totalSteps,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +18,7 @@ class IndicatorBar extends StatelessWidget {
       child: Center(
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: List.generate(5, (index) {
+          children: List.generate(totalSteps, (index) {
             final isActive = index == currentIndex;
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 3),
@@ -36,11 +41,13 @@ class IndicatorBar extends StatelessWidget {
 /// 뒤로가기 버튼 + 인디케이터 바 함께 구성된 위젯
 class IndicatorBarWithBack extends StatelessWidget {
   final int currentIndex;
+  final int totalSteps; // 전체 개수 추가
   final VoidCallback onBack;
 
   const IndicatorBarWithBack({
     super.key,
     required this.currentIndex,
+    required this.totalSteps,
     required this.onBack,
   });
 
@@ -71,7 +78,10 @@ class IndicatorBarWithBack extends StatelessWidget {
         ),
 
         // 인디케이터 바
-        IndicatorBar(currentIndex: currentIndex),
+        IndicatorBar(
+          currentIndex: currentIndex,
+          totalSteps: totalSteps,
+        ),
       ],
     );
   }

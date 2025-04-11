@@ -50,7 +50,8 @@ class InputFinalScreen extends ConsumerWidget {
               children: [
                 // 인디케이터 + 뒤로가기 버튼
                 IndicatorBarWithBack(
-                  currentIndex: 4,
+                  currentIndex: 8,
+                  totalSteps: InputStep.values.length,
                   onBack: () => vm.prevStep(),
                 ),
 
@@ -74,7 +75,7 @@ class InputFinalScreen extends ConsumerWidget {
                 const Spacer(),
 
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 40),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: GestureDetector(
                     onTap: () {
                       // 시작하기 버튼을 누르면 home_screen.dart로 이동
@@ -99,6 +100,21 @@ class InputFinalScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
+                    ),
+                  ),
+                ),
+
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 24),
+                  child: Text(
+                    '서비스 품질 향상을 위해, 입력하신 정보는\n개인정보를 제외한 익명 통계로 활용될 수 있습니다.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF9B9B9B),
+                      fontSize: 12,
+                      fontFamily: 'Open Sans',
+                      fontWeight: FontWeight.w400,
+                      height: 1.5,
                     ),
                   ),
                 ),
