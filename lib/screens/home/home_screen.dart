@@ -237,7 +237,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          ref.read(userTypeProvider.notifier).state = label == '사업주' ? 'employer' : 'worker';
+          ref.read(userTypeProvider.notifier).state =
+          label == '사업주' ? 'employer' : 'worker';
+
+          if (label == '근로자') {
+            context.go('/worker'); // ✅ 페이지 이동 추가!
+          }
         },
         child: Container(
           height: 100,
