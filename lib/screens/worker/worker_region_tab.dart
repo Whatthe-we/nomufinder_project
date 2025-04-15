@@ -43,7 +43,7 @@ class WorkerRegionScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => LawyerListScreen(
-                      region: region,
+                      title: region,
                       lawyers: lawyers,
                     ),
                   ),
