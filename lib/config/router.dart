@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../screens/input/input_screen.dart';
+
 import '../screens/splash/splash_screen.dart';
-import '../screens/onboarding/onboarding_screen.dart'; // Onboarding 화면 import
+import '../screens/onboarding/onboarding_screen.dart';
+import '../screens/input/input_screen.dart';
 import '../screens/home/home_screen.dart';
+import '../screens/worker/worker_screen.dart'; // 새로 만든 통합된 스크린
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -11,64 +13,37 @@ class MyBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      // 모든 아이템을 균일한 색상으로 보여주기 위해 fixed로 설정
       type: BottomNavigationBarType.fixed,
-
-      // 선택된 아이콘/레이블 색상
       selectedItemColor: Colors.grey[800],
-
-      // 선택되지 않은 아이콘/레이블 색상
       unselectedItemColor: Colors.grey[800],
-
-      // 선택된, 선택되지 않은 라벨 스타일 (선택 사항)
-      selectedLabelStyle: const TextStyle(
-        fontWeight: FontWeight.w600,
-      ),
-      unselectedLabelStyle: const TextStyle(
-        fontWeight: FontWeight.w400,
-      ),
-
-      currentIndex: 0, // 실제로는 상태에 따라 관리
+      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
+      unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+      currentIndex: 0, // 상태관리 적용 안된 단순 예시
       onTap: (index) {
         switch (index) {
           case 0:
             context.go('/home');
             break;
           case 1:
-          // 예시: context.go('/search');
+          // context.go('/search');
             break;
           case 2:
-          // 예시: context.go('/chatbot');
+          // context.go('/chatbot');
             break;
           case 3:
-          // 예시: context.go('/favorites');
+          // context.go('/favorites');
             break;
           case 4:
-          // 예시: context.go('/mypage');
+          // context.go('/mypage');
             break;
         }
       },
       items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: '홈',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.search),
-          label: '검색',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chat),
-          label: '챗봇',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.favorite),
-          label: '내 관심글',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: '마이페이지',
-        ),
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
+        BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
+        BottomNavigationBarItem(icon: Icon(Icons.chat), label: '챗봇'),
+        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: '내 관심글'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
       ],
     );
   }
@@ -77,7 +52,7 @@ class MyBottomNavigationBar extends StatelessWidget {
 final router = GoRouter(
   initialLocation: '/splash',
   routes: [
-    // 내비게이션 바 없이 보여줄 화면들
+    // ✅ 초기 단일 화면들 (내비게이션 바 없음)
     GoRoute(
       path: '/splash',
       name: 'Splash',
@@ -90,12 +65,8 @@ final router = GoRouter(
         key: state.pageKey,
         child: const InputScreen(),
         transitionDuration: const Duration(milliseconds: 500),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(opacity: animation, child: child),
       ),
     ),
     GoRoute(
@@ -109,7 +80,8 @@ final router = GoRouter(
             FadeTransition(opacity: animation, child: child),
       ),
     ),
-    // 내비게이션 바가 적용될 화면들을 ShellRoute로 묶음
+
+    // ✅ ShellRoute 포함 화면들 (내비게이션 바 있음)
     ShellRoute(
       builder: (context, state, child) {
         return Scaffold(
@@ -125,8 +97,18 @@ final router = GoRouter(
             key: state.pageKey,
             child: const HomeScreen(),
             transitionDuration: const Duration(milliseconds: 500),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) =>
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                FadeTransition(opacity: animation, child: child),
+          ),
+        ),
+        GoRoute(
+          path: '/worker',
+          name: 'Worker',
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: const WorkerScreen(), // 상황별/지역별 통합 탭 화면
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
           ),
         ),
