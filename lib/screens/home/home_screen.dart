@@ -1,78 +1,171 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../services/api_service.dart';
+import '../../viewmodels/search_viewmodel.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  String _searchQuery = '';
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  List<String> suggestions = []; // 자동완성 목록
+  String selectedCategory = "";  // 선택된 카테고리
 
-  // 예시용 dummy 데이터 (실제 API 연동 시 데이터를 여기서 대체)
-  final List<String> _allItems = [
-    "노동법",
-    "근로계약",
-    "부당해고",
-    "노무 상담",
-    "임금",
-    "퇴직금",
-    "산업재해",
-    "노동조합",
-    "휴가",
-    "근무조건",
-  ];
+  @override
+  void initState() {
+    super.initState();
+  }
 
-  List<String> get _searchResults {
-    if (_searchQuery.isEmpty) {
-      return [];
+  // 사용자가 입력한 값에 따라 관련 단어 목록 업데이트
+  void _updateSuggestions(String query) async {
+    if (query.isNotEmpty) {
+      try {
+        // API 호출하여 관련 단어 목록을 받아오기
+        final response = await ApiService.getSuggestions(query);
+        print("Suggestions: $response");  // 받아온 단어 목록 출력
+
+        setState(() {
+          suggestions = response; // 받아온 목록으로 갱신
+        });
+      } catch (e) {
+        print("자동완성 요청 실패: $e");
+      }
+    } else {
+      setState(() {
+        suggestions = []; // 입력이 비었을 때는 자동완성 목록을 비워줍니다.
+      });
     }
-    return _allItems
-        .where((item) =>
-        item.toLowerCase().contains(_searchQuery.toLowerCase()))
-        .toList();
+  }
+
+  // 카테고리 클릭 시 해당 카테고리에 맞는 노무사 목록 보여주기
+  void _selectCategory(String category) async {
+    final laborAttorneys = await ApiService.getLaborAttorneysByCategory(category);
+
+    // 노무사 이름만 추출해서 List<String>으로 변환
+    final attorneyNames = laborAttorneys.map((attorney) => attorney['name'] as String).toList();
+
+    // 선택된 카테고리와 노무사 목록을 화면에 표시
+    setState(() {
+      selectedCategory = category;
+    });
+
+    // 화면에서 노무사 목록을 보여주는 UI 추가
+    _showLaborAttorneyList(attorneyNames);
+  }
+
+  void _showLaborAttorneyList(List<String> attorneyNames) {
+    // 여기에 UI를 업데이트하여 선택된 카테고리에 맞는 노무사 목록을 표시하도록 함
+    // 예를 들어, 리스트를 표시하는 부분을 추가하거나 다른 화면으로 넘길 수 있음
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('선택된 카테고리: $selectedCategory'),
+        content: Column(
+          children: attorneyNames.map((name) => Text(name)).toList(),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final category = ref.watch(categoryProvider);
+
     return SafeArea(
-      // 검색어가 있으면 검색 결과, 없으면 기존 홈 콘텐츠 표시
       child: SingleChildScrollView(
         child: Column(
           children: [
             _buildHeader(),
             const SizedBox(height: 20),
             _buildSearchBar(),
+            const SizedBox(height: 10),
+            if (selectedCategory.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text("📌 선택된 카테고리: $selectedCategory",
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
             const SizedBox(height: 20),
-            if (_searchQuery.isNotEmpty)
-              _buildSearchResults()
-            else ...[
-              _buildCategorySection(),
-              const SizedBox(height: 20),
-              _buildQuickConsultation(),
-              const SizedBox(height: 20),
-              _buildConsultationCostCard(),
-              const SizedBox(height: 20),
-              _buildIssueIcons(),
-              const SizedBox(height: 30),
-              _buildSectionTitle('오늘의 소식'),
-              _buildGrayContainer(height: 200),
-              const SizedBox(height: 30),
-              _buildSectionTitle('알아두면 좋은 법률 정보'),
-              _buildGrayContainer(height: 180),
-              const SizedBox(height: 30),
-              _buildSectionTitle('법정의무교육'),
-              _buildGrayContainer(height: 180),
-              const SizedBox(height: 40),
-            ],
+            if (suggestions.isNotEmpty) _buildSuggestionsList(),
+            const SizedBox(height: 20),
+            _buildQuickConsultation(),
+            const SizedBox(height: 20),
+            _buildConsultationCostCard(),
+            const SizedBox(height: 20),
+            _buildIssueIcons(),
+            const SizedBox(height: 30),
+            _buildSectionTitle('오늘의 소식'),
+            _buildGrayContainer(height: 200),
+            const SizedBox(height: 30),
+            _buildSectionTitle('알아두면 좋은 법률 정보'),
+            _buildGrayContainer(height: 180),
+            const SizedBox(height: 30),
+            _buildSectionTitle('법정의무교육'),
+            _buildGrayContainer(height: 180),
+            const SizedBox(height: 40),
           ],
         ),
       ),
     );
   }
 
-  /// 헤더 (앱 타이틀 / 로그인/가입)
+  // 자동완성 목록 출력
+  Widget _buildSuggestionsList() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: suggestions.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text(suggestions[index]),
+          onTap: () {
+            // 선택된 항목을 카테고리로 설정
+            _selectCategory(suggestions[index]);
+          },
+        );
+      },
+    );
+  }
+
+  /// 텍스트 입력 가능한 검색창 (아이콘 + onChanged)
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _updateSuggestions, // 텍스트가 변경될 때마다 자동완성 업데이트
+        decoration: InputDecoration(
+          prefixIcon: const Icon(Icons.search, color: Colors.grey),
+          hintText: '어떤 문제가 있으신가요?',
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.send),
+            onPressed: () async {
+              final result = await ApiService.classifyText(_searchController.text);
+              ref.read(categoryProvider.notifier).state = result;
+            },
+          ),
+          hintStyle: TextStyle(
+            color: Colors.black.withOpacity(0.5),
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+          fillColor: const Color(0xFFF4F2F2),
+          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        ),
+      ),
+    );
+  }
+
+  // 헤더 (앱 타이틀 / 로그인/가입)
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -101,79 +194,37 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// 텍스트 입력 가능한 검색창 (아이콘 + onChanged)
-  Widget _buildSearchBar() {
+  // 회색 박스 (Placeholder 영역)
+  Widget _buildGrayContainer({required double height}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      width: double.infinity,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+  }
+
+  // 섹션 타이틀
+  Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: TextField(
-        onChanged: (value) {
-          setState(() {
-            _searchQuery = value;
-          });
-        },
-        decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.search, color: Colors.grey),
-          hintText: '어떤 문제가 있으신가요?',
-          hintStyle: TextStyle(
-            color: Colors.black.withOpacity(0.5),
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-          fillColor: const Color(0xFFF4F2F2),
-          filled: true,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 12,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
     );
   }
 
-  /// 검색 결과 영역
-  Widget _buildSearchResults() {
-    final results = _searchResults;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        // 결과가 많아지면 최대 높이를 제한하여 스크롤 가능하게 만듦.
-        constraints: const BoxConstraints(maxHeight: 200),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey[300]!),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: results.isNotEmpty
-            ? ListView.separated(
-          shrinkWrap: true,
-          itemCount: results.length,
-          separatorBuilder: (context, index) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(
-                results[index],
-                style: const TextStyle(fontSize: 16),
-              ),
-              onTap: () {
-                // 검색 결과 선택 시 동작 (필요 시)
-                // 예: context.go('/searchResult', extra: results[index]);
-              },
-            );
-          },
-        )
-            : const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text('검색 결과가 없습니다.'),
-        ),
-      ),
-    );
-  }
-
-  /// 카테고리 섹션 (사업주, 근로자)
+  // 카테고리 섹션 (사업주, 근로자)
   Widget _buildCategorySection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -189,25 +240,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCategoryButton(String label) {
     return Expanded(
-      child: Container(
-        height: 100,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF2F1FA),
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x3F000000),
-              blurRadius: 4,
-              offset: Offset(0, 4),
-            )
-          ],
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+      child: GestureDetector(
+        onTap: () {
+          ref.read(userTypeProvider.notifier).state = label == '사업주' ? 'employer' : 'worker';
+        },
+        child: Container(
+          height: 100,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF2F1FA),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x3F000000),
+                blurRadius: 4,
+                offset: Offset(0, 4),
+              )
+            ],
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -215,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// 빠른 상담 / 최신 상담글 / 상담글 작성 영역
+  // 빠른 상담 / 최신 상담글 / 상담글 작성 영역
   Widget _buildQuickConsultation() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -252,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// 노무사 상담수수료 견적 카드
+  // 노무사 상담수수료 견적 카드
   Widget _buildConsultationCostCard() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -314,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// 아이콘 + 텍스트 10개 (2행 × 5열)
+  // 아이콘 + 텍스트 10개 (2행 × 5열)
   Widget _buildIssueIcons() {
     final issues = [
       {'icon': Icons.warning_amber_outlined, 'label': '부당해고'},
@@ -368,36 +424,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           );
         },
-      ),
-    );
-  }
-
-  /// 회색 박스 (Placeholder 영역)
-  Widget _buildGrayContainer({required double height}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      width: double.infinity,
-      height: height,
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(10),
-      ),
-    );
-  }
-
-  /// 섹션 타이틀
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
       ),
     );
   }
