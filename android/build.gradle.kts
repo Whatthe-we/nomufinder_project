@@ -1,3 +1,14 @@
+// 🔵 Firebase 플러그인을 위한 buildscript 블록 추가
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.google.gms:google-services:4.4.0") // 🔵 Firebase용 Gradle Plugin
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -12,6 +23,7 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
+
 subprojects {
     project.evaluationDependsOn(":app")
 }

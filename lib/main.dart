@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'config/router.dart'; // GoRouter 설정
-import 'config/providers.dart'; // 필요 시 사용
 import 'package:project_nomufinder/services/lawyer_data_loader.dart'; // ✅ JSON 데이터 로딩 파일
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:device_info_plus/device_info_plus.dart'; // 추가
+import 'package:firebase_core/firebase_core.dart'; // ✅ Firebase DB 저장
+import 'dart:io';
+import 'config/router.dart';
+import 'config/providers.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // ✅ 비동기 초기화 필요
-  await loadLawyerData(); // ✅ JSON 데이터 미리 로딩
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase 초기화
+  await Firebase.initializeApp();
+
+  // JSON 데이터 로드
+  await loadLawyerData();
+
+  // 환경변수 로드
+  final isEmulator = await _isRunningOnEmulator();
+  await dotenv.load(fileName: isEmulator ? '.env.dev' : '.env.prod');
 
   runApp(
-    const ProviderScope( // ✅ Riverpod 적용을 위한 최상위 위젯
+    const ProviderScope(
       child: MyApp(),
     ),
   );
@@ -25,9 +38,45 @@ class MyApp extends StatelessWidget {
       routerConfig: router,
       title: 'NomuFinder',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
     );
   }
+}
+
+// 에뮬레이터 판별 함수
+Future<bool> _isRunningOnEmulator() async {
+  if (Platform.isAndroid) {
+    const emulatorIndicators = ['google_sdk', 'sdk_gphone'];
+    try {
+      final buildProp = await File('/system/build.prop').readAsString();
+      return emulatorIndicators.any((e) => buildProp.contains(e));
+    } catch (_) {
+      return false;
+    }
+  } else if (Platform.isIOS) {
+    final deviceInfo = DeviceInfoPlugin();
+    final iosInfo = await deviceInfo.iosInfo;
+    return !iosInfo.isPhysicalDevice;
+  }
+  return false;
+}
+
+// 로컬 IP 가져오기
+Future<String> _getHostIP() async {
+  final interfaces = await NetworkInterface.list(
+    type: InternetAddressType.IPv4,
+    includeLoopback: false,
+  );
+
+  for (final interface in interfaces) {
+    for (final addr in interface.addresses) {
+      if (!addr.isLoopback && addr.address.startsWith('192.')) {
+        return addr.address;
+      }
+    }
+  }
+
+  return '127.0.0.1';
 }

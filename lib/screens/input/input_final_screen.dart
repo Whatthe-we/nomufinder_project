@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';  // 추가: GoRouter를 사용하기 위한 import
+import 'package:go_router/go_router.dart'; // 라우터 이동용
 import '../../widgets/indicator_bar.dart';
 import 'package:project_nomufinder/viewmodels/input_viewmodel.dart';
+import 'package:project_nomufinder/services/firebase_service.dart'; // Firestore 저장 로직
 
 class InputFinalScreen extends ConsumerWidget {
   const InputFinalScreen({super.key});
@@ -10,6 +11,7 @@ class InputFinalScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vm = ref.watch(inputViewModelProvider.notifier);
+    final state = ref.watch(inputViewModelProvider);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -77,9 +79,35 @@ class InputFinalScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: GestureDetector(
-                    onTap: () {
-                      // 시작하기 버튼을 누르면 home_screen.dart로 이동
-                      context.go('/home');
+                    onTap: () async {
+                      // 현재 상태 가져오기
+                      final inputState = ref.read(inputViewModelProvider);
+
+                      // 로딩 인디케이터 표시
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+
+                      try {
+                        // Firestore에 설문 데이터 저장
+                        await FirebaseService.saveSurvey(inputState);
+
+                        if (context.mounted) {
+                          Navigator.of(context).pop(); // 로딩 닫기
+                          context.go('/home'); // 홈으로 이동
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          Navigator.of(context).pop(); // 로딩 닫기
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('저장 실패: $e')),
+                          );
+                        }
+                      }
                     },
                     child: Container(
                       height: 64,
