@@ -1,8 +1,10 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
+    id("org.jetbrains.kotlin.android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services") // ✅ Firebase용 plugin
 }
 
 android {
@@ -42,4 +44,15 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // ✅ Firebase BoM (Bill of Materials)
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
+
+    // ✅ Firestore SDK 추가
+    implementation("com.google.firebase:firebase-firestore")
+
+    // (선택) Firebase Analytics 등 다른 기능을 쓰려면 여기에 추가 가능
+    // implementation("com.google.firebase:firebase-analytics")
 }

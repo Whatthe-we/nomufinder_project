@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1058085475204",
+    "project_id": "nomufinder",
+    "storage_bucket": "nomufinder.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1058085475204:android:a0b37c4925e01bcc2583d1",
+        "android_client_info": {
+          "package_name": "com.example.project_nomufinder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVd3R3cR8b9djLWTjQW9sw1iB-IH-4yY4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
