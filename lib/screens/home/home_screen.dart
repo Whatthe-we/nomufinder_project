@@ -71,34 +71,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  void _selectCategory(String category) async {
-    final laborAttorneys = await ApiService.getLaborAttorneysByCategory(category);
-    final attorneyNames = laborAttorneys.map((attorney) => attorney['name'] as String).toList();
-
-    setState(() {
-      selectedCategory = category;
-    });
-
-    _showLaborAttorneyList(attorneyNames);
-  }
-
-  void _showLaborAttorneyList(List<String> attorneyNames) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('선택된 카테고리: $selectedCategory'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: attorneyNames.map((name) => Text(name)).toList(),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final category = ref.watch(categoryProvider);
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -117,16 +91,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 20),
 
               // 자동완성 검색 결과
-              if (_searchQuery.isNotEmpty)
-                _buildSearchResults(),
-
-              // 선택된 카테고리
-              if (selectedCategory.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text("📌 선택된 카테고리: $selectedCategory",
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                ),
+              if (_searchQuery.isNotEmpty) _buildSearchResults(),
 
               // 자동완성 목록
               if (suggestions.isNotEmpty) _buildSuggestionsList(),
@@ -166,16 +131,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return ListTile(
           title: Text(suggestions[index]),
           onTap: () {
-            // 자동완성 항목을 클릭하면 해당 카테고리에 맞는 변호사 리스트로 이동
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => LawyerListScreen(
-                  title: suggestions[index],  // 선택한 카테고리
-                  lawyers: [], // 해당 카테고리에 맞는 노무사 목록을 전달
-                ),
-              ),
-            );
+            // 자동완성 항목을 선택했을 때, 관련 작업을 추가할 수 있음
+            // 예: `showDialog`로 선택된 항목을 표시하거나 추가 처리
+            setState(() {
+              _searchQuery = suggestions[index];
+            });
           },
         );
       },
@@ -202,16 +162,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           itemBuilder: (context, index) => ListTile(
             title: Text(results[index], style: const TextStyle(fontSize: 16)),
             onTap: () {
-              // 결과 클릭 시 노무사 리스트 화면으로 이동
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => LawyerListScreen(
-                    title: results[index],  // 선택한 검색어
-                    lawyers: [], // 해당 검색어에 맞는 노무사 목록을 전달
-                  ),
-                ),
-              );
+              // 결과 클릭 시 처리 추가 (필요 시)
             },
           ),
         )
@@ -222,7 +173,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
-
 
   // 검색창
   Widget _buildSearchBar() {
@@ -242,8 +192,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           suffixIcon: IconButton(
             icon: const Icon(Icons.send),
             onPressed: () async {
-              final result = await ApiService.classifyText(_searchController.text);
-              ref.read(categoryProvider.notifier).state = result;
+              // 여기에 검색 결과를 처리할 수 있습니다.
+              print("검색어: $_searchQuery");
             },
           ),
           hintStyle: TextStyle(

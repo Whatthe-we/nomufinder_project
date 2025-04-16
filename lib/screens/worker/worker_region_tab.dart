@@ -47,7 +47,7 @@ class WorkerRegionScreen extends StatelessWidget {
                   return;
                 }
 
-                // 다른 지역을 클릭하면 변호사 리스트 화면으로 이동
+                // 다른 지역을 클릭하면 노무사 리스트 화면으로 이동
                 final lawyers = lawyersByRegion[region] ?? [];
 
                 Navigator.push(

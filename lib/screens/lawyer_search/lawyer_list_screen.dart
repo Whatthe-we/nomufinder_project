@@ -4,13 +4,13 @@ import 'package:project_nomufinder/screens/lawyer_search/lawyer_detail_screen.da
 
 class LawyerListScreen extends StatelessWidget {
   final String title;
-  final String region; // region 파라미터 추가
+  final String region; // region 필드 추가
   final List<Lawyer> lawyers;
 
   const LawyerListScreen({
     super.key,
     required this.title,
-    required this.region, // 'region'을 필수 인자로 받도록 설정
+    required this.region, // 필수로 받도록 설정
     required this.lawyers,
   });
 
@@ -19,7 +19,7 @@ class LawyerListScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(title), // 여기서 title을 사용
+        title: Text(title),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -125,12 +125,6 @@ class LawyerListScreen extends StatelessWidget {
               _buildFee('영상상담', lawyer.videoFee),
               _buildFee('방문상담', lawyer.visitFee),
             ],
-          ),
-          const SizedBox(height: 8),
-          // region을 사용하여 표시
-          Text(
-            'Region: $region', // 여기에 region을 표시
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
         ],
       ),
