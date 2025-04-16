@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project_nomufinder/models/lawyer.dart';
 import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart';
 import 'package:project_nomufinder/services/lawyer_data_loader.dart';
+import 'package:project_nomufinder/screens/worker/region_map_screen.dart';
 
 class WorkerRegionScreen extends StatelessWidget {
   const WorkerRegionScreen({super.key});
@@ -35,7 +36,15 @@ class WorkerRegionScreen extends StatelessWidget {
 
             return GestureDetector(
               onTap: () {
-                if (isLast) return;
+                if (isLast) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const RegionMapScreen(),
+                    ),
+                  );
+                  return;
+                }
 
                 final lawyers = lawyersByRegion[region] ?? [];
 

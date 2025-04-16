@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../services/api_service.dart';
 import '../../viewmodels/search_viewmodel.dart';
 import 'package:project_nomufinder/widgets/common_header.dart';
+import 'package:project_nomufinder/services/lawyer_data_loader.dart';
+import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -351,16 +353,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildIssueIcons() {
     final issues = [
-      {'icon': Icons.warning_amber_outlined, 'label': '부당해고'},
-      {'icon': Icons.gavel, 'label': '부당징계'},
-      {'icon': Icons.article, 'label': '근로계약'},
-      {'icon': Icons.work_outline, 'label': '근무조건'},
-      {'icon': Icons.block_outlined, 'label': '직장 내\n성희롱'},
-      {'icon': Icons.report_gmailerrorred_outlined, 'label': '직장 내\n차별'},
-      {'icon': Icons.mood_bad_outlined, 'label': '직장 내\n괴롭힘'},
-      {'icon': Icons.attach_money, 'label': '임금/퇴직금'},
-      {'icon': Icons.health_and_safety_outlined, 'label': '산업재해'},
-      {'icon': Icons.account_balance, 'label': '노동조합'},
+      '부당해고', '부당징계', '근로계약', '근무조건',
+      '직장 내 성희롱', '직장 내 차별', '직장 내 괴롭힘',
+      '임금/퇴직금', '산업재해', '노동조합',
+    ];
+
+    final icons = [
+      Icons.warning_amber_outlined,
+      Icons.gavel,
+      Icons.article,
+      Icons.work_outline,
+      Icons.block_outlined,
+      Icons.report_gmailerrorred_outlined,
+      Icons.mood_bad_outlined,
+      Icons.attach_money,
+      Icons.health_and_safety_outlined,
+      Icons.account_balance,
     ];
 
     return Padding(
@@ -377,26 +385,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         itemBuilder: (context, index) {
           final issue = issues[index];
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                backgroundColor: Colors.white,
-                radius: 20,
-                child: Icon(issue['icon'] as IconData, color: Colors.black87, size: 20),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                issue['label'].toString(),
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, height: 1.2),
-              ),
-            ],
+          return GestureDetector(
+            onTap: () {
+              final filtered = lawyersByRegion.values
+                  .expand((list) => list)
+                  .where((lawyer) =>
+                  lawyer.specialties.any((tag) => tag.contains(issue)))
+                  .toList();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LawyerListScreen(
+                    title: issue,
+                    lawyers: filtered,
+                  ),
+                ),
+              );
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  radius: 20,
+                  child: Icon(icons[index], color: Colors.black87, size: 20),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  issue,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, height: 1.2),
+                ),
+              ],
+            ),
           );
         },
       ),
     );
   }
+
 
   Widget _buildGrayContainer({required double height}) {
     return Container(

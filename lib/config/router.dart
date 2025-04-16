@@ -6,6 +6,7 @@ import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/input/input_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/worker/worker_screen.dart'; // 새로 만든 통합된 스크린
+import '../screens/auth/my_page_screen.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -34,7 +35,7 @@ class MyBottomNavigationBar extends StatelessWidget {
           // context.go('/favorites');
             break;
           case 4:
-          // context.go('/mypage');
+            context.go('/mypage');
             break;
         }
       },
@@ -107,6 +108,17 @@ final router = GoRouter(
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
             child: const WorkerScreen(), // 상황별/지역별 통합 탭 화면
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                FadeTransition(opacity: animation, child: child),
+          ),
+        ),
+        GoRoute(
+          path: '/mypage',
+          name: 'MyPage',
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: const MyPageScreen(),
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),

@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart'; // ✅ Firebase DB 저장
 import 'dart:io';
 import 'config/router.dart';
 import 'config/providers.dart';
+import 'package:project_nomufinder/screens/auth/my_page_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
