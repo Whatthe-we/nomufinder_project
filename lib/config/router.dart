@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:project_nomufinder/models/lawyer.dart';
 
 import '../screens/splash/splash_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
@@ -7,7 +8,9 @@ import '../screens/input/input_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/worker/worker_screen.dart'; // 상황별/지역별 통합 탭 화면
 import '../screens/lawyer_search/keyword_search_screen.dart'; // 🔍 검색 화면 추가
-import '../screens/auth/my_page_screen.dart'; // 마이페이지 추가
+import '../screens/auth/my_page_screen.dart';
+import '../screens/reservation/reservation_screen.dart';
+import '../screens/reservation/reservation_success_screen.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -135,6 +138,24 @@ final router = GoRouter(
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
           ),
+        ),
+        GoRoute(
+          path: '/reservation',
+          builder: (context, state) {
+            final lawyer = state.extra as Lawyer; // ✅ GoRouter로 Lawyer 전달 받기
+            return ReservationScreen(lawyer: lawyer); // ✅ 이 코드로 수정
+          },
+        ),
+        GoRoute(
+          path: '/reservation_success',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>;
+            return ReservationSuccessScreen(
+              date: extra['date'],
+              time: extra['time'],
+              lawyer: extra['lawyer'],
+            );
+          },
         ),
       ],
     ),
