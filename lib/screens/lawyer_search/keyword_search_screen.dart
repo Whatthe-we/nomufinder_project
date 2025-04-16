@@ -125,7 +125,7 @@ class _KeywordSearchScreenState extends ConsumerState<KeywordSearchScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,
-        title: const Text('어떤 문제가 있으신가요?', style: TextStyle(color: Colors.black)),
+        title: const Text('도와드릴게요!', style: TextStyle(color: Colors.black)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
