@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:project_nomufinder/models/lawyer.dart';
 import 'package:project_nomufinder/screens/lawyer_search/lawyer_detail_screen.dart';
-import 'package:project_nomufinder/screens/reservation/reservation_screen.dart';
 
 class LawyerListScreen extends StatelessWidget {
-  final String region;
+  final String title;
+  final String region; // region 파라미터 추가
   final List<Lawyer> lawyers;
 
   const LawyerListScreen({
     super.key,
-    required this.region,
+    required this.title,
+    required this.region, // 'region'을 필수 인자로 받도록 설정
     required this.lawyers,
   });
 
@@ -18,7 +19,7 @@ class LawyerListScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(region),
+        title: Text(title),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -28,7 +29,17 @@ class LawyerListScreen extends StatelessWidget {
         itemCount: lawyers.length,
         itemBuilder: (context, index) {
           final lawyer = lawyers[index];
-          return _buildLawyerCard(context, lawyer); // context 넘기기!
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LawyerDetailScreen(lawyer: lawyer),
+                ),
+              );
+            },
+            child: _buildLawyerCard(context, lawyer),
+          );
         },
       ),
     );
@@ -71,10 +82,7 @@ class LawyerListScreen extends StatelessWidget {
                         const SizedBox(width: 6),
                         const Icon(Icons.verified, size: 16, color: Colors.grey),
                         const SizedBox(width: 4),
-                        const Text(
-                          "신속",
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
+                        const Text("신속", style: TextStyle(fontSize: 12, color: Colors.grey)),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -86,7 +94,9 @@ class LawyerListScreen extends StatelessWidget {
                     Wrap(
                       spacing: 6,
                       runSpacing: 4,
-                      children: lawyer.specialties.map(_buildTagChip).toList(),
+                      children: lawyer.specialties
+                          .map((tag) => TagChip(tag: tag)) // ✅ 태그 표시
+                          .toList(),
                     ),
                   ],
                 ),
@@ -94,12 +104,7 @@ class LawyerListScreen extends StatelessWidget {
               const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReservationScreen(lawyer: lawyer),
-                    ),
-                  );
+                  // 예약화면 연동
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0010BA),
@@ -115,7 +120,6 @@ class LawyerListScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               _buildFee('전화상담', lawyer.phoneFee),
               _buildFee('영상상담', lawyer.videoFee),
@@ -123,24 +127,6 @@ class LawyerListScreen extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTagChip(String tag) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF2F1FA),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        '#$tag',
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: Colors.black87,
-        ),
       ),
     );
   }
@@ -165,6 +151,29 @@ class LawyerListScreen extends StatelessWidget {
     return price.toString().replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
           (match) => '${match[1]},',
+    );
+  }
+}
+
+class TagChip extends StatelessWidget {
+  final String tag;
+  const TagChip({super.key, required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2F1FA),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        '#$tag',
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.black87,
+        ),
+      ),
     );
   }
 }
