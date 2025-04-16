@@ -1,19 +1,11 @@
-// lib/services/lawyer_service.dart
+import 'package:project_nomufinder/models/lawyer.dart';
 
-import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
-import '../models/lawyer.dart';
+/// 상황별 필터링 함수
+List<Lawyer> filterLawyersBySpecialty(String specialty, List<Lawyer> allLawyers) {
+  return allLawyers.where((lawyer) => lawyer.specialties.contains(specialty)).toList();
+}
 
-class LawyerService {
-  static Future<Map<String, List<Lawyer>>> loadLawyersByRegion() async {
-    final String jsonString = await rootBundle.loadString('assets/lawyers_by_region.json');
-    final Map<String, dynamic> jsonData = json.decode(jsonString);
-
-    return jsonData.map((region, lawyersJson) {
-      final lawyers = (lawyersJson as List)
-          .map((e) => Lawyer.fromJson(e))
-          .toList();
-      return MapEntry(region, lawyers);
-    });
-  }
+/// 지역별 필터링 함수
+List<Lawyer> filterLawyersByRegion(String region, Map<String, List<Lawyer>> allLawyersByRegion) {
+  return allLawyersByRegion[region] ?? [];
 }

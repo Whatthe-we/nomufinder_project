@@ -5,7 +5,8 @@ import '../screens/splash/splash_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/input/input_screen.dart';
 import '../screens/home/home_screen.dart';
-import '../screens/worker/worker_screen.dart'; // 새로 만든 통합된 스크린
+import '../screens/worker/worker_screen.dart';
+import '../screens/lawyer_search/keyword_search_screen.dart'; // 🔍 검색 화면 추가
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -25,7 +26,7 @@ class MyBottomNavigationBar extends StatelessWidget {
             context.go('/home');
             break;
           case 1:
-          // context.go('/search');
+            context.go('/search'); // ✅ 검색 화면으로 이동
             break;
           case 2:
           // context.go('/chatbot');
@@ -106,7 +107,18 @@ final router = GoRouter(
           name: 'Worker',
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
-            child: const WorkerScreen(), // 상황별/지역별 통합 탭 화면
+            child: const WorkerScreen(),
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                FadeTransition(opacity: animation, child: child),
+          ),
+        ),
+        GoRoute(
+          path: '/search',
+          name: 'KeywordSearch',
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: const KeywordSearchScreen(),
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),

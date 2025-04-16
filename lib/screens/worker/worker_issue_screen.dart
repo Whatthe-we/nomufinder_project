@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:project_nomufinder/models/lawyer.dart';
+import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart';
+import 'package:project_nomufinder/services/lawyer_data_loader.dart';
 
 class WorkerIssueScreen extends StatelessWidget {
   const WorkerIssueScreen({super.key});
@@ -13,11 +16,10 @@ class WorkerIssueScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ 오른쪽 하단에 "전체보기"를 고정시키기 위해 빈칸 추가
     final List<String> fullList = [
       ...issues,
-      '',             // 왼쪽 빈칸
-      '+ 전체보기',     // 오른쪽 아래 고정
+      '',
+      '+ 전체보기',
     ];
 
     return Padding(
@@ -38,7 +40,24 @@ class WorkerIssueScreen extends StatelessWidget {
           return GestureDetector(
             onTap: () {
               if (isEmpty) return;
-              // TODO: 상세 페이지 이동
+
+              final filtered = lawyersByRegion.values
+                  .expand((list) => list)
+                  .where((lawyer) =>
+                  lawyer.specialties.any((tag) => tag.contains(issue)))
+                  .toList();
+
+              // ✅ 해당 이슈를 전문으로 하는 노무사 리스트 화면으로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LawyerListScreen(
+                    title: issue,
+                    region: issue, // region 값 전달 (issue를 region으로 사용)
+                    lawyers: filtered,
+                  ),
+                ),
+              );
             },
             child: Container(
               decoration: BoxDecoration(
@@ -48,9 +67,8 @@ class WorkerIssueScreen extends StatelessWidget {
                     ? Colors.white
                     : const Color(0xFFF2F1FA),
                 borderRadius: BorderRadius.circular(12),
-                border: isLast
-                    ? Border.all(color: Colors.grey.shade300)
-                    : null,
+                border:
+                isLast ? Border.all(color: Colors.grey.shade300) : null,
               ),
               child: Center(
                 child: Text(
