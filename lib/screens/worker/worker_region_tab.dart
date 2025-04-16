@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project_nomufinder/models/lawyer.dart';
 import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart';
+import 'package:project_nomufinder/screens/worker/region_map_screen.dart'; // 지역 맵 화면 추가
 import 'package:project_nomufinder/services/lawyer_data_loader.dart';
 
 class WorkerRegionScreen extends StatelessWidget {
@@ -35,8 +36,18 @@ class WorkerRegionScreen extends StatelessWidget {
 
             return GestureDetector(
               onTap: () {
-                if (isLast) return;
+                if (isLast) {
+                  // + 전체보기 클릭 시 지역 맵 화면으로 이동
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const RegionMapScreen(),
+                    ),
+                  );
+                  return;
+                }
 
+                // 다른 지역을 클릭하면 변호사 리스트 화면으로 이동
                 final lawyers = lawyersByRegion[region] ?? [];
 
                 Navigator.push(

@@ -19,7 +19,7 @@ class LawyerListScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(title),
+        title: Text(title), // 여기서 title을 사용
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -125,6 +125,12 @@ class LawyerListScreen extends StatelessWidget {
               _buildFee('영상상담', lawyer.videoFee),
               _buildFee('방문상담', lawyer.visitFee),
             ],
+          ),
+          const SizedBox(height: 8),
+          // region을 사용하여 표시
+          Text(
+            'Region: $region', // 여기에 region을 표시
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
         ],
       ),

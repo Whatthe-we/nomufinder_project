@@ -6,6 +6,7 @@ class Lawyer {
   final int videoFee;
   final int visitFee;
   final String profileImage;
+  final String address; // ✅ 주소 필드 추가
 
   Lawyer({
     required this.name,
@@ -15,6 +16,7 @@ class Lawyer {
     required this.videoFee,
     required this.visitFee,
     required this.profileImage,
+    required this.address,
   });
 
   factory Lawyer.fromJson(Map<String, dynamic> json) {
@@ -22,7 +24,10 @@ class Lawyer {
     Map<String, int> feeMap = {};
     for (int i = 0; i < (json['consult']?.length ?? 0); i++) {
       final type = json['consult'][i];
-      final priceStr = json['price'][i].replaceAll(',', '').replaceAll('원', '');
+      final priceStr = json['price'][i]
+          .replaceAll(',', '')
+          .replaceAll('원', '')
+          .replaceAll(' ', '');
       feeMap[type] = int.tryParse(priceStr) ?? 0;
     }
 
@@ -34,6 +39,7 @@ class Lawyer {
       videoFee: feeMap['영상상담'] ?? 0,
       visitFee: feeMap['방문상담'] ?? 0,
       profileImage: json['photo'] ?? '',
+      address: json['address'] ?? '', // ✅ address 파싱
     );
   }
 }
