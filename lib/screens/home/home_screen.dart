@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../services/api_service.dart';
 import '../../viewmodels/search_viewmodel.dart';
 import 'package:project_nomufinder/widgets/common_header.dart';
+import 'package:project_nomufinder/services/lawyer_data_loader.dart';
+import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart';
 
 // 상수 정의
 const Color searchBarBackgroundColor = Color(0xFFEBEBEB);
@@ -30,19 +33,73 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
-  bool _showSuggestions = false;
+  List<String> suggestions = []; // 자동완성 목록
+  String selectedCategory = ""; // 선택된 카테고리
+  String _searchQuery = "";
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+  final List<String> _allItems = [
+    "노동법", "근로계약", "부당해고", "노무 상담", "임금",
+    "퇴직금", "산업재해", "노동조합", "휴가", "근무조건",
+  ];
+
+  List<String> get _searchResults {
+    if (_searchQuery.isEmpty) return [];
+    return _allItems
+        .where((item) => item.toLowerCase().contains(_searchQuery.toLowerCase()))
+        .toList();
   }
 
-  // 화면 UI 구성
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _updateSuggestions(String query) async {
+    if (query.isNotEmpty) {
+      try {
+        final response = await ApiService.getSuggestions(query);
+        setState(() {
+          suggestions = response;
+        });
+      } catch (e) {
+        print("자동완성 요청 실패: $e");
+      }
+    } else {
+      setState(() {
+        suggestions = [];
+      });
+    }
+  }
+
+  void _selectCategory(String category) async {
+    final laborAttorneys = await ApiService.getLaborAttorneysByCategory(category);
+    final attorneyNames = laborAttorneys.map((attorney) => attorney['name'] as String).toList();
+
+    setState(() {
+      selectedCategory = category;
+    });
+
+    _showLaborAttorneyList(attorneyNames);
+  }
+
+  void _showLaborAttorneyList(List<String> attorneyNames) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('선택된 카테고리: $selectedCategory'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: attorneyNames.map((name) => Text(name)).toList(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final category = ref.watch(categoryProvider);
+
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -52,97 +109,185 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         toolbarHeight: 56,
       ),
       body: SafeArea(
-        child: Stack(
-          children: [
-            ListView(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: suggestionsBoxHorizontalPadding, vertical: 20),
-              children: [
-                _buildSearchBar(context), // 검색창
-                const SizedBox(height: 20),
-                _buildCategorySection(context, ref),
-                const SizedBox(height: 30),
-                _buildQuickConsultation(),
-                const SizedBox(height: 20),
-                _buildConsultationCostCard(),
-                const SizedBox(height: 20),
-                _buildIssueIcons(),
-                const SizedBox(height: 30),
-                _buildSectionTitle('오늘의 소식'),
-                _buildGrayContainer(height: 200),
-                const SizedBox(height: 30),
-                _buildSectionTitle('법률 정보'),
-                _buildGrayContainer(height: 180),
-                const SizedBox(height: 30),
-                _buildSectionTitle('법정의무교육'),
-                _buildGrayContainer(height: 180),
-                const SizedBox(height: 40),
-              ],
-            ),
-            if (_showSuggestions) _buildSuggestionsBox(),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              _buildSearchBar(),
+              const SizedBox(height: 20),
+
+              // 자동완성 검색 결과
+              if (_searchQuery.isNotEmpty)
+                _buildSearchResults(),
+
+              // 선택된 카테고리
+              if (selectedCategory.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text("📌 선택된 카테고리: $selectedCategory",
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+
+              // 자동완성 목록
+              if (suggestions.isNotEmpty) _buildSuggestionsList(),
+
+              const SizedBox(height: 20),
+              _buildCategorySection(),
+              const SizedBox(height: 20),
+              _buildQuickConsultation(),
+              const SizedBox(height: 20),
+              _buildConsultationCostCard(),
+              const SizedBox(height: 20),
+              _buildIssueIcons(),
+              const SizedBox(height: 30),
+              _buildSectionTitle('오늘의 소식'),
+              _buildGrayContainer(height: 200),
+              const SizedBox(height: 30),
+              _buildSectionTitle('알아두면 좋은 법률 정보'),
+              _buildGrayContainer(height: 180),
+              const SizedBox(height: 30),
+              _buildSectionTitle('법정의무교육'),
+              _buildGrayContainer(height: 180),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // 검색창 위젯
-  Widget _buildSearchBar(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: searchBarBackgroundColor,
-        borderRadius: BorderRadius.circular(searchBarBorderRadius),
-        border: Border.all(color: Colors.grey.shade300, width: 2), // Border for the search bar
+  // 자동완성 목록
+  Widget _buildSuggestionsList() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: suggestions.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text(suggestions[index]),
+          onTap: () {
+            // 자동완성 항목을 클릭하면 해당 카테고리에 맞는 변호사 리스트로 이동
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => LawyerListScreen(
+                  title: suggestions[index],  // 선택한 카테고리
+                  lawyers: [], // 해당 카테고리에 맞는 노무사 목록을 전달
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // 검색 결과
+  Widget _buildSearchResults() {
+    final results = _searchResults;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        constraints: const BoxConstraints(maxHeight: 200),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: results.isNotEmpty
+            ? ListView.separated(
+          shrinkWrap: true,
+          itemCount: results.length,
+          separatorBuilder: (_, __) => const Divider(height: 1),
+          itemBuilder: (context, index) => ListTile(
+            title: Text(results[index], style: const TextStyle(fontSize: 16)),
+            onTap: () {
+              // 결과 클릭 시 노무사 리스트 화면으로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LawyerListScreen(
+                    title: results[index],  // 선택한 검색어
+                    lawyers: [], // 해당 검색어에 맞는 노무사 목록을 전달
+                  ),
+                ),
+              );
+            },
+          ),
+        )
+            : const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text('검색 결과가 없습니다.'),
+        ),
       ),
+    );
+  }
+
+
+  // 검색창
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TextField(
         controller: _searchController,
         onChanged: (value) {
+          _updateSuggestions(value);
           setState(() {
-            _showSuggestions = value.length >= 2;
+            _searchQuery = value;
           });
         },
         decoration: InputDecoration(
-          hintText: '어떤 문제가 있으신가요?',
-          border: InputBorder.none,
           prefixIcon: const Icon(Icons.search, color: Colors.grey),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              _searchController.clear();
-              setState(() {
-                _showSuggestions = false;
-              });
+          hintText: '어떤 문제가 있으신가요?',
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.send),
+            onPressed: () async {
+              final result = await ApiService.classifyText(_searchController.text);
+              ref.read(categoryProvider.notifier).state = result;
             },
-          )
-              : null,
-          contentPadding: const EdgeInsets.symmetric(
-              horizontal: searchBarContentPaddingHorizontal,
-              vertical: searchBarContentPaddingVertical),
+          ),
+          hintStyle: TextStyle(
+            color: Colors.black.withOpacity(0.5),
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+          fillColor: const Color(0xFFF4F2F2),
+          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         ),
       ),
     );
   }
 
-  // 사업주/근로자 버튼 섹션 위젯
-  Widget _buildCategorySection(BuildContext context, WidgetRef ref) {
-    return Row(
-      children: [
-        _buildCategoryButton(context, ref, '사업주', 'employer'),
-        const SizedBox(width: 16),
-        _buildCategoryButton(context, ref, '근로자', 'worker'),
-      ],
+  // 카테고리 섹션
+  Widget _buildCategorySection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          _buildCategoryButton('사업주'),
+          const SizedBox(width: 16),
+          _buildCategoryButton('근로자'),
+        ],
+      ),
     );
   }
 
-  // 사업주/근로자 버튼 위젯
-  Widget _buildCategoryButton(
-      BuildContext context, WidgetRef ref, String label, String userType) {
+  // 카테고리 버튼
+  Widget _buildCategoryButton(String label) {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          ref.read(userTypeProvider.notifier).state = userType;
-          context.push('/category-selection'); // 카테고리 선택 화면으로 이동
+          ref.read(userTypeProvider.notifier).state =
+          label == '사업주' ? 'employer' : 'worker';
+
+          if (label == '근로자') {
+            context.go('/worker'); // 페이지 이동
+          }
         },
         child: Container(
           height: 100,
@@ -160,10 +305,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Center(
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -171,166 +313,67 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // 자동완성 목록 위젯
-  Widget _buildSuggestionsBox() {
-    final suggestionsFuture =
-    ref.watch(suggestionsProvider(_searchController.text));
+  // 추가적인 UI 요소들 (간편 상담, 비용 카드 등)
+  Widget _buildQuickConsultation() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          _buildSmallBox('빠른 상담 ⚡'),
+          const SizedBox(width: 10),
+          _buildSmallBox('최신 상담글 🆕'),
+          const SizedBox(width: 10),
+          _buildSmallBox('상담글 작성 ✍️'),
+        ],
+      ),
+    );
+  }
 
-    return Positioned(
-      top: suggestionsBoxTop,
-      left: suggestionsBoxHorizontalPadding,
-      right: suggestionsBoxHorizontalPadding,
-      child: Material(
-        elevation: 8,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: suggestionsFuture.when(
-            data: (suggestions) {
-              if (suggestions.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  child: Center(child: Text("추천 검색어가 없습니다")),
-                );
-              }
-              return ListView.separated(
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                itemCount: suggestions.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final suggestion = suggestions[index];
-                  return ListTile(
-                    title:
-                    _buildHighlightedText(suggestion, _searchController.text),
-                    dense: true,
-                    onTap: () {
-                      _searchController.text = suggestion;
-                      setState(() {
-                        _showSuggestions = false;
-                      });
-                      context.push('/search', extra: suggestion);
-                    },
-                  );
-                },
-              );
-            },
-            loading: () => const Padding(
-              padding: EdgeInsets.all(15),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (error, stack) {
-              debugPrint("Error fetching suggestions: $error\n$stack");
-              return const Padding(
-                padding: EdgeInsets.all(15),
-                child: Center(child: Text("검색어 추천에 실패했습니다.")),
-              );
-            },
+  // 작은 박스 위젯
+  Widget _buildSmallBox(String text) {
+    return Expanded(
+      child: Container(
+        height: 50,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF4F2F2),
+          borderRadius: BorderRadius.circular(11),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ),
       ),
     );
   }
 
-  // 검색어에서 입력된 텍스트와 일치하는 부분을 강조하는 위젯
-  Widget _buildHighlightedText(String text, String query) {
-    if (query.isEmpty) {
-      return Text(text);
-    }
-
-    final lowerCaseText = text.toLowerCase();
-    final lowerCaseQuery = query.toLowerCase();
-    final matches = <TextSpan>[];
-    var start = 0;
-
-    while (start < text.length) {
-      final startIndex = lowerCaseText.indexOf(lowerCaseQuery, start);
-      if (startIndex == -1) {
-        matches.add(TextSpan(text: text.substring(start)));
-        break;
-      }
-
-      matches.add(TextSpan(text: text.substring(start, startIndex)));
-      matches.add(
-        TextSpan(
-          text: text.substring(startIndex, startIndex + query.length),
-          style: const TextStyle(
-            color: highlightedTextColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-      start = startIndex + query.length;
-    }
-
-    return Text.rich(TextSpan(children: matches));
-  }
-}
-
-// 간편 상담 UI 박스들 (빠른상담, 최신 글 등) 위젯
-Widget _buildQuickConsultation() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: suggestionsBoxHorizontalPadding),
-    child: Row(
-      children: [
-        _buildSmallBox('빠른 상담 ⚡'),
-        const SizedBox(width: 10),
-        _buildSmallBox('최신 상담글 🆕'),
-        const SizedBox(width: 10),
-        _buildSmallBox('상담글 작성 ✍️'),
-      ],
-    ),
-  );
-}
-
-// 작은 박스 위젯
-Widget _buildSmallBox(String text) {
-  return Expanded(
-    child: Container(
-      height: 50,
+  // 회색 박스 (Placeholder 영역) 위젯
+  Widget _buildGrayContainer({required double height}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      width: double.infinity,
+      height: height,
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F2F2),
-        borderRadius: BorderRadius.circular(11),
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(10),
       ),
-      child: Center(
+    );
+  }
+
+  // 섹션 타이틀 위젯
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Align(
+        alignment: Alignment.centerLeft,
         child: Text(
-          text,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          title,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
         ),
       ),
-    ),
-  );
-}
-
-// 회색 박스 (Placeholder 영역) 위젯
-Widget _buildGrayContainer({required double height}) {
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: suggestionsBoxHorizontalPadding),
-    width: double.infinity,
-    height: height,
-    decoration: BoxDecoration(
-      color: Colors.grey[300],
-      borderRadius: BorderRadius.circular(10),
-    ),
-  );
-}
-
-// 섹션 타이틀 위젯
-Widget _buildSectionTitle(String title) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: suggestionsBoxHorizontalPadding),
-    child: Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-      ),
-    ),
-  );
+    );
+  }
 }
 
 // 근로 문제를 나타내는 대표 아이콘 목록 위젯

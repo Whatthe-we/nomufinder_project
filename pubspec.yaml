@@ -46,9 +46,10 @@ flutter:
 
   assets:
     - assets/images/logo.png
+    - assets/images/korea_map.png
     - assets/lawyers_by_region.json
-    - .env.dev
     - .env.prod
+    - lib/fastapi_server/.env
 
   fonts:
     - family: Open Sans

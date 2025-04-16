@@ -5,8 +5,9 @@ import '../screens/splash/splash_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/input/input_screen.dart';
 import '../screens/home/home_screen.dart';
-import '../screens/worker/worker_screen.dart';
+import '../screens/worker/worker_screen.dart'; // 상황별/지역별 통합 탭 화면
 import '../screens/lawyer_search/keyword_search_screen.dart'; // 🔍 검색 화면 추가
+import '../screens/auth/my_page_screen.dart'; // 마이페이지 추가
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -26,16 +27,16 @@ class MyBottomNavigationBar extends StatelessWidget {
             context.go('/home');
             break;
           case 1:
-            context.go('/search'); // ✅ 검색 화면으로 이동
+            context.go('/search'); // 검색 화면으로 이동
             break;
           case 2:
-          // context.go('/chatbot');
+            context.go('/chatbot'); // 챗봇 화면 (추가 예정)
             break;
           case 3:
-          // context.go('/favorites');
+            context.go('/favorites'); // 관심글 화면 (추가 예정)
             break;
           case 4:
-          // context.go('/mypage');
+            context.go('/mypage'); // 마이페이지 화면으로 이동
             break;
         }
       },
@@ -53,7 +54,7 @@ class MyBottomNavigationBar extends StatelessWidget {
 final router = GoRouter(
   initialLocation: '/splash',
   routes: [
-    // ✅ 초기 단일 화면들 (내비게이션 바 없음)
+    // 초기 단일 화면들 (내비게이션 바 없음)
     GoRoute(
       path: '/splash',
       name: 'Splash',
@@ -82,7 +83,7 @@ final router = GoRouter(
       ),
     ),
 
-    // ✅ ShellRoute 포함 화면들 (내비게이션 바 있음)
+    // ShellRoute 포함 화면들 (내비게이션 바 있음)
     ShellRoute(
       builder: (context, state, child) {
         return Scaffold(
@@ -107,7 +108,7 @@ final router = GoRouter(
           name: 'Worker',
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
-            child: const WorkerScreen(),
+            child: const WorkerScreen(), // 상황별/지역별 통합 탭 화면
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
@@ -119,6 +120,17 @@ final router = GoRouter(
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
             child: const KeywordSearchScreen(),
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                FadeTransition(opacity: animation, child: child),
+          ),
+        ),
+        GoRoute(
+          path: '/mypage',
+          name: 'MyPage',
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: const MyPageScreen(), // 마이페이지 화면
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
