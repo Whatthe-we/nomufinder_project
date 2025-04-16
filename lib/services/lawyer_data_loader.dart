@@ -19,36 +19,25 @@ final Map<String, List<String>> regionKeywords = {
 };
 
 Future<void> loadLawyerData() async {
-  // JSON 파일 읽어오기
-  final String jsonString = await rootBundle.loadString('assets/lawyers_by_region.json');
+  final String jsonString =
+  await rootBundle.loadString('assets/lawyers_by_region.json');
+  final List<dynamic> jsonList = json.decode(jsonString);
 
-  // JSON 데이터를 맵으로 디코딩
-  final Map<String, dynamic> jsonMap = json.decode(jsonString);
-
-  // 'lawyers_by_region' 키가 존재하는지 확인
-  final List<dynamic> jsonList = jsonMap['lawyers_by_region'] ?? [];
-
-  if (jsonList.isEmpty) {
-    print('No data found for lawyers_by_region.');
-    return;
-  }
-
-  // 기존 데이터를 초기화
   lawyersByRegion = {};
 
   for (var json in jsonList) {
     final lawyer = Lawyer.fromJson(json);
     final address = json['address'] ?? '';
 
-    // address를 기반으로 지역 자동 매핑
-    String matchedRegion = '기타'; // 기본값은 '기타'
+    // address 기반으로 region 자동 매핑
+    String matchedRegion = '기타';
     regionKeywords.forEach((region, keywords) {
       if (keywords.any((keyword) => address.contains(keyword))) {
-        matchedRegion = region; // 키워드가 주소에 포함되면 해당 지역으로 매핑
+        matchedRegion = region;
       }
     });
 
-    // 해당 지역에 노무사 추가
+    // 해당 region에 노무사 추가
     if (!lawyersByRegion.containsKey(matchedRegion)) {
       lawyersByRegion[matchedRegion] = [];
     }

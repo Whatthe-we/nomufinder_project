@@ -6,16 +6,15 @@ import 'package:project_nomufinder/services/lawyer_data_loader.dart';
 class RegionMapScreen extends StatelessWidget {
   const RegionMapScreen({super.key});
 
-  // 지역을 선택했을 때 호출되는 함수
   void _onRegionSelected(BuildContext context, String region) {
-    final lawyers = lawyersByRegion[region] ?? [];  // 해당 지역에 해당하는 노무사 목록 가져오기
+    final lawyers = lawyersByRegion[region] ?? [];
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => LawyerListScreen(
-          title: region,    // '지역'을 title로 전달
-          region: region,   // '지역'을 region으로 전달
-          lawyers: lawyers, // 해당 지역의 노무사 목록 전달
+          title: region,
+          lawyers: lawyers,
+          region: region, // region 값 전달
         ),
       ),
     );
@@ -56,7 +55,6 @@ class RegionMapScreen extends StatelessWidget {
     );
   }
 
-  // 지역 선택 버튼 위젯
   Widget _regionButton(BuildContext context, String region) {
     return TextButton(
       style: TextButton.styleFrom(
@@ -64,7 +62,7 @@ class RegionMapScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       ),
-      onPressed: () => _onRegionSelected(context, region),  // 지역을 선택하면 해당 노무사 리스트 화면으로 이동
+      onPressed: () => _onRegionSelected(context, region),
       child: Text(region, style: const TextStyle(fontSize: 11)),
     );
   }

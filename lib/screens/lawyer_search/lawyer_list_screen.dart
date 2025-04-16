@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:project_nomufinder/models/lawyer.dart';
 import 'package:project_nomufinder/screens/lawyer_search/lawyer_detail_screen.dart';
+import 'package:project_nomufinder/screens/reservation/reservation_screen.dart';
 
 class LawyerListScreen extends StatelessWidget {
   final String title;
-  final String region; // region 필드 추가
   final List<Lawyer> lawyers;
+  final String region; // region 매개변수 추가
 
   const LawyerListScreen({
     super.key,
     required this.title,
-    required this.region, // 필수로 받도록 설정
     required this.lawyers,
+    required this.region, // region 매개변수 추가
   });
 
   @override
@@ -95,7 +96,7 @@ class LawyerListScreen extends StatelessWidget {
                       spacing: 6,
                       runSpacing: 4,
                       children: lawyer.specialties
-                          .map((tag) => TagChip(tag: tag)) // ✅ 태그 표시
+                          .map((tag) => TagChip(tag: tag))
                           .toList(),
                     ),
                   ],
@@ -104,7 +105,12 @@ class LawyerListScreen extends StatelessWidget {
               const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {
-                  // 예약화면 연동
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReservationScreen(lawyer: lawyer),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0010BA),

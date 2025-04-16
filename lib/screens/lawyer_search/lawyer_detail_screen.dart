@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_nomufinder/models/lawyer.dart';
+import 'package:project_nomufinder/screens/reservation/reservation_screen.dart';
 
 class LawyerDetailScreen extends StatelessWidget {
   final Lawyer lawyer;
@@ -101,7 +102,14 @@ class LawyerDetailScreen extends StatelessWidget {
             height: 48,
             width: double.infinity,
             child: OutlinedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ReservationScreen(lawyer: lawyer),
+                  ),
+                );
+              },
               child: const Text('상담 예약'),
             ),
           ),
@@ -122,12 +130,12 @@ class LawyerDetailScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Row(
-            children: const [
-              Icon(Icons.location_on, size: 16, color: Colors.grey),
-              SizedBox(width: 4),
+            children: [
+              const Icon(Icons.location_on, size: 16, color: Colors.grey),
+              const SizedBox(width: 4),
               Text(
-                '서울특별시 강남구 코어대로 382 (11동) 6층 ~ 8층',
-                style: TextStyle(color: Colors.grey),
+                lawyer.address, // ✅ 여기만 바꿨어!
+                style: const TextStyle(color: Colors.grey),
               ),
             ],
           ),
