@@ -47,13 +47,13 @@ class WorkerIssueScreen extends StatelessWidget {
                   lawyer.specialties.any((tag) => tag.contains(issue)))
                   .toList();
 
-              // ✅ 해당 이슈를 전문으로 하는 노무사 리스트 화면으로 이동
+              // 해당 이슈를 전문으로 하는 노무사 리스트 화면으로 이동
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => LawyerListScreen(
                     title: issue,
-                    region: issue, // region 값을 추가하여 전달
+                    category: issue, // ✅ region 제거, category만 전달
                     lawyers: filtered,
                   ),
                 ),

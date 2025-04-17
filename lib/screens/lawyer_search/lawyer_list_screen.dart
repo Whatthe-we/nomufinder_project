@@ -6,13 +6,13 @@ import 'package:project_nomufinder/screens/reservation/reservation_screen.dart';
 class LawyerListScreen extends StatelessWidget {
   final String title;
   final List<Lawyer> lawyers;
-  final String region; // region 매개변수 추가
+  final String category; // 카테고리 추가
 
   const LawyerListScreen({
     super.key,
     required this.title,
     required this.lawyers,
-    required this.region, // region 매개변수 추가
+    required this.category, // 카테고리 전달
   });
 
   @override
@@ -20,7 +20,7 @@ class LawyerListScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(title),
+        title: Text('$title - $category'), // 카테고리 제목도 표시
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,

@@ -14,7 +14,7 @@ class RegionMapScreen extends StatelessWidget {
         builder: (_) => LawyerListScreen(
           title: region,
           lawyers: lawyers,
-          region: region, // region 값 전달
+          category: region, // ✅ 카테고리만 전달
         ),
       ),
     );
