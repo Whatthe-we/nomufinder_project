@@ -16,7 +16,6 @@ class KeywordSearchScreen extends ConsumerStatefulWidget {
 class _KeywordSearchScreenState extends ConsumerState<KeywordSearchScreen> {
   final TextEditingController _controller = TextEditingController();
   Future<List<String>>? _suggestionsFuture;
-  String category = ''; // 카테고리 상태
 
   @override
   void initState() {
@@ -25,20 +24,18 @@ class _KeywordSearchScreenState extends ConsumerState<KeywordSearchScreen> {
   }
 
   void _onSearchChanged(String query) {
-    print("검색창 입력 변경: $query"); // 추가
     if (query.isNotEmpty) {
       setState(() {
         _suggestionsFuture = ApiService.getSuggestions(query);
-        print("API 호출 시작 (쿼리: $query)"); // 추가
       });
     } else {
       setState(() {
         _suggestionsFuture = Future.value([]);
-        print("쿼리 비어짐, 자동완성 목록 초기화"); // 추가
       });
     }
   }
 
+  // _buildSuggestionsList 메서드를 정의
   Widget _buildSuggestionsList() {
     return FutureBuilder<List<String>>(
       future: _suggestionsFuture,
@@ -53,8 +50,12 @@ class _KeywordSearchScreenState extends ConsumerState<KeywordSearchScreen> {
             child: Text('추천 검색어가 없습니다.'),
           );
         } else {
-          return Column(
-            children: snapshot.data!.map((suggestion) {
+          return ListView.builder(
+            shrinkWrap: true, // 부모 위젯의 크기에 맞춰 크기 조정
+            physics: const BouncingScrollPhysics(), // 스크롤 시 탄력 효과
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              final suggestion = snapshot.data![index];
               return GestureDetector(
                 onTap: () {
                   _onSelectSuggestion(suggestion);
@@ -71,7 +72,7 @@ class _KeywordSearchScreenState extends ConsumerState<KeywordSearchScreen> {
                   ),
                 ),
               );
-            }).toList(),
+            },
           );
         }
       },
@@ -114,7 +115,25 @@ class _KeywordSearchScreenState extends ConsumerState<KeywordSearchScreen> {
 
   void _onSelectSuggestion(String text) async {
     _controller.text = text;
-    // 카테고리 분류 후, 해당 카테고리에 맞는 노무사 검색
+    final selectedCategory = await ApiService.classifyText(text);
+
+    if (selectedCategory == "카테고리를 찾을 수 없습니다") {
+      print("카테고리 추출 실패");
+      return;
+    }
+
+    final laborAttorneys = await ApiService.getLaborAttorneysBySpecialty(selectedCategory);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LawyerListScreen(
+          title: selectedCategory,
+          lawyers: laborAttorneys,
+          category: selectedCategory,
+        ),
+      ),
+    );
   }
 
   @override
@@ -125,7 +144,7 @@ class _KeywordSearchScreenState extends ConsumerState<KeywordSearchScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,
-        title: const Text('도와드릴게요!', style: TextStyle(color: Colors.black)),
+        title: const Text('어떤 문제가 있으신가요?', style: TextStyle(color: Colors.black)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -146,7 +165,7 @@ class _KeywordSearchScreenState extends ConsumerState<KeywordSearchScreen> {
                 controller: _controller,
                 onChanged: _onSearchChanged,
                 decoration: InputDecoration(
-                  hintText: '어떤 문제가 있으신가요?',
+                  hintText: '일을 하다가 다리를 다쳤어요',
                   border: InputBorder.none,
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: _controller.text.isNotEmpty
@@ -164,7 +183,7 @@ class _KeywordSearchScreenState extends ConsumerState<KeywordSearchScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            Expanded(child: _buildSuggestionsList()),
+            Expanded(child: _buildSuggestionsList()), // 여기서 자동완성 목록을 표시합니다.
           ],
         ),
       ),
