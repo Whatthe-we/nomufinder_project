@@ -23,19 +23,15 @@ class ApiService {
 
   // 카테고리 분류 함수
   static Future<String> classifyText(String text) async {
-    try {
-      final response = await _dio.post(
-        '$baseUrl/classify',
-        data: {'text': text},
-        options: Options(headers: {'Content-Type': 'application/json'}),
-      );
-      if (response.statusCode == 200) {
-        return response.data['category'];
-      } else {
-        throw Exception('분류 실패: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('분류 실패: $e');
+    final response = await _dio.post(
+      '$baseUrl/classify',
+      data: {'text': text},
+      options: Options(headers: {'Content-Type': 'application/json'}),
+    );
+    if (response.statusCode == 200) {
+      return response.data['category']; // 문자열 반환
+    } else {
+      throw Exception('분류 실패: ${response.statusCode}');
     }
   }
 

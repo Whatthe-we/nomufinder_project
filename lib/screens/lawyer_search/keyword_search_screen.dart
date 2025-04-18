@@ -19,10 +19,38 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     try {
       final response = await ApiService.getSuggestions(query);
       setState(() {
-        suggestions = response['suggestions']; // response: { category, suggestions }
+        suggestions = response['suggestions']; // API에서 받아온 추천 키워드
       });
     } catch (e) {
-      print("❌ 추천 실패: $e");
+      print("❌ 자동완성 실패: $e");
+    }
+  }
+
+  Future<void> _classifyAndNavigate(String keyword) async {
+    try {
+      // GPT 기반 분류 API 호출
+      final category = await ApiService.classifyText(keyword);
+
+      // 카테고리 기반으로 노무사 필터링
+      final filtered = lawyersByRegion.values
+          .expand((list) => list)
+          .where((lawyer) =>
+          lawyer.specialties.any((tag) => tag.contains(category)))
+          .toList();
+
+      // 결과 화면으로 이동
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => LawyerListScreen(
+            title: category,
+            category: category,
+            lawyers: filtered,
+          ),
+        ),
+      );
+    } catch (e) {
+      print("❌ 분류 및 이동 실패: $e");
     }
   }
 
@@ -83,7 +111,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                 runSpacing: 8,
                 children: suggestions.map((keyword) {
                   return GestureDetector(
-                    onTap: () => _onKeywordTap(keyword),
+                    onTap: () => _classifyAndNavigate(keyword),
                     child: Chip(
                       label: Text(keyword),
                       backgroundColor: const Color(0xFFEFEFFF),
