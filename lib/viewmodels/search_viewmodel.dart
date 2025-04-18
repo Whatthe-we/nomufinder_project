@@ -11,5 +11,6 @@ final userTypeProvider = StateProvider<String>((ref) => 'worker');
 
 // 분류 요청을 처리하는 프로바이더
 final classifyTextAsyncProvider = FutureProvider.autoDispose.family<String, String>((ref, input) async {
-  return ApiService.classifyText(input); // ApiService의 classifyText를 사용하여 카테고리 분류
+  final category = await ApiService.classifyText(input);
+  return category;
 });

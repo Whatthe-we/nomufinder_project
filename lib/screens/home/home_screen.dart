@@ -61,7 +61,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // 🛠 ref가 필요한 경우 이렇게 작성
+  // 사업주 & 근로자 버튼
   Widget _buildCategorySection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -115,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: GestureDetector(
-        onTap: () => context.push('/keyword-search'),
+        onTap: () => context.go('/search'),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
