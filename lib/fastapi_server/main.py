@@ -1,19 +1,19 @@
 from fastapi import FastAPI, Query
 from pydantic import BaseModel
-import os
-import google.generativeai as genai
 from dotenv import load_dotenv
-from classifier import router, set_model, classify_text_with_gemini  # classify_text_with_gemini를 import
+import os
+from classifier import router, set_openai_api_key, classify_text_with_openai
 
-# Gemini 모델 초기화
+# 환경변수 불러오기
 load_dotenv()
-api_key = os.getenv("GOOGLE_API_KEY", "여기에_API_키_입력")  # 실제 API 키 사용
-genai.configure(api_key=api_key)
-model_name = "models/gemini-1.5-pro-latest"
-model = genai.GenerativeModel(model_name=model_name)
-set_model(model)
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("❌ OPENAI_API_KEY가 .env에 없습니다.")
 
-# FastAPI 앱 생성 및 라우터 등록
+# 모델 초기화
+set_openai_api_key(api_key)
+
+# FastAPI 앱
 app = FastAPI()
 app.include_router(router)
 
@@ -28,7 +28,7 @@ def suggest_endpoint(query: str):
     print(f"Received query: {query}")
 
     # 키워드를 기반으로 카테고리 찾기 (classifier.py에서 처리)
-    category_result = classify_text_with_gemini(query)  # 수정된 부분
+    category_result = classify_text_with_openai(query)  # 수정된 부분
     print(f"Classified category: {category_result}")
 
     # 자동완성 추천 (classifier.py에서 제공하는 키워드 맵 사용)
@@ -37,3 +37,7 @@ def suggest_endpoint(query: str):
     print(f"Suggestions for category '{category_result}': {suggestions}")
 
     return {"category": category_result, "suggestions": suggestions}
+
+# specialty에 맞는 노무사 필터링 함수
+def filter_lawyers_by_specialty(specialty: str):
+    return [lawyer for lawyer in lawyers if lawyer["specialty"] == specialty]

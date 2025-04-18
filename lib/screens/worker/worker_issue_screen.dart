@@ -41,24 +41,28 @@ class WorkerIssueScreen extends StatelessWidget {
             onTap: () {
               if (isEmpty) return;
 
-              final filtered = lawyersByRegion.values
+              // 전체보기일 경우 모든 노무사 가져오기
+              final filtered = isLast
+                  ? lawyersByRegion.values.expand((list) => list).toList()
+                  : lawyersByRegion.values
                   .expand((list) => list)
                   .where((lawyer) =>
                   lawyer.specialties.any((tag) => tag.contains(issue)))
                   .toList();
 
-              // 해당 이슈를 전문으로 하는 노무사 리스트 화면으로 이동
+              // 노무사 리스트 화면으로 이동
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => LawyerListScreen(
-                    title: issue,
-                    category: issue, // ✅ region 제거, category만 전달
+                    title: isLast ? '전체보기' : issue,
+                    category: isLast ? '' : issue,
                     lawyers: filtered,
                   ),
                 ),
               );
             },
+
             child: Container(
               decoration: BoxDecoration(
                 color: isEmpty

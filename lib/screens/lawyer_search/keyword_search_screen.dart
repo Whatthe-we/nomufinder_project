@@ -1,136 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import '../../services/api_service.dart';
-import '../../viewmodels/search_viewmodel.dart';
+import 'package:project_nomufinder/services/api_service.dart';
 import 'package:project_nomufinder/models/lawyer.dart';
+import 'package:project_nomufinder/services/lawyer_data_loader.dart';
 import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart';
 
-class KeywordSearchScreen extends ConsumerStatefulWidget {
+class KeywordSearchScreen extends StatefulWidget {
   const KeywordSearchScreen({super.key});
 
   @override
-  ConsumerState<KeywordSearchScreen> createState() => _KeywordSearchScreenState();
+  State<KeywordSearchScreen> createState() => _KeywordSearchScreenState();
 }
 
-class _KeywordSearchScreenState extends ConsumerState<KeywordSearchScreen> {
+class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
   final TextEditingController _controller = TextEditingController();
-  Future<List<String>>? _suggestionsFuture;
+  List<String> suggestions = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _controller.addListener(() => _onSearchChanged(_controller.text));
-  }
-
-  void _onSearchChanged(String query) {
-    if (query.isNotEmpty) {
+  Future<void> _fetchSuggestions(String query) async {
+    try {
+      final response = await ApiService.getSuggestions(query);
       setState(() {
-        _suggestionsFuture = ApiService.getSuggestions(query);
+        suggestions = response['suggestions']; // response: { category, suggestions }
       });
-    } else {
-      setState(() {
-        _suggestionsFuture = Future.value([]);
-      });
+    } catch (e) {
+      print("❌ 추천 실패: $e");
     }
   }
 
-  // _buildSuggestionsList 메서드를 정의
-  Widget _buildSuggestionsList() {
-    return FutureBuilder<List<String>>(
-      future: _suggestionsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('자동완성 목록을 불러오는 데 실패했습니다.'));
-        } else if (snapshot.data?.isEmpty ?? true) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 10),
-            child: Text('추천 검색어가 없습니다.'),
-          );
-        } else {
-          return ListView.builder(
-            shrinkWrap: true, // 부모 위젯의 크기에 맞춰 크기 조정
-            physics: const BouncingScrollPhysics(), // 스크롤 시 탄력 효과
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              final suggestion = snapshot.data![index];
-              return GestureDetector(
-                onTap: () {
-                  _onSelectSuggestion(suggestion);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF4F2F2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: _buildHighlightedText(suggestion, _controller.text),
-                  ),
-                ),
-              );
-            },
-          );
-        }
-      },
-    );
+  // 유사 키워드 매칭 함수
+  bool _isTagMatching(String keyword, List<String> tags) {
+    return tags.any((tag) =>
+    tag.contains(keyword) || keyword.contains(tag)); // 양방향 대응
   }
 
-  // 검색어와 일치하는 부분을 빨간색으로 강조하는 함수
-  Widget _buildHighlightedText(String text, String query) {
-    if (query.isEmpty) {
-      return Text(text);
-    }
-
-    final lowerCaseText = text.toLowerCase();
-    final lowerCaseQuery = query.toLowerCase();
-    final matches = <TextSpan>[];
-    var start = 0;
-
-    while (start < text.length) {
-      final startIndex = lowerCaseText.indexOf(lowerCaseQuery, start);
-      if (startIndex == -1) {
-        matches.add(TextSpan(text: text.substring(start)));
-        break;
-      }
-
-      matches.add(TextSpan(text: text.substring(start, startIndex)));
-      matches.add(
-        TextSpan(
-          text: text.substring(startIndex, startIndex + query.length),
-          style: const TextStyle(
-            color: Color(0xFFBD0101), // 빨간색 강조
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-      start = startIndex + query.length;
-    }
-
-    return Text.rich(TextSpan(children: matches));
-  }
-
-  void _onSelectSuggestion(String text) async {
-    _controller.text = text;
-    final selectedCategory = await ApiService.classifyText(text);
-
-    if (selectedCategory == "카테고리를 찾을 수 없습니다") {
-      print("카테고리 추출 실패");
-      return;
-    }
-
-    final laborAttorneys = await ApiService.getLaborAttorneysBySpecialty(selectedCategory);
+  void _onKeywordTap(String keyword) {
+    final filtered = lawyersByRegion.values
+        .expand((list) => list)
+        .where((lawyer) => _isTagMatching(keyword, lawyer.specialties))
+        .toList();
 
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => LawyerListScreen(
-          title: selectedCategory,
-          lawyers: laborAttorneys,
-          category: selectedCategory,
+          title: keyword,
+          category: keyword,
+          lawyers: filtered,
         ),
       ),
     );
@@ -139,51 +53,45 @@ class _KeywordSearchScreenState extends ConsumerState<KeywordSearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
-        title: const Text('어떤 문제가 있으신가요?', style: TextStyle(color: Colors.black)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: AppBar(title: const Text("어떤 문제가 있으신가요?")),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBEBEB),
-                borderRadius: BorderRadius.circular(22.5),
-              ),
-              child: TextField(
-                controller: _controller,
-                onChanged: _onSearchChanged,
-                decoration: InputDecoration(
-                  hintText: '일을 하다가 다리를 다쳤어요',
-                  border: InputBorder.none,
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _controller.text.isNotEmpty
-                      ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      _controller.clear();
-                      setState(() {
-                        _suggestionsFuture = Future.value([]);
-                      });
-                    },
-                  )
-                      : null,
-                ),
+            TextField(
+              controller: _controller,
+              onChanged: (value) {
+                if (value.isNotEmpty) _fetchSuggestions(value);
+              },
+              decoration: const InputDecoration(
+                hintText: '예시 : 일하다 다쳤어요',
+                border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 20),
-            Expanded(child: _buildSuggestionsList()), // 여기서 자동완성 목록을 표시합니다.
+            const SizedBox(height: 16),
+            if (suggestions.isNotEmpty) ...[
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "추천 키워드:",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: suggestions.map((keyword) {
+                  return GestureDetector(
+                    onTap: () => _onKeywordTap(keyword),
+                    child: Chip(
+                      label: Text(keyword),
+                      backgroundColor: const Color(0xFFEFEFFF),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
           ],
         ),
       ),

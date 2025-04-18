@@ -20,7 +20,7 @@ class LawyerListScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('$title - $category'), // 카테고리 제목도 표시
+        title: Text(title),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,

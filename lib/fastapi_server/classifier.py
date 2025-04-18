@@ -1,18 +1,21 @@
-import google.generativeai as genai
 import os
 import random
-from dotenv import load_dotenv
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional
+from openai import OpenAI
 
 # 라우터 초기화
 router = APIRouter()
 
-# 전역 변수로 모델 참조 저장 (main.py에서 설정)
-model = None
+# 전역 키 설정
+client: OpenAI = None
 
-# 사용자 입력 모델 추가
+def set_openai_api_key(api_key: str):
+    global client
+    client = OpenAI(api_key=api_key)
+
+# 사용자 입력 모델
 class UserInput(BaseModel):
     text: str
 
@@ -31,7 +34,7 @@ autocomplete_map = {
     "직장 내 성희롱": ["성희롱", "성추행", "언어폭력", "성적언급", "성적이해", "성희롱 예방", "직장 내 폭력", "성적대상", "불법촬영", "성희롱신고"],
     "직장 내 괴롭힘": ["괴롭힘", "폭력", "언어폭력", "모욕", "따돌림", "고립", "감정노동", "폭행", "스트레스", "고소"],
     "직장 내 차별": ["차별", "성차별", "연령차별", "성별차별", "직급차별", "직무차별", "종교차별", "고용차별", "평등", "차별철폐"],
-    "임금체불": ["임금체불", "급여 미지급", "지연 지급", "최저임금", "근로계약 미이행", "연장근로 수당 미지급", "퇴직금 미지급", "임금체불 신고", "임금체불 처리", "법정 급여"],
+    "임금/퇴직금": ["임금체불", "급여 미지급", "지연 지급", "최저임금", "근로계약 미이행", "연장근로 수당 미지급", "퇴직금 미지급", "임금체불 신고", "임금체불 처리", "법정 급여"],
     "산업재해": ["산재", "근로자 재해", "산업재해 보상", "재해 보상", "직업병", "산재보험", "산재처리", "산업사고", "재해 예방법", "산재 사고"],
     "노동조합": ["노동조합", "파업", "임금협상", "노조 활동", "노동권", "노동자 권리", "노동조합 설립", "노조 파업", "노조 대표", "조합원"],
 
@@ -41,13 +44,9 @@ autocomplete_map = {
     "급여 아웃소싱": ["급여 관리", "급여 대행", "급여 계산", "세금 신고", "사회보험", "급여 지급", "급여 시스템", "급여 아웃소싱 계약", "급여 보고", "급여 처리"]
 }
 
-# 텍스트를 분석하여 적절한 카테고리로 분류하는 함수
-def classify_text_with_gemini(user_input: str) -> str:
+# OpenAI 분류 함수
+def classify_text_with_openai(user_input: str) -> str:
     """텍스트를 분석하여 적절한 카테고리로 분류하는 함수"""
-    global model
-
-    if model is None:
-        return "모델이 초기화되지 않았습니다"
 
     # 퓨샷 예시 (fewshot_examples)
     fewshot_examples = [
@@ -67,11 +66,11 @@ def classify_text_with_gemini(user_input: str) -> str:
         '"동료 간 불화로 인한 징계 절차가 궁금해요" -> 부당징계',
 
         # 임금체불
-        '"급여 이체가 지연되었는데 어떻게 대응해야 할까요?" -> 임금체불',
-        '"연장근로 수당을 미지급한 상황입니다" -> 임금체불',
-        '"임금 산정 기준 변경 관련 문의입니다" -> 임금체불',
-        '"퇴직금 정산 기준이 헷갈립니다" -> 임금체불',
-        '"전 직원의 임금 지급 누락 건 처리 방법이 궁금합니다" -> 임금체불',
+        '"급여 이체가 지연되었는데 어떻게 대응해야 할까요?" -> 임금/퇴직금',
+        '"연장근로 수당을 미지급한 상황입니다" -> 임금/퇴직금',
+        '"임금 산정 기준 변경 관련 문의입니다" -> 임금/퇴직금',
+        '"퇴직금 정산 기준이 헷갈립니다" -> 임금/퇴직금',
+        '"전 직원의 임금 지급 누락 건 처리 방법이 궁금합니다" -> 임금/퇴직금',
 
         # 직장내 성희롱
         '"성희롱 신고가 접수됐을 때 기업의 책임은?" -> 직장 내 성희롱',
@@ -173,11 +172,11 @@ def classify_text_with_gemini(user_input: str) -> str:
         '"출산휴가 후 인사이동이 됐어요" -> 직장 내 차별',
 
         # 임금체불
-        '"월급이 계속 지연되고 있어요" -> 임금체불',
-        '"잔업수당을 한 번도 받은 적이 없어요" -> 임금체불',
-        '"퇴직금이 제대로 정산되지 않았어요" -> 임금체불',
-        '"연차수당이 지급되지 않았어요" -> 임금체불',
-        '"임금 일부가 현물로 지급돼요" -> 임금체불',
+        '"월급이 계속 지연되고 있어요" -> 임금/퇴직금',
+        '"잔업수당을 한 번도 받은 적이 없어요" -> 임금/퇴직금',
+        '"퇴직금이 제대로 정산되지 않았어요" -> 임금/퇴직금',
+        '"연차수당이 지급되지 않았어요" -> 임금/퇴직금',
+        '"임금 일부가 현물로 지급돼요" -> 임금/퇴직금',
 
         # 산업재해
         '"작업 중 다쳐도 산재 처리를 안 해줘요" -> 산업재해',
@@ -197,7 +196,7 @@ def classify_text_with_gemini(user_input: str) -> str:
     # 퓨샷 예시를 포함한 프롬프트 작성
     prompt = f"""
     다음 문장을 아래 카테고리 중 하나로 분류하세요:
-    [부당해고, 부당징계, 근로계약, 근무조건, 직장 내 성희롱, 직장 내 괴롭힘, 직장 내 차별, 임금체불, 산업재해, 노동조합]
+    [부당해고, 부당징계, 근로계약, 근무조건, 직장 내 성희롱, 직장 내 괴롭힘, 직장 내 차별, 임금/퇴직금, 산업재해, 노동조합]
 
     예시:
     {chr(10).join(fewshot_examples)}
@@ -207,21 +206,21 @@ def classify_text_with_gemini(user_input: str) -> str:
     """
 
     try:
-        response = model.generate_content(prompt)
-        if response.candidates and response.candidates[0].content.parts:
-            text = response.candidates[0].content.parts[0].text.strip()
-            print(f"Predicted Category: {text}")
-            # 카테고리만 반환하고, 불필요한 설명 제거
-            category = text.split("카테고리:")[-1].strip()
-            return category.split(" ")[0]  # 카테고리 이름만 반환
-        return "카테고리를 찾을 수 없습니다"
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=50,
+        )
+        result = response.choices[0].message.content.strip()
+        print(f"Predicted Category: {result}")
+        return result.split(" ")[0]
     except Exception as e:
-        print("❌ Gemini API 호출 오류:", e)
-        return f"분류 실패: {e}"
+        print("❌ OpenAI API 오류:", e)
+        return "분류 실패"
 
-# 분류 API
+# FastAPI 분류 엔드포인트
 @router.post("/classify")
 async def classify_endpoint(user_input: UserInput):
-    """사용자 입력을 받아 카테고리로 분류하는 API 엔드포인트"""
-    result = classify_text_with_gemini(user_input.text)
+    result = classify_text_with_openai(user_input.text)
     return {"category": result}
