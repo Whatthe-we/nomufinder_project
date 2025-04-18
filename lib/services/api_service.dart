@@ -21,36 +21,35 @@ class ApiService {
     }
   }
 
-  // 카테고리로 필터링된 노무사 목록 가져오기
-  static Future<List<Lawyer>> getLaborAttorneysBySpecialty(String specialty) async {
+  // 카테고리 분류 함수
+  static Future<String> classifyText(String text) async {
     try {
-      // specialty를 사용하여 API 호출
-      final response = await _dio.get('$baseUrl/lawyers?specialty=$specialty');
+      final response = await _dio.post(
+        '$baseUrl/classify',
+        data: {'text': text},
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
       if (response.statusCode == 200) {
-        // API 응답에서 노무사 목록을 Lawyer 객체로 변환
-        List<Lawyer> lawyers = (response.data as List)
-            .map((lawyerData) => Lawyer.fromJson(lawyerData))
-            .toList();
-        return lawyers;
+        return response.data['category'];
       } else {
-        throw Exception('카테고리별 노무사 목록 불러오기 실패: ${response.statusCode}');
+        throw Exception('분류 실패: ${response.statusCode}');
       }
-    } on DioException catch (e) {
-      throw Exception('카테고리별 노무사 목록 불러오기 실패: ${e.message}');
     } catch (e) {
-      throw Exception('카테고리별 노무사 목록 불러오기 실패: $e');
+      throw Exception('분류 실패: $e');
     }
   }
 
   // 자동완성 불러오기
-  static Future<List<String>> getSuggestions(String query) async {
+  static Future<Map<String, dynamic>> getSuggestions(String query) async {
     try {
       final response = await _dio.get('$baseUrl/suggest?query=$query');
       if (response.statusCode == 200) {
-        // 카테고리와 함께 자동완성 키워드 반환
         final category = response.data['category'];
         final suggestions = (response.data['suggestions'] as List).cast<String>();
-        return suggestions;
+        return {
+          'category': category,
+          'suggestions': suggestions,
+        };
       } else {
         throw Exception('자동완성 불러오기 실패: ${response.statusCode}');
       }
@@ -58,21 +57,6 @@ class ApiService {
       throw Exception('자동완성 불러오기 실패: ${e.message}');
     } catch (e) {
       throw Exception('자동완성 불러오기 실패: $e');
-    }
-  }
-  // 카테고리 분류 API
-  static Future<String> classifyText(String text) async {
-    try {
-      final response = await _dio.post('$baseUrl/classify', data: {'text': text});
-      if (response.statusCode == 200) {
-        return response.data['category'];
-      } else {
-        throw Exception('카테고리 분류 실패: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception('카테고리 분류 실패: ${e.message}');
-    } catch (e) {
-      throw Exception('카테고리 분류 실패: $e');
     }
   }
 }

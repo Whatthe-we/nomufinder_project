@@ -37,6 +37,7 @@ class WorkerRegionScreen extends StatelessWidget {
             return GestureDetector(
               onTap: () {
                 if (isLast) {
+                  // 전체보기 버튼 클릭 시 지도 화면으로 이동
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -46,15 +47,17 @@ class WorkerRegionScreen extends StatelessWidget {
                   return;
                 }
 
+                // 지역에 맞는 노무사 목록을 가져옴
                 final lawyers = lawyersByRegion[region] ?? [];
 
+                // LawyerListScreen으로 카테고리와 노무사 목록 전달
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => LawyerListScreen(
-                      title: region,
-                      category: region, // ✅ region 대신 category만 전달
-                      lawyers: lawyers,
+                      title: region,  // 지역명을 제목으로 사용
+                      lawyers: lawyers,  // 지역에 맞는 노무사 리스트
+                      category: region, // ✅ category 파라미터에 region 값을 전달합니다.
                     ),
                   ),
                 );
