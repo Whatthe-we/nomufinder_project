@@ -46,15 +46,18 @@ class OnboardingScreen extends StatelessWidget {
                       color: const Color(0xFFF1F1F1),
                       borderRadius: BorderRadius.circular(38),
                     ),
-                    child: const Center(
-                      child: Text(
-                        "I DIDN'T UNDERSTAND",
-                        style: TextStyle(
-                          color: Color(0xFF6B6B6B),
-                          fontSize: 16,
-                          fontFamily: 'Open Sans',
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.28,
+                    child: GestureDetector(
+                      onTap: () => context.go('/home'), // ✅ 홈 화면으로 이동
+                      child: const Center(
+                        child: Text(
+                          "I DON'T UNDERSTAND",
+                          style: TextStyle(
+                            color: Color(0xFF6B6B6B),
+                            fontSize: 16,
+                            fontFamily: 'Open Sans',
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.28,
+                          ),
                         ),
                       ),
                     ),

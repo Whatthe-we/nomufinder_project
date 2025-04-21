@@ -20,7 +20,8 @@ final Map<String, List<String>> regionKeywords = {
 
 Future<void> loadLawyerData() async {
   final String jsonString =
-  await rootBundle.loadString('assets/lawyers_by_region.json');
+  await rootBundle.loadString(
+      'assets/lawyers_by_region_ver2.json'); // json 파일 업데이트
   final List<dynamic> jsonList = json.decode(jsonString);
 
   lawyersByRegion = {};
@@ -28,6 +29,16 @@ Future<void> loadLawyerData() async {
   for (var json in jsonList) {
     final lawyer = Lawyer.fromJson(json);
     final address = json['address'] ?? '';
+
+    // ✅ specialty 강제 보강 처리
+    if (lawyer.specialties.contains('괴롭힘·성희롱')) {
+      if (!lawyer.specialties.contains('직장 내 괴롭힘')) {
+        lawyer.specialties.add('직장 내 괴롭힘');
+      }
+      if (!lawyer.specialties.contains('직장 내 성희롱')) {
+        lawyer.specialties.add('직장 내 성희롱');
+      }
+    }
 
     // address 기반으로 region 자동 매핑
     String matchedRegion = '기타';
