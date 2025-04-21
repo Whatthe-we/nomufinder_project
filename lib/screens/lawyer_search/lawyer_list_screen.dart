@@ -1,47 +1,121 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project_nomufinder/models/lawyer.dart';
 import 'package:project_nomufinder/screens/lawyer_search/lawyer_detail_screen.dart';
 import 'package:project_nomufinder/screens/reservation/reservation_screen.dart';
+import 'package:project_nomufinder/widgets/filter_bottom_sheet.dart';
+import 'package:project_nomufinder/viewmodels/search_viewmodel.dart';
 
-class LawyerListScreen extends StatelessWidget {
+class LawyerListScreen extends ConsumerStatefulWidget {
   final String title;
   final List<Lawyer> lawyers;
-  final String category; // 카테고리 추가
+  final String? category; // nullable로 변경해도 안전하게 처리
 
   const LawyerListScreen({
     super.key,
     required this.title,
     required this.lawyers,
-    required this.category, // 카테고리 전달
+    this.category,
   });
 
   @override
+  ConsumerState<LawyerListScreen> createState() => _LawyerListScreenState();
+}
+
+class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    print('📦 전달된 노무사 수: ${widget.lawyers.length}');
+    print('✅ 전달된 category: ${widget.category}');
+
+    Future.microtask(() {
+      ref
+          .read(allLawyersProvider.notifier)
+          .state = widget.lawyers;
+
+      // ✅ 전달된 lawyers 디버깅 출력
+      for (var lawyer in widget.lawyers) {
+        print('🧠 ${lawyer.name} / specialties: ${lawyer.specialties}');
+      }
+
+      // ✅ normalize 적용
+      final normalizedCategory = normalizeCategory(widget.category ?? '');
+      print('🧪 normalizedCategory: $normalizedCategory');
+
+      // ✅ 지역명이 아닌 경우에만 카테고리 상태로 반영
+      if (!regionKeywords.keys.contains(normalizedCategory)) {
+        ref
+            .read(categoryProvider.notifier)
+            .state = normalizedCategory;
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final filteredLawyers = ref.watch(filteredLawyersProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(title),
+        title: Text(
+          widget.title,
+          style: const TextStyle(fontFamily: 'OpenSans'),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: lawyers.length,
-        itemBuilder: (context, index) {
-          final lawyer = lawyers[index];
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => LawyerDetailScreen(lawyer: lawyer),
-                ),
+      body: Stack(
+        children: [
+          ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            itemCount: filteredLawyers.length,
+            itemBuilder: (context, index) {
+              final lawyer = filteredLawyers[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => LawyerDetailScreen(lawyer: lawyer),
+                    ),
+                  );
+                },
+                child: _buildLawyerCard(context, lawyer),
               );
             },
-            child: _buildLawyerCard(context, lawyer),
-          );
-        },
+          ),
+          Positioned(
+            left: MediaQuery.of(context).size.width * 0.5 - 65,
+            bottom: 20,
+            child: SizedBox(
+              width: 130,
+              height: 42,
+              child: ElevatedButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => const FilterBottomSheet(),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueGrey[600]!.withOpacity(0.7), // 80% 불투명
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text(
+                  '필터 적용하기',
+                  style: TextStyle(fontSize: 14, color: Colors.white, fontFamily: 'OpenSans'),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -58,7 +132,6 @@ class LawyerListScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 상단: 프로필 + 이름/설명 + 예약 버튼
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -78,26 +151,28 @@ class LawyerListScreen extends StatelessWidget {
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
+                            fontFamily: 'OpenSans',
                           ),
                         ),
                         const SizedBox(width: 6),
                         const Icon(Icons.verified, size: 16, color: Colors.grey),
                         const SizedBox(width: 4),
-                        const Text("신속", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        const Text(
+                          "신속",
+                          style: TextStyle(fontSize: 12, color: Colors.grey, fontFamily: 'OpenSans'),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       lawyer.description,
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                      style: const TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'OpenSans'),
                     ),
                     const SizedBox(height: 4),
                     Wrap(
                       spacing: 6,
                       runSpacing: 4,
-                      children: lawyer.specialties
-                          .map((tag) => TagChip(tag: tag))
-                          .toList(),
+                      children: lawyer.specialties.map((tag) => TagChip(tag: tag)).toList(),
                     ),
                   ],
                 ),
@@ -120,7 +195,7 @@ class LawyerListScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                child: const Text("예약하기", style: TextStyle(fontSize: 13)),
+                child: const Text("예약하기", style: TextStyle(fontSize: 13, fontFamily: 'OpenSans')),
               ),
             ],
           ),
@@ -143,10 +218,10 @@ class LawyerListScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey, fontFamily: 'OpenSans')),
           Text(
             '${_formatPrice(fee)}원',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'OpenSans'),
           ),
         ],
       ),
@@ -178,6 +253,7 @@ class TagChip extends StatelessWidget {
         style: const TextStyle(
           fontSize: 12,
           color: Colors.black87,
+          fontFamily: 'OpenSans',
         ),
       ),
     );

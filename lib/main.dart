@@ -8,12 +8,20 @@ import 'dart:io';
 import 'config/router.dart';
 import 'config/providers.dart';
 import 'package:project_nomufinder/screens/auth/my_page_screen.dart';
+import 'firebase_options.dart'; // flutterfire CLI 생성 파일
+import 'app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Firebase 초기화
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    print("⚠️ Firebase 초기화 무시됨: $e");
+  }
 
   // JSON 데이터 로드
   await loadLawyerData();

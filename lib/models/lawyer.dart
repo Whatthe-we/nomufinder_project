@@ -1,4 +1,7 @@
+import '../viewmodels/search_viewmodel.dart';
+
 class Lawyer {
+  final int licenseNumber; // ✅ licenseNumber 추가
   final String name;
   final String description;
   final List<String> specialties;
@@ -7,17 +10,24 @@ class Lawyer {
   final int visitFee;
   final String profileImage;
   final String address; // ✅ 주소 필드 추가
+  final String gender; // ✅ 성별 필드 추가
+  final String email; // ✅ 이메일 추가
+  final String phone; // ✅ 연락처 추가
 
   Lawyer({
+    required this.licenseNumber, // ✅ licenseNumber 추가
     required this.name,
     required this.description,
-    required this.specialties,
+    required List<String> specialties, // 변경 지점
     required this.phoneFee,
     required this.videoFee,
     required this.visitFee,
     required this.profileImage,
     required this.address,
-  });
+    required this.gender,     // ✅ 성별 필터
+    required this.email,       // ✅ 이메일 추가
+    required this.phone,       // ✅ 연락처 추가
+  }) : specialties = List.from(specialties); // ← 이렇게 초기화하면 가변 리스트 됨
 
   factory Lawyer.fromJson(Map<String, dynamic> json) {
     // 상담유형과 가격 매칭
@@ -32,14 +42,18 @@ class Lawyer {
     }
 
     return Lawyer(
+      licenseNumber: json['license_number'] ?? 0, // ✅ json에서 licenseNumber 추출
       name: json['name'] ?? '',
       description: json['desc'] ?? '',
-      specialties: List<String>.from(json['specialty'] ?? []),
+      specialties: (json['specialty'] as List<dynamic>).expand((e) => e is List ? e : [e]).cast<String>().toList(),
       phoneFee: feeMap['전화상담'] ?? 0,
       videoFee: feeMap['영상상담'] ?? 0,
       visitFee: feeMap['방문상담'] ?? 0,
       profileImage: json['photo'] ?? '',
       address: json['address'] ?? '', // ✅ address 파싱
+      gender: json['gender'] ?? '',   // ✅ 성별
+      email: json['email'] ?? '',     // ✅ 이메일
+      phone: json['phone'] ?? '',     // ✅ 연락처
     );
   }
 }
