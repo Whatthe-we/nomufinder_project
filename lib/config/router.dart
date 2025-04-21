@@ -11,6 +11,7 @@ import '../screens/lawyer_search/keyword_search_screen.dart'; // 🔍 검색 화
 import '../screens/auth/my_page_screen.dart';
 import '../screens/reservation/reservation_screen.dart';
 import '../screens/reservation/reservation_success_screen.dart';
+import 'package:project_nomufinder/screens/reservation/my_reservations_screen.dart'; // 내 예약 관리
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -134,6 +135,17 @@ final router = GoRouter(
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
             child: const MyPageScreen(), // 마이페이지 화면
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                FadeTransition(opacity: animation, child: child),
+          ),
+        ),
+        GoRoute(
+          path: '/my-reservations',
+          name: 'MyReservations',
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: const MyReservationsScreen(),
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
