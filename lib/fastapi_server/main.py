@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
 from classifier import router, set_openai_api_key, classify_text_with_openai
+from routers import reservation_router
 
 # 환경변수 불러오기
 load_dotenv()
@@ -15,7 +16,8 @@ set_openai_api_key(api_key)
 
 # FastAPI 앱
 app = FastAPI()
-app.include_router(router)
+app.include_router(router) # 검색 분류
+app.include_router(reservation_router.router) # 예약 메일 발송
 
 # 사용자 입력 모델
 class UserInput(BaseModel):
