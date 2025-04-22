@@ -161,11 +161,18 @@ final router = GoRouter(
         GoRoute(
           path: '/reservation_success',
           builder: (context, state) {
-            final extra = state.extra as Map<String, dynamic>;
+            final extra = state.extra as Map<String, dynamic>?;
+            final dynamic dateRaw = extra?['date'];
+            final date = dateRaw is DateTime ? dateRaw : DateTime.parse(dateRaw); // ✅ string일 경우 파싱
+            final time = extra?['time'] as String?;
+            final lawyerMap = extra?['lawyer'];
+
+            final lawyer = lawyerMap != null ? Lawyer.fromJson(lawyerMap) : null;
+
             return ReservationSuccessScreen(
-              date: extra['date'],
-              time: extra['time'],
-              lawyer: extra['lawyer'],
+              date: date,
+              time: time ?? '',
+              lawyer: lawyer!,
             );
           },
         ),

@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/reservation.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
 
 class ReservationViewModel {
   final _collection = FirebaseFirestore.instance.collection('reservations');
@@ -59,8 +62,65 @@ class ReservationViewModel {
         .toList();
   }
 
-  /// 예약 취소 (예약 ID 기준)
+  /// 예약 ID 기준으로 단순 삭제
   Future<void> deleteReservation(String reservationId) async {
     await _collection.doc(reservationId).delete();
+  }
+
+  /// 예약 취소 + 이메일 전송
+  Future<void> deleteReservationWithEmail({
+    required String reservationId,
+    required String lawyerEmail,
+    required String lawyerName,
+    required String userName,
+    required String date,
+    required String time,
+    required String type,
+  }) async {
+    await deleteReservation(reservationId); // 기존 삭제
+    // ✅ 이메일 전송 (취소 알림 전용 API 만들면 좋음)
+    await sendReservationEmail(
+      lawyerEmail: lawyerEmail,
+      lawyerName: lawyerName,
+      userName: userName,
+      date: date,
+      time: time,
+      type: type,
+      isCanceled: true, // ✅ 취소
+    );
+  }
+
+  /// 예약 메일 발송
+  Future<void> sendReservationEmail({
+    required String lawyerEmail,
+    required String lawyerName,
+    required String userName,
+    required String date,
+    required String time,
+    required String type,
+    bool isCanceled = false, // ✅ 기본값 false
+  }) async {
+    final url = '${dotenv.env['FASTAPI_BASE_URL']}/send-reservation-email';
+    print('📨 이메일 전송 URL: $url');
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'lawyerEmail': lawyerEmail,
+        'lawyerName': lawyerName,
+        'userName': userName,
+        'date': date,
+        'time': time,
+        'type': type,
+        'isCanceled': isCanceled, // ✅ FastAPI에 전달
+      }),
+    );
+    print('📨 FastAPI 응답 코드: ${response.statusCode}');
+    print('📨 FastAPI 응답 내용: ${response.body}');
+
+    if (response.statusCode != 200) {
+      throw Exception('이메일 전송 실패: ${response.body}');
+    }
   }
 }
