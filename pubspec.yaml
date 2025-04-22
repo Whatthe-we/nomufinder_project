@@ -32,6 +32,7 @@ dependencies:
   device_info_plus: ^9.0.3
   dio: ^5.4.0
   table_calendar: ^3.0.9
+  add_2_calendar: ^3.0.1
   firebase_database: ^10.4.2
 
   # The following adds the Cupertino Icons font to your application.
