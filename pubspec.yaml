@@ -46,13 +46,15 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
   assets:
     - assets/images/logo.png
     - assets/images/korea_map.png
     - assets/lawyers_by_region_ver2.json
     - .env.dev
     - .env.prod
+    - assets/images/banner1.png
+    - assets/images/banner2.png
+    - assets/images/banner3.png
 
   fonts:
     - family: Open Sans
