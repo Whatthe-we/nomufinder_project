@@ -9,7 +9,7 @@ import 'package:project_nomufinder/viewmodels/search_viewmodel.dart';
 class LawyerListScreen extends ConsumerStatefulWidget {
   final String title;
   final List<Lawyer> lawyers;
-  final String? category; // nullable로 변경해도 안전하게 처리
+  final String? category;
 
   const LawyerListScreen({
     super.key,
@@ -26,28 +26,12 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
   @override
   void initState() {
     super.initState();
-    print('📦 전달된 노무사 수: ${widget.lawyers.length}');
-    print('✅ 전달된 category: ${widget.category}');
-
     Future.microtask(() {
-      ref
-          .read(allLawyersProvider.notifier)
-          .state = widget.lawyers;
+      ref.read(allLawyersProvider.notifier).state = widget.lawyers;
 
-      // ✅ 전달된 lawyers 디버깅 출력
-      for (var lawyer in widget.lawyers) {
-        print('🧠 ${lawyer.name} / specialties: ${lawyer.specialties}');
-      }
-
-      // ✅ normalize 적용
       final normalizedCategory = normalizeCategory(widget.category ?? '');
-      print('🧪 normalizedCategory: $normalizedCategory');
-
-      // ✅ 지역명이 아닌 경우에만 카테고리 상태로 반영
       if (!regionKeywords.keys.contains(normalizedCategory)) {
-        ref
-            .read(categoryProvider.notifier)
-            .state = normalizedCategory;
+        ref.read(categoryProvider.notifier).state = normalizedCategory;
       }
     });
   }
@@ -59,10 +43,7 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: const TextStyle(fontFamily: 'OpenSans'),
-        ),
+        title: Text(widget.title, style: const TextStyle(fontFamily: 'OpenSans')),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -76,12 +57,7 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
               final lawyer = filteredLawyers[index];
               return GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => LawyerDetailScreen(lawyer: lawyer),
-                    ),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => LawyerDetailScreen(lawyer: lawyer)));
                 },
                 child: _buildLawyerCard(context, lawyer),
               );
@@ -103,15 +79,10 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueGrey[600]!.withOpacity(0.7), // 80% 불투명
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  backgroundColor: Colors.blueGrey[600]!.withOpacity(0.7),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
-                child: const Text(
-                  '필터 적용하기',
-                  style: TextStyle(fontSize: 14, color: Colors.white, fontFamily: 'OpenSans'),
-                ),
+                child: const Text('필터 적용하기', style: TextStyle(fontSize: 14, color: Colors.white, fontFamily: 'OpenSans')),
               ),
             ),
           ),
@@ -144,31 +115,22 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          lawyer.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            fontFamily: 'OpenSans',
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        const Icon(Icons.verified, size: 16, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        const Text(
-                          "신속",
-                          style: TextStyle(fontSize: 12, color: Colors.grey, fontFamily: 'OpenSans'),
-                        ),
-                      ],
-                    ),
+                    Text(lawyer.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'OpenSans')),
                     const SizedBox(height: 4),
-                    Text(
-                      lawyer.description,
-                      style: const TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'OpenSans'),
-                    ),
+                    Text(lawyer.description, style: const TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'OpenSans')),
                     const SizedBox(height: 4),
+                    Text(lawyer.comment, style: const TextStyle(fontSize: 13, fontFamily: 'OpenSans')),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: lawyer.badges.map((badge) => Chip(
+                        label: Text(badge, style: const TextStyle(fontSize: 10, color: Colors.white)),
+                        backgroundColor: Colors.blueAccent,
+                        padding: EdgeInsets.zero,
+                      )).toList(),
+                    ),
+                    const SizedBox(height: 6),
                     Wrap(
                       spacing: 6,
                       runSpacing: 4,
@@ -180,20 +142,13 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
               const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReservationScreen(lawyer: lawyer),
-                    ),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => ReservationScreen(lawyer: lawyer)));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0010BA),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
                 child: const Text("예약하기", style: TextStyle(fontSize: 13, fontFamily: 'OpenSans')),
               ),
@@ -205,6 +160,9 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
               _buildFee('전화상담', lawyer.phoneFee),
               _buildFee('영상상담', lawyer.videoFee),
               _buildFee('방문상담', lawyer.visitFee),
+              const Spacer(),
+              Icon(Icons.star, color: Colors.orange, size: 14),
+              Text('${lawyer.reviews} 후기', style: const TextStyle(fontSize: 12, fontFamily: 'OpenSans')),
             ],
           ),
         ],
@@ -219,20 +177,14 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey, fontFamily: 'OpenSans')),
-          Text(
-            '${_formatPrice(fee)}원',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'OpenSans'),
-          ),
+          Text('${_formatPrice(fee)}원', style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'OpenSans')),
         ],
       ),
     );
   }
 
   String _formatPrice(int price) {
-    return price.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (match) => '${match[1]},',
-    );
+    return price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (match) => '${match[1]},');
   }
 }
 
@@ -248,14 +200,7 @@ class TagChip extends StatelessWidget {
         color: const Color(0xFFF2F1FA),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        '#$tag',
-        style: const TextStyle(
-          fontSize: 12,
-          color: Colors.black87,
-          fontFamily: 'OpenSans',
-        ),
-      ),
+      child: Text('#$tag', style: const TextStyle(fontSize: 12, color: Colors.black87, fontFamily: 'OpenSans')),
     );
   }
 }
