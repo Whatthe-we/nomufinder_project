@@ -13,6 +13,9 @@ class Lawyer {
   final String gender; // ✅ 성별 필드 추가
   final String email; // ✅ 이메일 추가
   final String phone; // ✅ 연락처 추가
+  final List<String> badges;
+  final String comment;
+  final int reviews;
 
   Lawyer({
     required this.licenseNumber, // ✅ licenseNumber 추가
@@ -27,6 +30,10 @@ class Lawyer {
     required this.gender,     // ✅ 성별 필터
     required this.email,       // ✅ 이메일 추가
     required this.phone,       // ✅ 연락처 추가
+    required this.badges,
+    required this.comment,
+    required this.reviews,
+
   }) : specialties = List.from(specialties); // ← 이렇게 초기화하면 가변 리스트 됨
 
   // ✅ JSON → 객체로 역직렬화
@@ -57,6 +64,9 @@ class Lawyer {
       gender: json['gender'] ?? '',
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
+      badges: List<String>.from(json['badges']),
+      comment: json['comment'],
+      reviews: json['reviews'],
     );
   }
 
@@ -78,6 +88,7 @@ class Lawyer {
       'gender': gender,
       'email': email,
       'phone': phone,
+
     };
   }
 }
