@@ -29,8 +29,8 @@ class Lawyer {
     required this.phone,       // ✅ 연락처 추가
   }) : specialties = List.from(specialties); // ← 이렇게 초기화하면 가변 리스트 됨
 
+  // ✅ JSON → 객체로 역직렬화
   factory Lawyer.fromJson(Map<String, dynamic> json) {
-    // 상담유형과 가격 매칭
     Map<String, int> feeMap = {};
     for (int i = 0; i < (json['consult']?.length ?? 0); i++) {
       final type = json['consult'][i];
@@ -42,18 +42,42 @@ class Lawyer {
     }
 
     return Lawyer(
-      licenseNumber: json['license_number'] ?? 0, // ✅ json에서 licenseNumber 추출
+      licenseNumber: json['license_number'] ?? 0,
       name: json['name'] ?? '',
       description: json['desc'] ?? '',
-      specialties: (json['specialty'] as List<dynamic>).expand((e) => e is List ? e : [e]).cast<String>().toList(),
+      specialties: (json['specialty'] as List<dynamic>)
+          .expand((e) => e is List ? e : [e])
+          .cast<String>()
+          .toList(),
       phoneFee: feeMap['전화상담'] ?? 0,
       videoFee: feeMap['영상상담'] ?? 0,
       visitFee: feeMap['방문상담'] ?? 0,
       profileImage: json['photo'] ?? '',
-      address: json['address'] ?? '', // ✅ address 파싱
-      gender: json['gender'] ?? '',   // ✅ 성별
-      email: json['email'] ?? '',     // ✅ 이메일
-      phone: json['phone'] ?? '',     // ✅ 연락처
+      address: json['address'] ?? '',
+      gender: json['gender'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'] ?? '',
     );
+  }
+
+  // ✅ 객체 → JSON 직렬화
+  Map<String, dynamic> toJson() {
+    return {
+      'license_number': licenseNumber,
+      'name': name,
+      'desc': description,
+      'specialty': specialties,
+      'consult': ['전화상담', '영상상담', '방문상담'],
+      'price': [
+        phoneFee.toString(),
+        videoFee.toString(),
+        visitFee.toString(),
+      ],
+      'photo': profileImage,
+      'address': address,
+      'gender': gender,
+      'email': email,
+      'phone': phone,
+    };
   }
 }

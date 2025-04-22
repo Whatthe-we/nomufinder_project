@@ -9,7 +9,6 @@ import 'config/router.dart';
 import 'config/providers.dart';
 import 'package:project_nomufinder/screens/auth/my_page_screen.dart';
 import 'firebase_options.dart'; // flutterfire CLI 생성 파일
-import 'app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +27,7 @@ Future<void> main() async {
 
   // 환경변수 로드
   final isEmulator = await _isRunningOnEmulator();
-  await dotenv.load(fileName: isEmulator ? '.env.dev' : '.env.prod');
+  await dotenv.load(fileName: '.env.dev');
 
   runApp(
     const ProviderScope(

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart'; // 📅 캘린더 패키지
 import 'package:project_nomufinder/models/lawyer.dart';
 import 'package:project_nomufinder/viewmodels/reservation_viewmodel.dart'; // 예약 저장
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 final ReservationViewModel _reservationVM = ReservationViewModel();
 
@@ -47,32 +48,60 @@ class _ReservationScreenState extends State<ReservationScreen> {
   ];
 
   void _goToNextPage() async {
-    if (_selectedDay != null && _selectedTime != null) {
-      try {
-        await _reservationVM.saveReservation(
-          lawyerId: widget.lawyer.licenseNumber.toString(),
-          lawyerName: widget.lawyer.name,
-          date: _selectedDay!,
-          time: _selectedTime!,
-          type: _selectedType,
-          userName: '홍길동', // TODO: 사용자 로그인 정보 연동
-          userPhone: '010-0000-0000', // TODO: 사용자 로그인 정보 연동
-          lawyerEmail: widget.lawyer.email, // ✅ 추가
-        );
-
-        context.go('/reservation_success', extra: {
-          'date': _selectedDay,
-          'time': _selectedTime,
-          'lawyer': widget.lawyer,
-        });
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('예약 저장에 실패했습니다.')),
-        );
-      }
-    } else {
+    if (_selectedDay == null || _selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('날짜와 시간을 선택해주세요.')),
+      );
+      return;
+    }
+
+    final selectedDate = _selectedDay!.toIso8601String().substring(0, 10);
+    final isAlreadyReserved =
+        _reservedDateTimes[selectedDate]?.contains(_selectedTime) ?? false;
+
+    if (isAlreadyReserved) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('이미 예약된 시간입니다.')),
+      );
+      return;
+    }
+
+    try {
+      // ✅ 환경변수 확인 로그 (여기에 추가!)
+      print('📡 FASTAPI BASE URL (Flutter): ${dotenv.env['FASTAPI_BASE_URL']}');
+
+      // ✅ 예약 저장
+      await _reservationVM.saveReservation(
+        lawyerId: widget.lawyer.licenseNumber.toString(),
+        lawyerName: widget.lawyer.name,
+        date: _selectedDay!,
+        time: _selectedTime!,
+        type: _selectedType,
+        userName: '홍길동',
+        userPhone: '010-0000-0000',
+        lawyerEmail: widget.lawyer.email,
+      );
+
+      // ✅ 이메일 전송
+      await _reservationVM.sendReservationEmail(
+        lawyerEmail: widget.lawyer.email,
+        lawyerName: widget.lawyer.name,
+        userName: '홍길동',
+        date: _selectedDay!.toIso8601String(),
+        time: _selectedTime!,
+        type: _selectedType,
+      );
+
+      // ✅ 예약 완료 페이지 이동
+      context.go('/reservation_success', extra: {
+        'date': _selectedDay!.toIso8601String(),
+        'time': _selectedTime!,
+        'lawyer': widget.lawyer.toJson(), // ✅ 안전하게 전달
+      });
+    } catch (e) {
+      print('❌ 오류 발생: $e'); // ← 실제 에러 출력
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('예약 저장에 실패했습니다.')),
       );
     }
   }
@@ -142,8 +171,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
                   label: Text(slot),
                   selected: isSelected,
                   onSelected: isDisabled
-                      ? null
-                      : (_) => setState(() => _selectedTime = slot),
+                      ? null // ✅ 이미 예약된 경우 → 비활성화
+                      : (_) => setState(() => _selectedTime = slot), // 선택 가능
                   selectedColor: Colors.blue,
                   backgroundColor: isDisabled ? Colors.grey[400] : Colors.grey[200],
                   labelStyle: TextStyle(
