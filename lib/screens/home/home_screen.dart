@@ -172,7 +172,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-
   // 검색창
   Widget _buildSearchBar(BuildContext context) {
     return Padding(
