@@ -1,0 +1,56 @@
+[
+  {
+    "model": "Zero-shot",
+    "text": "야근 수당 안 주는 건 불법 아닌가요?",
+    "true_label": "근무조건",
+    "predicted_label": "임금/퇴직금"
+  },
+  {
+    "model": "Zero-shot",
+    "text": "업무 태도 문제로 경고 먹었어요",
+    "true_label": "부당징계",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Zero-shot",
+    "text": "비정규직이라는 이유로 연차도 못 써요",
+    "true_label": "직장내차별",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Zero-shot",
+    "text": "일을 너무 많이 시키고 혼자서 감당이 안 돼요",
+    "true_label": "직장내괴롭힘",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Zero-shot",
+    "text": "수당을 안 주는 건 물론이고, 주휴수당도 몰라요",
+    "true_label": "근무조건",
+    "predicted_label": "임금/퇴직금"
+  },
+  {
+    "model": "Zero-shot",
+    "text": "출산휴가 다녀온 뒤 부서가 바뀌었어요",
+    "true_label": "직장내차별",
+    "predicted_label": "근로계약"
+  },
+  {
+    "model": "Zero-shot",
+    "text": "징계위원회 없이 바로 정직당했어요",
+    "true_label": "부당징계",
+    "predicted_label": "부당해고"
+  },
+  {
+    "model": "Zero-shot",
+    "text": "주말마다 나와서 일하는데 수당도 없어요",
+    "true_label": "근무조건",
+    "predicted_label": "임금/퇴직금"
+  },
+  {
+    "model": "Zero-shot",
+    "text": "노조에 가입했더니 회식에서도 따돌림당해요",
+    "true_label": "노동조합",
+    "predicted_label": "직장내차별"
+  }
+]
