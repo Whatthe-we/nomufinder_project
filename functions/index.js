@@ -46,7 +46,7 @@ function createHtmlContent({ userName, date, time, type, isCanceled = false }) {
   `;
 }
 
-// ✅ 예약 생성 시 이메일
+// 예약 생성 시 이메일
 exports.sendReservationEmail = functions.firestore
   .document("reservations/{docId}")
   .onCreate((snap, context) => {
@@ -66,10 +66,15 @@ exports.sendReservationEmail = functions.firestore
       }),
     };
 
-    return transporter.sendMail(mailOptions);
+    return transporter.sendMail(mailOptions)
+      .then(() => console.log("✅ 메일 전송 성공"))
+      .catch((error) => {
+        console.error("❌ 메일 전송 실패:", error);
+        throw new Error("메일 전송 실패");
+      });
   });
 
-// ✅ 예약 취소 시 이메일
+// 예약 취소 시 이메일
 exports.sendCancellationEmail = functions.firestore
   .document("reservations/{docId}")
   .onDelete((snap, context) => {
@@ -89,5 +94,10 @@ exports.sendCancellationEmail = functions.firestore
       }),
     };
 
-    return transporter.sendMail(mailOptions);
+    return transporter.sendMail(mailOptions)
+      .then(() => console.log("✅ 메일 전송 성공"))
+      .catch((error) => {
+        console.error("❌ 메일 전송 실패:", error);
+        throw new Error("메일 전송 실패");
+      });
   });
