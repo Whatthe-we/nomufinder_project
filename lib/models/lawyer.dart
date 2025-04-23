@@ -27,9 +27,9 @@ class Lawyer {
     required this.visitFee,
     required this.profileImage,
     required this.address,
-    required this.gender,      // 성별
-    required this.email,       // 이메일
-    required this.phone,       // 연락처
+    required this.gender,
+    required this.email,
+    required this.phone,
     required this.badges,
     required this.comment,
     required this.reviews,
@@ -87,9 +87,9 @@ class Lawyer {
       'gender': gender,
       'email': email,
       'phone': phone,
-      'badges': badges,       // ✅ 추가
-      'comment': comment,     // ✅ 추가
-      'reviews': reviews,     // ✅ 추가
+      'badges': badges,
+      'comment': comment,
+      'reviews': reviews,
     };
   }
 }

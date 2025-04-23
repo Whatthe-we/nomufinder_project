@@ -26,26 +26,17 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
   @override
   void initState() {
     super.initState();
-    print('📦 전달된 노무사 수: ${widget.lawyers.length}');
-    print('✅ 전달된 category: ${widget.category}');
 
     Future.microtask(() {
       ref.read(allLawyersProvider.notifier).state = widget.lawyers;
 
-      // ✅ 전달된 lawyers 디버깅 출력
-      for (var lawyer in widget.lawyers) {
-        print('🧠 ${lawyer.name} / specialties: ${lawyer.specialties}');
-      }
-
-      // ✅ normalize 적용
+      // normalize 적용
       final normalizedCategory = normalizeCategory(widget.category ?? '');
       print('🧪 normalizedCategory: $normalizedCategory');
 
-      // ✅ 지역명이 아닌 경우에만 카테고리 상태로 반영
+      // 지역명이 아닌 경우에만 카테고리 상태로 반영
       if (!regionKeywords.keys.contains(normalizedCategory)) {
-        ref
-            .read(categoryProvider.notifier)
-            .state = normalizedCategory;
+        ref.read(categoryProvider.notifier).state = normalizedCategory;
       }
     });
   }
@@ -78,11 +69,11 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
             },
           ),
           Positioned(
-            left: MediaQuery.of(context).size.width * 0.5 - 65,
+            left: MediaQuery.of(context).size.width * 0.5 - 60,
             bottom: 20,
             child: SizedBox(
-              width: 130,
-              height: 42,
+              width: 120,
+              height: 40,
               child: ElevatedButton(
                 onPressed: () {
                   showModalBottomSheet(
@@ -93,15 +84,12 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueGrey[600]!.withOpacity(0.7), // 80% 불투명
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  backgroundColor: Colors.blueGrey[600]!.withOpacity(0.7),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: EdgeInsets.zero,
                 ),
-                child: const Text(
-                  '필터 적용하기',
-                  style: TextStyle(fontSize: 14, color: Colors.white, fontFamily: 'OpenSans'),
-                ),
+                child: const Text('필터 적용하기',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'OpenSans')),
               ),
             ),
           ),
@@ -125,8 +113,9 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(width: 4),
               CircleAvatar(
-                radius: 30,
+                radius: 38, // 확대
                 backgroundImage: NetworkImage(lawyer.profileImage),
               ),
               const SizedBox(width: 12),
@@ -134,9 +123,9 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(lawyer.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'OpenSans')),
+                    Text(lawyer.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, fontFamily: 'OpenSans')),
                     const SizedBox(height: 4),
-                    Text(lawyer.description, style: const TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'OpenSans')),
+                    Text(lawyer.description, style: const TextStyle(fontSize: 13, color: Colors.grey, fontFamily: 'OpenSans')),
                     const SizedBox(height: 4),
                     Text(lawyer.comment, style: const TextStyle(fontSize: 13, fontFamily: 'OpenSans')),
                     const SizedBox(height: 6),
@@ -144,8 +133,8 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
                       spacing: 4,
                       runSpacing: 4,
                       children: lawyer.badges.map((badge) => Chip(
-                        label: Text(badge, style: const TextStyle(fontSize: 10, color: Colors.white)),
-                        backgroundColor: Colors.blueAccent,
+                        label: Text(badge, style: const TextStyle(fontSize: 11, color: Colors.white)),
+                        backgroundColor: const Color(0xFF0010BA),
                         padding: EdgeInsets.zero,
                       )).toList(),
                     ),
@@ -169,7 +158,7 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
-                child: const Text("예약하기", style: TextStyle(fontSize: 13, fontFamily: 'OpenSans')),
+                child: const Text("예약하기", style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, fontFamily: 'OpenSans')),
               ),
             ],
           ),
@@ -203,10 +192,7 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
   }
 
   String _formatPrice(int price) {
-    return price.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (match) => '${match[1]},',
-    );
+    return price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (match) => '${match[1]},');
   }
 }
 
@@ -222,14 +208,7 @@ class TagChip extends StatelessWidget {
         color: const Color(0xFFF2F1FA),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        '#$tag',
-        style: const TextStyle(
-          fontSize: 12,
-          color: Colors.black87,
-          fontFamily: 'OpenSans',
-        ),
-      ),
+      child: Text('#$tag', style: const TextStyle(fontSize: 12, color: Colors.black87, fontFamily: 'OpenSans')),
     );
   }
 }
