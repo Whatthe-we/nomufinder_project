@@ -42,7 +42,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
   void initState() {
     super.initState();
     _setRandomPrompt();
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
       _setRandomPrompt();
     });
   }
@@ -159,23 +159,38 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
             const SizedBox(height: 20),
 
-            // ✅ Fade 효과 예시 문구
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 500),
-              transitionBuilder: (child, animation) {
-                final offsetAnimation = Tween<Offset>(
-                  begin: const Offset(0, 0.5),
-                  end: Offset.zero,
-                ).animate(animation);
-                return SlideTransition(
-                  position: offsetAnimation,
-                  child: child,
-                );
-              },
-              child: Text(
-                '예시: $currentPrompt',
-                key: ValueKey(currentPrompt),
-                style: const TextStyle(color: Colors.grey),
+            // ✅ 예시 문구 애니메이션
+            Center(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                transitionBuilder: (child, animation) {
+                  final fadeAnimation = CurvedAnimation(parent: animation, curve: Curves.easeInOut);
+                  final slideAnimation = Tween<Offset>(
+                    begin: const Offset(0, 0.3),
+                    end: Offset.zero,
+                  ).animate(animation);
+
+                  final scaleAnimation = Tween<double>(
+                    begin: 0.95,
+                    end: 1.0,
+                  ).animate(animation);
+
+                  return FadeTransition(
+                    opacity: fadeAnimation,
+                    child: SlideTransition(
+                      position: slideAnimation,
+                      child: ScaleTransition(
+                        scale: scaleAnimation,
+                        child: child,
+                      ),
+                    ),
+                  );
+                },
+                child: Text(
+                  currentPrompt,
+                  key: ValueKey(currentPrompt),
+                  style: const TextStyle(color: Colors.grey),
+                ),
               ),
             ),
 
