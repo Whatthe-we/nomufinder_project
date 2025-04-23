@@ -82,16 +82,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
         lawyerEmail: widget.lawyer.email,
       );
 
-      // ✅ 이메일 전송
-      await _reservationVM.sendReservationEmail(
-        lawyerEmail: widget.lawyer.email,
-        lawyerName: widget.lawyer.name,
-        userName: '홍길동',
-        date: _selectedDay!.toIso8601String(),
-        time: _selectedTime!,
-        type: _selectedType,
-      );
-
       // ✅ 예약 완료 페이지 이동
       context.go('/reservation_success', extra: {
         'date': _selectedDay!.toIso8601String(),

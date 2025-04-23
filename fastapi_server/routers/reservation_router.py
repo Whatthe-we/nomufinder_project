@@ -18,15 +18,18 @@ class ReservationRequest(BaseModel):
 async def send_reservation_alert(reservation: ReservationRequest):
     try:
         print("📥 이메일 요청 도착:", reservation)
-        send_reservation_email(
-            to_email=reservation.lawyerEmail,
-            lawyer_name=reservation.lawyerName,
-            user_name=reservation.userName,
-            date=reservation.date[:10],
-            time=reservation.time,
-            method=reservation.type,
-            is_canceled=reservation.isCanceled,  # ✅ 이렇게 FastAPI 함수에 넘김
-        )
+
+        # ❌ 아래 메일 전송 호출 제거 (Cloud Functions에서 자동 처리함)
+        # send_reservation_email(
+        #     to_email=reservation.lawyerEmail,
+        #     lawyer_name=reservation.lawyerName,
+        #     user_name=reservation.userName,
+        #     date=reservation.date[:10],
+        #     time=reservation.time,
+        #     method=reservation.type,
+        #     is_canceled=reservation.isCanceled,
+        # )
+
         return {"success": True}
     except Exception as e:
         print("❌ 이메일 전송 실패:", e)

@@ -27,8 +27,16 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
     });
   }
 
-  Future<void> _cancelReservation(String id) async {
-    await _viewModel.deleteReservation(id);
+  Future<void> _cancelReservation(Reservation r) async {
+    await _viewModel.deleteReservationWithEmail(
+      reservationId: r.id,
+      lawyerEmail: r.lawyerEmail,
+      lawyerName: r.lawyerName,
+      userName: r.userName,
+      date: DateFormat('yyyy-MM-dd').format(r.date),
+      time: r.time,
+      type: r.type,
+    );
     await _loadReservations();
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('예약이 취소되었습니다.')));
   }
@@ -50,7 +58,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
               title: Text('${r.lawyerName} 노무사와의 상담'),
               subtitle: Text('$date ${r.time} (${r.type})'),
               trailing: TextButton(
-                onPressed: () => _cancelReservation(r.id),
+                onPressed: () => _cancelReservation(r),
                 child: const Text('예약 취소', style: TextStyle(color: Colors.red)),
               ),
             ),

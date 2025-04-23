@@ -34,8 +34,11 @@ class ReservationViewModel {
   }
 
   /// 예약된 날짜 + 시간 조합 (예약 화면 비활성화용)
-  Future<Map<String, List<String>>> getReservedDateTimes(String lawyerId) async {
-    final snapshot = await _collection.where('lawyerId', isEqualTo: lawyerId).get();
+  Future<Map<String, List<String>>> getReservedDateTimes(
+      String lawyerId) async {
+    final snapshot = await _collection
+        .where('lawyerId', isEqualTo: lawyerId)
+        .get();
 
     Map<String, List<String>> reservedMap = {};
     for (var doc in snapshot.docs) {
@@ -58,7 +61,8 @@ class ReservationViewModel {
     }
     final snapshot = await query.orderBy('date', descending: false).get();
     return snapshot.docs
-        .map((doc) => Reservation.fromDoc(doc.id, doc.data() as Map<String, dynamic>))
+        .map((doc) =>
+        Reservation.fromDoc(doc.id, doc.data() as Map<String, dynamic>))
         .toList();
   }
 
@@ -67,7 +71,7 @@ class ReservationViewModel {
     await _collection.doc(reservationId).delete();
   }
 
-  /// 예약 취소 + 이메일 전송
+  /// 예약 취소 (이메일은 Cloud Functions에서 자동으로 처리됨)
   Future<void> deleteReservationWithEmail({
     required String reservationId,
     required String lawyerEmail,
@@ -77,50 +81,6 @@ class ReservationViewModel {
     required String time,
     required String type,
   }) async {
-    await deleteReservation(reservationId); // 기존 삭제
-    // ✅ 이메일 전송 (취소 알림 전용 API 만들면 좋음)
-    await sendReservationEmail(
-      lawyerEmail: lawyerEmail,
-      lawyerName: lawyerName,
-      userName: userName,
-      date: date,
-      time: time,
-      type: type,
-      isCanceled: true, // ✅ 취소
-    );
-  }
-
-  /// 예약 메일 발송
-  Future<void> sendReservationEmail({
-    required String lawyerEmail,
-    required String lawyerName,
-    required String userName,
-    required String date,
-    required String time,
-    required String type,
-    bool isCanceled = false, // ✅ 기본값 false
-  }) async {
-    final url = '${dotenv.env['FASTAPI_BASE_URL']}/send-reservation-email';
-    print('📨 이메일 전송 URL: $url');
-
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'lawyerEmail': lawyerEmail,
-        'lawyerName': lawyerName,
-        'userName': userName,
-        'date': date,
-        'time': time,
-        'type': type,
-        'isCanceled': isCanceled, // ✅ FastAPI에 전달
-      }),
-    );
-    print('📨 FastAPI 응답 코드: ${response.statusCode}');
-    print('📨 FastAPI 응답 내용: ${response.body}');
-
-    if (response.statusCode != 200) {
-      throw Exception('이메일 전송 실패: ${response.body}');
-    }
+    await deleteReservation(reservationId);
   }
 }
