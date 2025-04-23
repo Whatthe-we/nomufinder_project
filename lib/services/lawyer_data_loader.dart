@@ -5,17 +5,17 @@ import 'package:project_nomufinder/models/lawyer.dart';
 Map<String, List<Lawyer>> lawyersByRegion = {};
 
 final Map<String, List<String>> regionKeywords = {
-  '서울': ['서울'],
-  '경기': ['경기'],
+  '서울': ['서울', '서울특별시'],
+  '경기': ['경기', '경기도'],
   '춘천/강원': ['강원', '춘천'],
-  '제주': ['제주'],
-  '인천/부천': ['인천', '부천'],
-  '대구/경북': ['대구', '경북'],
-  '청주/충북': ['청주', '충북'],
-  '대전/충남/세종': ['대전', '충남', '세종'],
-  '전주/전북': ['전주', '전북'],
-  '부산/울산/경남': ['부산', '울산', '경남'],
-  '광주/전남': ['광주', '전남'],
+  '제주': ['제주', '제주특별자치도'],
+  '인천/부천': ['인천', '부천', '인천광역시'],
+  '대구/경북': ['대구', '경북', '대구광역시', '경상북도'],
+  '청주/충북': ['청주', '충북', '충청북도'],
+  '대전/충남/세종': ['대전', '충남', '세종', '대전광역시', '충청남도', '세종특별자치시'],
+  '전주/전북': ['전주', '전북', '전라북도'],
+  '부산/울산/경남': ['부산', '울산', '경남', '부산광역시', '울산광역시', '경상남도'],
+  '광주/전남': ['광주', '전남', '광주광역시', '전라남도'],
 };
 
 Future<void> loadLawyerData() async {
@@ -30,7 +30,7 @@ Future<void> loadLawyerData() async {
     final lawyer = Lawyer.fromJson(json);
     final address = json['address'] ?? '';
 
-    // ✅ specialty 강제 보강 처리
+    // specialty 보강
     if (lawyer.specialties.contains('괴롭힘·성희롱')) {
       if (!lawyer.specialties.contains('직장 내 괴롭힘')) {
         lawyer.specialties.add('직장 내 괴롭힘');
