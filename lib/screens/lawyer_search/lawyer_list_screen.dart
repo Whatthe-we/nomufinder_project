@@ -64,11 +64,11 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
             },
           ),
           Positioned(
-            left: MediaQuery.of(context).size.width * 0.5 - 65,
+            left: MediaQuery.of(context).size.width * 0.5 - 60,
             bottom: 20,
             child: SizedBox(
-              width: 130,
-              height: 42,
+              width: 120,
+              height: 40,
               child: ElevatedButton(
                 onPressed: () {
                   showModalBottomSheet(
@@ -81,8 +81,10 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueGrey[600]!.withOpacity(0.7),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: EdgeInsets.zero,
                 ),
-                child: const Text('필터 적용하기', style: TextStyle(fontSize: 14, color: Colors.white, fontFamily: 'OpenSans')),
+                child: const Text('필터 적용하기',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'OpenSans')),
               ),
             ),
           ),
@@ -106,8 +108,9 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(width: 4),
               CircleAvatar(
-                radius: 30,
+                radius: 38, // 확대
                 backgroundImage: NetworkImage(lawyer.profileImage),
               ),
               const SizedBox(width: 12),
@@ -115,9 +118,9 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(lawyer.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'OpenSans')),
+                    Text(lawyer.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, fontFamily: 'OpenSans')),
                     const SizedBox(height: 4),
-                    Text(lawyer.description, style: const TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'OpenSans')),
+                    Text(lawyer.description, style: const TextStyle(fontSize: 13, color: Colors.grey, fontFamily: 'OpenSans')),
                     const SizedBox(height: 4),
                     Text(lawyer.comment, style: const TextStyle(fontSize: 13, fontFamily: 'OpenSans')),
                     const SizedBox(height: 6),
@@ -125,8 +128,8 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
                       spacing: 4,
                       runSpacing: 4,
                       children: lawyer.badges.map((badge) => Chip(
-                        label: Text(badge, style: const TextStyle(fontSize: 10, color: Colors.white)),
-                        backgroundColor: Colors.blueAccent,
+                        label: Text(badge, style: const TextStyle(fontSize: 11, color: Colors.white)),
+                        backgroundColor: const Color(0xFF0010BA),
                         padding: EdgeInsets.zero,
                       )).toList(),
                     ),
@@ -150,7 +153,7 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
-                child: const Text("예약하기", style: TextStyle(fontSize: 13, fontFamily: 'OpenSans')),
+                child: const Text("예약하기", style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, fontFamily: 'OpenSans')),
               ),
             ],
           ),
