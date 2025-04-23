@@ -27,7 +27,7 @@ Future<void> main() async {
 
   // 환경변수 로드
   final isEmulator = await _isRunningOnEmulator();
-  await dotenv.load(fileName: '.env.template');
+  await dotenv.load(fileName: '.env');
 
   runApp(
     const ProviderScope(
