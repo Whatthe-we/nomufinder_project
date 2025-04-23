@@ -11,6 +11,13 @@ import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart
 // 상수 선언
 const double suggestionsBoxHorizontalPadding = 16.0;
 
+// ✅ 배너 데이터
+final List<Map<String, String>> bannerData = [
+  {'title': '노무사 상담 비용, 미리 확인!', 'image': 'assets/images/banner1.png'},
+  {'title': '무료 상담 신청하기!', 'image': 'assets/images/banner2.png'},
+  {'title': '법률 정보 받아보기!', 'image': 'assets/images/banner3.png'},
+];
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -19,6 +26,29 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // 자동 슬라이드 설정
+    Future.delayed(const Duration(seconds: 5), _autoSlide);
+  }
+
+  void _autoSlide() {
+    if (_pageController.hasClients) {
+      int nextPage = (_currentPage + 1) % bannerData.length;
+      _pageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+      setState(() => _currentPage = nextPage);
+    }
+    Future.delayed(const Duration(seconds: 5), _autoSlide);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,6 +87,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // ✅ PageView 배너
+  Widget _buildPageViewBanner() {
+    return SizedBox(
+      height: 120,
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: bannerData.length,
+        itemBuilder: (context, index) {
+          final banner = bannerData[index];
+          return _buildBannerItem(banner['image']!);  // title 필요 없음
+        },
+        onPageChanged: (index) {
+          setState(() {
+            _currentPage = index;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildBannerItem(String imageUrl) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      clipBehavior: Clip.antiAlias, // 모서리 둥글게 자르기
+      child: Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
       ),
     );
   }
@@ -160,10 +224,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildSmallBox(String text) {
     return Expanded(
       child: Container(
-        height: 50,
+        height: 54,
         decoration: BoxDecoration(
-          color: const Color(0xFFF4F2F2),
-          borderRadius: BorderRadius.circular(11),
+          color: const Color(0xFFEFEFFD),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Center(
           child: Text(
@@ -222,9 +293,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 5,
-          mainAxisSpacing: 6,
-          crossAxisSpacing: 6,
-          childAspectRatio: 0.8,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 0.75,
         ),
         itemBuilder: (context, index) {
           final issue = issues[index];
@@ -233,73 +304,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               CircleAvatar(
                 backgroundColor: Colors.white,
-                radius: 20,
+                radius: 22,
                 child: Icon(issue['icon'] as IconData, color: Colors.black87, size: 20),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 issue['label'].toString(),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                    fontSize: 11, fontWeight: FontWeight.w500, height: 1.2),
+                    fontSize: 12, fontWeight: FontWeight.w500, height: 1.3),
               ),
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildConsultationCostCard() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: suggestionsBoxHorizontalPadding),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: const Color(0xFF0010BA),
-          borderRadius: BorderRadius.circular(11),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    '노무사 상담 비용, 미리 확인하기!',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600),
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    '노무사 상담수수료 견적 받기',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600),
-                  ),
-                  SizedBox(height: 6),
-                  Divider(color: Colors.white, thickness: 1, endIndent: 150),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(11),
-                image: const DecorationImage(
-                  image: NetworkImage("https://placehold.co/60x60"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

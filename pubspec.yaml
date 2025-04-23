@@ -32,6 +32,7 @@ dependencies:
   device_info_plus: ^9.0.3
   dio: ^5.4.0
   table_calendar: ^3.0.9
+  add_2_calendar: ^3.0.1
   firebase_database: ^10.4.2
 
   # The following adds the Cupertino Icons font to your application.
@@ -52,6 +53,9 @@ flutter:
     - assets/lawyers_by_region_ver2.json
     - .env.dev
     - .env.prod
+    - assets/images/banner1.png
+    - assets/images/banner2.png
+    - assets/images/banner3.png
 
   fonts:
     - family: Open Sans
