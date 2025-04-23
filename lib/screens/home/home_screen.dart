@@ -32,7 +32,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // 자동 슬라이드 설정
     Future.delayed(const Duration(seconds: 5), _autoSlide);
   }
 
@@ -67,11 +66,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 16),
               _buildSearchBar(context),
               const SizedBox(height: 20),
-              _buildCategorySection(), // ✅ ref는 여기서 사용 가능!
+              _buildCategorySection(),
               const SizedBox(height: 20),
               _buildQuickConsultation(),
               const SizedBox(height: 20),
-              _buildPageViewBanner(),  // ✅ PageView 배너
+              _buildPageViewBanner(),
               const SizedBox(height: 20),
               _buildIssueIcons(),
               const SizedBox(height: 30),
@@ -100,7 +99,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         itemCount: bannerData.length,
         itemBuilder: (context, index) {
           final banner = bannerData[index];
-          return _buildBannerItem(banner['image']!);  // title 필요 없음
+          return _buildBannerItem(banner['image']!);
         },
         onPageChanged: (index) {
           setState(() {
@@ -117,10 +116,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
       ),
-      clipBehavior: Clip.antiAlias, // 모서리 둥글게 자르기
+      clipBehavior: Clip.antiAlias,
       child: Image.asset(
         imageUrl,
-        fit: BoxFit.cover,
+        fit: BoxFit.fill,
       ),
     );
   }
