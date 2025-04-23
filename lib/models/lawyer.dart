@@ -10,9 +10,9 @@ class Lawyer {
   final int visitFee;
   final String profileImage;
   final String address; // 주소
-  final String gender; // 성별
-  final String email; // 이메일
-  final String phone; // 연락처
+  final String gender;  // 성별
+  final String email;   // 이메일
+  final String phone;   // 연락처
   final List<String> badges;
   final String comment;
   final int reviews;
