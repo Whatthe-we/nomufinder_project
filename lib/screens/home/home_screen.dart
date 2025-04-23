@@ -71,7 +71,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 20),
               _buildQuickConsultation(),
               const SizedBox(height: 20),
-              _buildConsultationCostCard(),
+              _buildPageViewBanner(),  // ✅ PageView 배너
               const SizedBox(height: 20),
               _buildIssueIcons(),
               const SizedBox(height: 30),
@@ -184,7 +184,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
             color: const Color(0xFFF4F2F2),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(30),
           ),
           child: Row(
             children: const [
@@ -193,9 +193,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Text(
                 '어떤 문제가 있으신가요?',
                 style: TextStyle(
-                  color: Colors.black54,
+                  color: Colors.grey,
                   fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -205,16 +205,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // 추가적인 UI 요소들 (간편 상담, 비용 카드 등)
+  // 빠른 상담 등
   Widget _buildQuickConsultation() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
           _buildSmallBox('빠른 상담 ⚡'),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           _buildSmallBox('최신 상담글 🆕'),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           _buildSmallBox('상담글 작성 ✍️'),
         ],
       ),
