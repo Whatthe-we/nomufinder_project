@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional
 from openai import OpenAI
+from datetime import datetime
 
 # 라우터 초기화
 router = APIRouter()
@@ -35,11 +36,10 @@ autocomplete_map = {
     "컨설팅": ["경영 컨설팅", "IT 컨설팅", "인사 컨설팅", "조직 컨설팅", "ESG", "평가제도 도입", "인재 채용 전략", "직무분석 컨설팅", "성과관리 도입", "조직 개편 자문"],
     "급여아웃소싱": ["급여 관리", "급여 대행", "급여 계산", "세금 신고", "사회보험", "급여 지급", "급여 시스템", "급여 아웃소싱 계약", "4대보험 및 원천징수", "급여 처리"]
 }
-
 # 카테고리 목록
 categories = list(autocomplete_map.keys())
 
-# 퓨샷 예시 (기존 공식 예시 + 비형식 문장 합치기)
+# Few-shot 예시 (공식 +
 business_examples = [
     '"무단결근한 직원의 해고가 가능한지 궁금해요" -> 부당해고',
     '"신규 사업 개시로 인해 인력 구조조정이 필요해요" -> 부당해고',
@@ -82,21 +82,48 @@ casual_examples = [
 
 fewshot_base = business_examples + worker_examples + casual_examples
 
+# 생성 함수
+def generate_prompt(user_input: str, examples: list[str], categories: list[str]) -> str:
+    return f"""당신은 한국의 노동문제를 분류하는 AI 어시스턴트입니다.
+아래 문장은 실제 근로자/사업주가 질문한 내용이며,
+이 문장을 가장 잘 설명하는 카테고리를 다음 중 하나로 선택하세요:
+
+- {chr(10).join(f"- {cat}" for cat in categories)}
+
+규칙:
+- 반드시 위 카테고리 중 하나만 출력하세요.
+- 다른 말은 출력하지 마세요.
+- 분류가 어려워도 가장 유사한 카테고리를 선택하세요.
+
+예시:
+{chr(10).join(examples)}
+
+사용자 문장:
+"{user_input}"
+
+👉 카테고리:"""
+
+# 출력 정제 로직
+def clean_category_output(result: str) -> str:
+    for cat in categories:
+        if cat in result:
+            return cat
+    return "분류 실패"
+
+# 오분류 로그 저장
+def log_failed_classification(user_input: str, result: str):
+    now = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_dir = "classified_logs"
+    os.makedirs(log_dir, exist_ok=True)
+    with open(os.path.join(log_dir, f"fail_{now}.txt"), "w", encoding="utf-8") as f:
+        f.write(f"문장: {user_input}\n")
+        f.write(f"예측 결과: {result}\n")
+
 # 분류 함수
 def classify_text_with_openai(user_input: str) -> str:
     examples = fewshot_base.copy()
     random.shuffle(examples)
-
-    prompt = f"""
-    다음 문장을 아래 카테고리 중 하나로 분류하세요:
-    {', '.join(categories)}
-
-    예시:
-    {chr(10).join(examples)}
-
-    문장: {user_input}
-    카테고리:
-    """
+    prompt = generate_prompt(user_input, examples, categories)
 
     try:
         response = client.chat.completions.create(
@@ -105,13 +132,20 @@ def classify_text_with_openai(user_input: str) -> str:
             temperature=0.3,
             max_tokens=50,
         )
-        result = response.choices[0].message.content.strip()
-        print(f"Predicted Category: {result}")
-        return result.split(" ")[0]
+        raw_result = response.choices[0].message.content.strip()
+        print(f"🔍 Raw Output: {raw_result}")
+        cleaned = clean_category_output(raw_result)
+
+        # Feedback Loop용 오분류 로그 저장
+        if cleaned == "분류 실패":
+            log_failed_classification(user_input, raw_result)
+
+        return cleaned
     except Exception as e:
         print("❌ OpenAI API 오류:", e)
         return "분류 실패"
 
+# FastAPI 엔드포인트
 @router.post("/classify")
 async def classify_endpoint(user_input: UserInput):
     result = classify_text_with_openai(user_input.text)
