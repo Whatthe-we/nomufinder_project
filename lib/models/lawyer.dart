@@ -30,6 +30,9 @@ class Lawyer {
     required this.gender,      // 성별
     required this.email,       // 이메일
     required this.phone,       // 연락처
+    required this.badges,
+    required this.comment,
+    required this.reviews,
   }) : specialties = List.from(specialties); // ← 이렇게 초기화하면 가변 리스트 됨
 
   // ✅ JSON → 객체로 역직렬화
@@ -84,6 +87,9 @@ class Lawyer {
       'gender': gender,
       'email': email,
       'phone': phone,
+      'badges': badges,       // ✅ 추가
+      'comment': comment,     // ✅ 추가
+      'reviews': reviews,     // ✅ 추가
     };
   }
 }
