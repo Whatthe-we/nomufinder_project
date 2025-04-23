@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional
-from email_service import send_reservation_email
 
 router = APIRouter()
 
