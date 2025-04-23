@@ -30,7 +30,7 @@ Future<void> loadLawyerData() async {
     final lawyer = Lawyer.fromJson(json);
     final address = json['address'] ?? '';
 
-    // ✅ specialty 강제 보강 처리
+    // specialty 보강
     if (lawyer.specialties.contains('괴롭힘·성희롱')) {
       if (!lawyer.specialties.contains('직장 내 괴롭힘')) {
         lawyer.specialties.add('직장 내 괴롭힘');
