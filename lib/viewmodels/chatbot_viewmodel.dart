@@ -1,39 +1,57 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/chatbot_service.dart';
-import 'package:firebase_database/firebase_database.dart';
+import '../services/firebase_service.dart';
 
-final chatbotViewModelProvider = StateNotifierProvider<ChatbotViewModel, void>((ref) {
-  return ChatbotViewModel();
-});
+final firebaseServiceProvider = Provider((ref) => FirebaseService());
+final chatbotServiceProvider = Provider((ref) => ChatbotService());
 
-class ChatbotViewModel extends StateNotifier<void> {
-  ChatbotViewModel() : super(null);
+final chatbotMessagesProvider =
+StateNotifierProvider<ChatbotViewModel, List<Map<String, String>>>(
+        (ref) => ChatbotViewModel(ref));
 
-  final dbRef = FirebaseDatabase.instance.ref();
+class ChatbotViewModel extends StateNotifier<List<Map<String, String>>> {
+  final Ref ref;
 
-  Future<void> sendMessage(String message) async {
-    await saveToFirebase("user", message);
+  ChatbotViewModel(this.ref) : super([]);
 
-    try {
-      // RAG 응답 호출
-      final response = await ChatbotService.getRagResponse(message);
-      await saveToFirebase("bot", response);
-    } catch (e) {
-      await saveToFirebase("bot", "⚠️ 오류: $e");
-    }
+  /// 채팅창 초기화
+  void clearMessages() {
+    state = [];
   }
 
-  Future<void> saveToFirebase(String role, String message) async {
-    if (role == "user") {
-      await dbRef.child('chat_questions').push().set({
-        'query': message,
-        'timestamp': ServerValue.timestamp, // 서버 기준 시간
-      });
-    } else {
-      await dbRef.child('chat_answers').push().set({
-        'answer': message,
-        'timestamp': ServerValue.timestamp,
-      });
-    }
+  /// 이전 메시지 불러오기
+  void loadPreviousMessages(List<Map<String, String>> previous) {
+    state = previous;
+  }
+
+  Future<void> sendMessage(String message) async {
+    state = [...state, {'role': 'user', 'message': message}];
+
+    final service = ref.read(chatbotServiceProvider);
+    final questionId = await service.sendQuery(message);
+
+    state = [...state, {'role': 'bot', 'message': '답변을 생성 중입니다...'}];
+
+    service.listenForAnswer(
+      questionId: questionId,
+      onAnswer: (answer) {
+        state = [
+          ...state.where((m) => m['message'] != '답변을 생성 중입니다...'),
+          {'role': 'bot', 'message': answer},
+        ];
+        ref.read(firebaseServiceProvider).saveChat(
+          userId: 'temp-user',
+          question: message,
+          answer: answer,
+          timestamp: DateTime.now(),
+        );
+      },
+      onError: (error) {
+        state = [
+          ...state.where((m) => m['message'] != '답변을 생성 중입니다...'),
+          {'role': 'bot', 'message': '⚠️ 오류: $error'},
+        ];
+      },
+    );
   }
 }

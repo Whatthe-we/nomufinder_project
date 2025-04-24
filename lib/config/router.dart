@@ -12,35 +12,48 @@ import '../screens/auth/my_page_screen.dart';
 import '../screens/reservation/reservation_screen.dart';
 import '../screens/reservation/reservation_success_screen.dart';
 import 'package:project_nomufinder/screens/reservation/my_reservations_screen.dart'; // 내 예약 관리
+import '../screens/chatbot/chatbot_screen.dart'; // ✅ chatbot 화면 import
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final router = GoRouter.of(context);
+    final location = router.routerDelegate.currentConfiguration.uri.toString();
+
+    final currentIndex = () {
+      if (location.startsWith('/home')) return 0;
+      if (location.startsWith('/search')) return 1;
+      if (location.startsWith('/chatbot')) return 2;
+      if (location.startsWith('/favorites')) return 3;
+      if (location.startsWith('/mypage')) return 4;
+      return 0;
+    }();
+
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
+      currentIndex: currentIndex,
       selectedItemColor: Colors.grey[800],
       unselectedItemColor: Colors.grey[800],
       selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
       unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
-      currentIndex: 0, // 상태관리 적용 안된 단순 예시
       onTap: (index) {
         switch (index) {
           case 0:
             context.go('/home');
             break;
           case 1:
-            context.go('/search'); // 검색 화면으로 이동
+            context.go('/search');
             break;
           case 2:
-            context.go('/chatbot'); // 챗봇 화면 (추가 예정)
+            context.go('/chatbot');
             break;
           case 3:
-            context.go('/favorites'); // 관심글 화면 (추가 예정)
+            context.go('/favorites');
             break;
           case 4:
-            context.go('/mypage'); // 마이페이지 화면으로 이동
+            context.go('/mypage');
             break;
         }
       },
@@ -130,6 +143,17 @@ final router = GoRouter(
           ),
         ),
         GoRoute(
+          path: '/chatbot', // ✅ 챗봇 경로 추가
+          name: 'Chatbot',
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: const ChatbotScreen(),
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                FadeTransition(opacity: animation, child: child),
+          ),
+        ),
+        GoRoute(
           path: '/mypage',
           name: 'MyPage',
           pageBuilder: (context, state) => CustomTransitionPage(
@@ -154,8 +178,8 @@ final router = GoRouter(
         GoRoute(
           path: '/reservation',
           builder: (context, state) {
-            final lawyer = state.extra as Lawyer; // ✅ GoRouter로 Lawyer 전달 받기
-            return ReservationScreen(lawyer: lawyer); // ✅ 이 코드로 수정
+            final lawyer = state.extra as Lawyer;
+            return ReservationScreen(lawyer: lawyer);
           },
         ),
         GoRoute(
@@ -163,7 +187,7 @@ final router = GoRouter(
           builder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
             final dynamic dateRaw = extra?['date'];
-            final date = dateRaw is DateTime ? dateRaw : DateTime.parse(dateRaw); // ✅ string일 경우 파싱
+            final date = dateRaw is DateTime ? dateRaw : DateTime.parse(dateRaw); // string일 경우 파싱
             final time = extra?['time'] as String?;
             final lawyerMap = extra?['lawyer'];
 
