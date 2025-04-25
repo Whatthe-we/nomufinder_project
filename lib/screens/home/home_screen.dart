@@ -7,6 +7,10 @@ import '../../viewmodels/search_viewmodel.dart';
 import 'package:project_nomufinder/widgets/common_header.dart';
 import 'package:project_nomufinder/services/lawyer_data_loader.dart';
 import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart';
+import '../favorites/post_list_screen.dart';
+import '../favorites/post_create_screen.dart';
+
+
 
 // 상수 선언
 const double suggestionsBoxHorizontalPadding = 16.0;
@@ -18,6 +22,19 @@ final List<Map<String, String>> bannerData = [
   {'title': '리뷰 배너', 'image': 'assets/images/banner3.png'},
   {'title': '노무사 상담 배너', 'image': 'assets/images/banner4.png'},
 ];
+// home_screen.dart 상단에 추가해줘!
+final Map<String, List<String>> issueKeywordMap = {
+  '직장 내 성희롱': ['성희롱', '직장내성희롱', '괴롭힘·성희롱'],
+  '직장 내 괴롭힘': ['괴롭힘', '직장내괴롭힘', '괴롭힘·성희롱'],
+  '근무조건': ['근무조건', '근로계약/근무조건 상담'],
+  '근로계약': ['근로계약', '근로계약/근무조건 상담'],
+  '임금/퇴직금': ['임금/퇴직금', '임금체불', '급여', '임금', '퇴직금'],
+  '노동조합': ['노동조합'],
+  '산업재해': ['산업재해'],
+  '부당해고': ['부당해고'],
+  '부당징계': ['부당징계'],
+  '직장 내 차별': ['차별','왕따'],
+};
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -69,7 +86,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 20),
               _buildCategorySection(),
               const SizedBox(height: 20),
-              _buildQuickConsultation(),
+              _buildQuickConsultation(context),
               const SizedBox(height: 20),
               _buildPageViewBanner(),
               const SizedBox(height: 20),
@@ -114,7 +131,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildBannerItem(String imageUrl) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      height: 140, // ⭐️ 높이 조절 포인트! 120~160 추천
+      height: 140,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -125,7 +142,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
-
 
 
   // 사업주 & 근로자 버튼
@@ -146,7 +162,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          ref.read(userTypeProvider.notifier).state =
+          ref
+              .read(userTypeProvider.notifier)
+              .state =
           label == '사업주' ? 'employer' : 'worker';
           if (label == '근로자') {
             context.go('/worker');
@@ -177,6 +195,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   // 검색창
+  // 수정된 검색창
   Widget _buildSearchBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -187,10 +206,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           decoration: BoxDecoration(
             color: const Color(0xFFF4F2F2),
             borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: Color(0xFF0024EE), width: 2), // 파란색 두께 추가
           ),
           child: Row(
             children: const [
-              Icon(Icons.search, color: Colors.grey),
+              Icon(Icons.search, color: Color(0xFF0024EE), size: 24),
+              // 명확한 파란 아이콘
               SizedBox(width: 10),
               Text(
                 '어떤 문제가 있으신가요?',
@@ -207,24 +228,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // 빠른 상담 등
-  Widget _buildQuickConsultation() {
+
+  Widget _buildQuickConsultation(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          _buildSmallBox('빠른 상담 ⚡'),
+          _buildSmallBox('빠른 상담 ⚡', () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('빠른 상담 준비 중')),
+            );
+          }),
           const SizedBox(width: 12),
-          _buildSmallBox('최신 상담글 🆕'),
+          _buildSmallBox('최신 상담글 🆕', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PostListScreen()),
+            );
+          }),
           const SizedBox(width: 12),
-          _buildSmallBox('상담글 작성 ✍️'),
+          _buildSmallBox('상담글 작성 ✍️', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PostCreateScreen(
+                  onPostCreated: (post) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('글 "${post.title}" 작성 완료!')),
+                    );
+                  },
+                ),
+              ),
+            );
+          }),
         ],
       ),
     );
   }
 
-  Widget _buildSmallBox(String text) {
-    return Expanded(
+
+
+  Widget _buildSmallBox(String text, VoidCallback onTap) {
+  return Expanded(
+    child: GestureDetector(
+      onTap: onTap,
       child: Container(
         height: 54,
         decoration: BoxDecoration(
@@ -245,9 +292,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
-    );
-  }
-
+    ),
+  );
+}
   Widget _buildGrayContainer({required double height}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -287,8 +334,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       {'icon': Icons.account_balance, 'label': '노동조합'},
     ];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: suggestionsBoxHorizontalPadding),
+    return Container(
+      color: Colors.grey[200],
+      padding: const EdgeInsets.symmetric(
+          horizontal: suggestionsBoxHorizontalPadding, vertical: 16),
       child: GridView.builder(
         itemCount: issues.length,
         shrinkWrap: true,
@@ -301,22 +350,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         itemBuilder: (context, index) {
           final issue = issues[index];
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                backgroundColor: Colors.white,
-                radius: 22,
-                child: Icon(issue['icon'] as IconData, color: Colors.black87, size: 20),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                issue['label'].toString(),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w500, height: 1.3),
-              ),
-            ],
+          final label = issue['label'] as String;
+
+          return GestureDetector(
+            onTap: () {
+              // 필터링 로직 (WorkerIssueScreen과 동일)
+              final filtered = lawyersByRegion.values
+                  .expand((list) => list)
+                  .where((lawyer) {
+                final normalized = normalizeCategory(label);
+                final keywords = issueKeywordMap[normalized] ?? [label.trim()];
+                return lawyer.specialties.any((tag) {
+                  return keywords.any((keyword) =>
+                  tag.contains(keyword) || keyword.contains(tag)); // 🔥 양방향 비교!
+                });
+              }).toList();
+
+              // LawyerListScreen으로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      LawyerListScreen(
+                        title: label,
+                        category: label,
+                        lawyers: filtered,
+                      ),
+                ),
+              );
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  radius: 22,
+                  child: Icon(issue['icon'] as IconData, color: Colors.black87,
+                      size: 20),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w500, height: 1.3),
+                ),
+              ],
+            ),
           );
         },
       ),

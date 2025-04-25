@@ -13,6 +13,8 @@ import '../screens/reservation/reservation_screen.dart';
 import '../screens/reservation/reservation_success_screen.dart';
 import 'package:project_nomufinder/screens/reservation/my_reservations_screen.dart'; // 내 예약 관리
 import '../screens/chatbot/chatbot_screen.dart'; // ✅ chatbot 화면 import
+import '../screens/favorites/favorites_screen.dart';
+
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -175,6 +177,18 @@ final router = GoRouter(
                 FadeTransition(opacity: animation, child: child),
           ),
         ),
+        GoRoute(
+          path: '/favorites',
+          name: 'Favorites',
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: const FavoritesScreen(), // 방금 만든 화면
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                FadeTransition(opacity: animation, child: child),
+          ),
+        ),
+
         GoRoute(
           path: '/reservation',
           builder: (context, state) {
