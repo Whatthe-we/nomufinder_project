@@ -13,9 +13,10 @@ const double suggestionsBoxHorizontalPadding = 16.0;
 
 // ✅ 배너 데이터
 final List<Map<String, String>> bannerData = [
-  {'title': '노무사 상담 비용, 미리 확인!', 'image': 'assets/images/banner1.png'},
-  {'title': '무료 상담 신청하기!', 'image': 'assets/images/banner2.png'},
-  {'title': '법률 정보 받아보기!', 'image': 'assets/images/banner3.png'},
+  {'title': '노무무 배너', 'image': 'assets/images/banner1.png'},
+  {'title': '5대 의무교육 배너', 'image': 'assets/images/banner2.png'},
+  {'title': '리뷰 배너', 'image': 'assets/images/banner3.png'},
+  {'title': '노무사 상담 배너', 'image': 'assets/images/banner4.png'},
 ];
 
 class HomeScreen extends ConsumerStatefulWidget {
