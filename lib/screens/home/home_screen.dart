@@ -112,17 +112,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildBannerItem(String imageUrl) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      height: 140, // ⭐️ 높이 조절 포인트! 120~160 추천
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
       ),
       clipBehavior: Clip.antiAlias,
       child: Image.asset(
         imageUrl,
-        fit: BoxFit.fill,
+        fit: BoxFit.cover,
       ),
     );
   }
+
+
 
   // 사업주 & 근로자 버튼
   Widget _buildCategorySection() {
