@@ -18,7 +18,6 @@ class CommonHeader extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        Icon(Icons.search, size: 20, color: Colors.grey[600]),
         const SizedBox(width: 4),
         Text(
           '마이페이지',
