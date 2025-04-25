@@ -4,7 +4,6 @@ import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart
 import 'package:project_nomufinder/services/lawyer_data_loader.dart';
 import 'package:project_nomufinder/viewmodels/search_viewmodel.dart';
 
-// 파일 최상단 또는 클래스 외부로 이동
 final Map<String, List<String>> issueKeywordMap = {
   '직장 내 성희롱': ['성희롱', '직장내성희롱', '괴롭힘·성희롱'],
   '직장 내 괴롭힘': ['괴롭힘', '직장내괴롭힘', '괴롭힘·성희롱'],
