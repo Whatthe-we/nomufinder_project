@@ -20,6 +20,7 @@ class InputGenderScreen extends ConsumerWidget {
       onSelect: vm.setGender,
       onBack: vm.prevStep,
       onNext: vm.nextStep,
+      showBackButton: false, // 👈 요거 추가
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart'; // ✅
 import 'package:project_nomufinder/services/api_service.dart';
 import 'package:project_nomufinder/models/lawyer.dart';
 import 'package:project_nomufinder/services/lawyer_data_loader.dart';
@@ -79,19 +80,15 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
       // 카테고리 기반으로 노무사 필터링
       final allLawyers = lawyersByRegion.values.expand((list) => list).toList();
-      final filtered = filterLawyersBySpecialty(normalized, allLawyers); // 필터 함수 사용
+      final filtered = filterLawyersBySpecialty(
+          normalized, allLawyers); // 필터 함수 사용
 
       // 해당 카테고리 노무사 리스트로 이동
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => LawyerListScreen(
-            title: category,
-            category: normalized, // 정규화된 카테고리 넘겨 필터링
-            lawyers: filtered,
-          ),
-        ),
-      );
+      context.push('/lawyer_list', extra: {
+        'category': normalized,
+        'title': category,
+        'lawyers': filtered,
+      });
     } catch (e) {
       print("❌ 분류 및 이동 실패: $e");
     }
@@ -112,11 +109,12 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => LawyerListScreen(
-          title: keyword,
-          category: keyword,
-          lawyers: filtered,
-        ),
+        builder: (_) =>
+            LawyerListScreen(
+              title: keyword,
+              category: keyword,
+              lawyers: filtered,
+            ),
       ),
     );
   }
@@ -133,91 +131,88 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const AnimatedLogoBanner(), // ✅ 애니메이션 로고 추가!
-            const SizedBox(height: 27),
-
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF4F2F2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: TextField(
-                controller: _controller,
-                onChanged: (value) {
-                  if (value.isNotEmpty) _fetchSuggestions(value);
-                },
-                decoration: const InputDecoration(
-                  hintText: '원하는 내용을 입력해보세요',
-                  border: InputBorder.none,
-                  icon: Icon(Icons.search, color: Colors.grey),
+        child: SingleChildScrollView( // Wrap the Column
+          child: Column(
+            children: [
+              const AnimatedLogoBanner(), // ✅ 애니메이션 로고 추가!
+              const SizedBox(height: 27),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4F2F2),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ✅ 예시 문구 애니메이션
-            Center(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
-                transitionBuilder: (child, animation) {
-                  final fadeAnimation = CurvedAnimation(parent: animation, curve: Curves.easeInOut);
-                  final slideAnimation = Tween<Offset>(
-                    begin: const Offset(0, 0.3),
-                    end: Offset.zero,
-                  ).animate(animation);
-
-                  final scaleAnimation = Tween<double>(
-                    begin: 0.95,
-                    end: 1.0,
-                  ).animate(animation);
-
-                  return FadeTransition(
-                    opacity: fadeAnimation,
-                    child: SlideTransition(
-                      position: slideAnimation,
-                      child: ScaleTransition(
-                        scale: scaleAnimation,
-                        child: child,
+                child: TextField(
+                  controller: _controller,
+                  onChanged: (value) {
+                    if (value.isNotEmpty) _fetchSuggestions(value);
+                  },
+                  decoration: const InputDecoration(
+                    hintText: '원하는 내용을 입력해보세요',
+                    border: InputBorder.none,
+                    icon: Icon(Icons.search, color: Colors.grey),
+                  ),
+                ),
+              ), // ✅ This closing parenthesis was misaligned
+              const SizedBox(height: 20),
+              // ✅ 예시 문구 애니메이션
+              Center(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  transitionBuilder: (child, animation) {
+                    final fadeAnimation =
+                    CurvedAnimation(parent: animation, curve: Curves.easeInOut);
+                    final slideAnimation = Tween<Offset>(
+                      begin: const Offset(0, 0.3),
+                      end: Offset.zero,
+                    ).animate(animation);
+                    final scaleAnimation = Tween<double>(
+                      begin: 0.95,
+                      end: 1.0,
+                    ).animate(animation);
+                    return FadeTransition(
+                      opacity: fadeAnimation,
+                      child: SlideTransition(
+                        position: slideAnimation,
+                        child: ScaleTransition(
+                          scale: scaleAnimation,
+                          child: child,
+                        ),
                       ),
-                    ),
-                  );
-                },
-                child: Text(
-                  currentPrompt,
-                  key: ValueKey(currentPrompt),
-                  style: const TextStyle(color: Colors.grey),
+                    );
+                  },
+                  child: Text(
+                    currentPrompt,
+                    key: ValueKey(currentPrompt),
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 ),
               ),
-            ),
-
-            if (suggestions.isNotEmpty) ...[
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "추천 키워드:",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+              if (suggestions.isNotEmpty) ...[
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "추천 키워드:",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: suggestions.map((keyword) {
-                  return GestureDetector(
-                    onTap: () => _classifyAndNavigate(keyword),
-                    child: Chip(
-                      label: Text(keyword),
-                      backgroundColor: const Color(0xFFEFEFFF),
-                    ),
-                  );
-                }).toList(),
-              ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: suggestions.map((keyword) {
+                    return GestureDetector(
+                      onTap: () => _classifyAndNavigate(keyword),
+                      child: Chip(
+                        label: Text(keyword),
+                        backgroundColor: const Color(0xFFEFEFFF),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

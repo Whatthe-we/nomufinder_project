@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from typing import Optional
 from openai import OpenAI
 from datetime import datetime
+import time
 
 # 라우터 초기화
 router = APIRouter()
@@ -121,8 +122,15 @@ def log_failed_classification(user_input: str, result: str):
 
 # 분류 함수
 def classify_text_with_openai(user_input: str) -> str:
-    examples = fewshot_base.copy()
-    random.shuffle(examples)
+    start = time.time()
+
+    # ✅ 예시 6개만 사용 (카테고리 다양성 확보)
+    examples = (
+        random.sample(business_examples, 2) +
+        random.sample(worker_examples, 2) +
+        random.sample(casual_examples, 2)
+    )
+
     prompt = generate_prompt(user_input, examples, categories)
 
     try:
@@ -134,6 +142,8 @@ def classify_text_with_openai(user_input: str) -> str:
         )
         raw_result = response.choices[0].message.content.strip()
         print(f"🔍 Raw Output: {raw_result}")
+        print(f"⏱️ GPT 응답 시간: {time.time() - start:.2f}초")
+
         cleaned = clean_category_output(raw_result)
 
         # Feedback Loop용 오분류 로그 저장

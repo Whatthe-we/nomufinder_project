@@ -3,7 +3,7 @@ import 'indicator_bar.dart';
 
 class QuestionTemplate extends StatelessWidget {
   final int currentIndex;
-  final int totalSteps; // ✅ 추가
+  final int totalSteps;
   final String question;
   final List<String> options;
   final String? selectedOption;
@@ -12,11 +12,12 @@ class QuestionTemplate extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onNext;
   final bool isMultiple;
+  final bool showBackButton; // ✅ 이 줄 추가!
 
   const QuestionTemplate({
     super.key,
     required this.currentIndex,
-    required this.totalSteps, // ✅ 생성자에 추가
+    required this.totalSteps,
     required this.question,
     required this.options,
     this.selectedOption,
@@ -25,31 +26,39 @@ class QuestionTemplate extends StatelessWidget {
     required this.onBack,
     required this.onNext,
     this.isMultiple = false,
+    this.showBackButton = true, // ✅ 기본값 true로 설정
   });
 
   @override
   Widget build(BuildContext context) {
+    // ✅ 선택 여부 확인
+    bool isSelected = isMultiple
+        ? (selectedOptions != null && selectedOptions!.isNotEmpty)
+        : (selectedOption != null && selectedOption!.isNotEmpty);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            IndicatorBarWithBack(
+            // 상단 인디케이터 + 뒤로가기
+            UnifiedIndicatorBar(
               currentIndex: currentIndex,
-              totalSteps: totalSteps, // ✅ 전달
-              onBack: onBack,
+              totalSteps: totalSteps,
+              onBack: showBackButton ? onBack : null,
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 30, top: 20, right: 30),
+              padding: const EdgeInsets.only(left: 30, top: 25, right: 30),
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
                   question,
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 23, // ✅ 글자 크기 조정
                     fontFamily: 'Open Sans',
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.28,
+                    height: 1.4, // ✅ 줄간격 조정
                   ),
                 ),
               ),
@@ -85,7 +94,7 @@ class QuestionTemplate extends StatelessWidget {
                             child: Text(
                               option,
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 18,
                                 fontFamily: 'Work Sans',
                                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                                 color: selected ? Colors.black : const Color(0xFF5A5A5A),
@@ -101,10 +110,26 @@ class QuestionTemplate extends StatelessWidget {
                 },
               ),
             ),
+
+            // ✅ 선택 안 된 경우 경고 문구
+            if (!isSelected)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: Text(
+                  '👉 항목을 선택해주세요 !',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+
+            // ✅ "다음" 버튼 (선택된 경우에만 활성화)
             Padding(
               padding: const EdgeInsets.only(bottom: 40),
               child: ElevatedButton(
-                onPressed: onNext,
+                onPressed: isSelected ? onNext : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0010BA),
                   foregroundColor: Colors.white,
