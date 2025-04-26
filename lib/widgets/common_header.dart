@@ -13,11 +13,12 @@ class CommonHeader extends StatelessWidget {
           style: TextStyle(
             color: Color(0xFF000FBA),
             fontSize: 20,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w900, // 더 진하게
             fontStyle: FontStyle.italic,
           ),
         ),
         const Spacer(),
+        Icon(Icons.settings, color: Colors.grey[600], size: 20), // 톱니바퀴 아이콘 추가
         const SizedBox(width: 4),
         Text(
           '마이페이지',
@@ -31,3 +32,4 @@ class CommonHeader extends StatelessWidget {
     );
   }
 }
+
