@@ -39,8 +39,8 @@ BM25_DATA_PATH = "split_texts_for_bm25.pkl"
 FIREBASE_SERVICE_ACCOUNT_KEY = "serviceAccountKey.json"
 
 # ===> 모델 설정 수정 <===
-EMBEDDING_MODEL_NAME = "text-embedding-ada-002" # OpenAI 임베딩 모델
-LLM_MODEL_NAME = "gpt-4.1-nano"                 # 사용할 LLM 모델
+EMBEDDING_MODEL_NAME = "text-embedding-3-large" # OpenAI 임베딩 모델
+LLM_MODEL_NAME = "gpt-4.1"                      # ✅ 사용할 LLM 모델
 # =====================
 
 # Firebase 설정 (환경 변수에서 로드)
@@ -59,7 +59,7 @@ ENSEMBLE_WEIGHTS = [0.7, 0.3] # BM25=0.7, FAISS=0.3
 # === FastAPI 앱 인스턴스 ===
 app = FastAPI()
 
-# === 질문 재처리 ===
+# === ✅ 질문 재처리 ===
 PROCESSED_IDS_JSON_PATH = "processed_ids.json"
 PROCESSED_IDS_BACKUP_PATH = "processed_ids_backup.json"
 MAX_PROCESSED_IDS = 100

@@ -7,12 +7,14 @@ import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/input/input_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/worker/worker_screen.dart'; // 상황별/지역별 통합 탭 화면
-import '../screens/lawyer_search/keyword_search_screen.dart'; // 🔍 검색 화면 추가
+import '../screens/lawyer_search/keyword_search_screen.dart'; // 검색 화면
 import '../screens/auth/my_page_screen.dart';
 import '../screens/reservation/reservation_screen.dart';
 import '../screens/reservation/reservation_success_screen.dart';
-import 'package:project_nomufinder/screens/reservation/my_reservations_screen.dart'; // 내 예약 관리
-import '../screens/chatbot/chatbot_screen.dart'; // ✅ chatbot 화면 import
+import 'package:project_nomufinder/screens/reservation/my_reservations_screen.dart';
+import '../screens/chatbot/chatbot_screen.dart'; // ✅ 챗봇
+import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart'; // ✅ 노무사 리스트
+import '../screens/favorites/favorites_screen.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -165,11 +167,45 @@ final router = GoRouter(
           ),
         ),
         GoRoute(
+          path: '/lawyer_list', // ✅ 노무사 리스트 경로 추가
+          name: 'LawyerList',
+          pageBuilder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+
+            final title = extra?['title'] as String? ?? '노무사 목록';
+            final category = extra?['category'] as String?;
+            final lawyers = (extra?['lawyers'] as List?)?.cast<Lawyer>() ?? [];
+
+            return CustomTransitionPage(
+              key: state.pageKey,
+              child: LawyerListScreen(
+                title: title,
+                category: category,
+                lawyers: lawyers,
+              ),
+              transitionDuration: const Duration(milliseconds: 500),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                  FadeTransition(opacity: animation, child: child),
+            );
+          },
+        ),
+        GoRoute(
           path: '/my-reservations',
           name: 'MyReservations',
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
             child: const MyReservationsScreen(),
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                FadeTransition(opacity: animation, child: child),
+          ),
+        ),
+        GoRoute(
+          path: '/favorites',
+          name: 'Favorites',
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: const FavoritesScreen(), // ✅ 방금 만든 화면
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
