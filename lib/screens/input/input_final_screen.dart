@@ -66,13 +66,13 @@ class InputFinalScreen extends ConsumerWidget {
                 const SizedBox(height: 110), // 인디케이터 높이 공간 확보
 
                 const Padding(
-                  padding: EdgeInsets.only(left: 30, top: 4, right: 30),
+                  padding: EdgeInsets.only(left: 30, top: 6, right: 30),
                   child: Align(
                     alignment: Alignment.topLeft,
                     child: Text(
                       '노무 고민,\n더 이상 혼자 하지 마세요.\n저희가 함께 해결해 드릴게요!',
                       style: TextStyle(
-                        fontSize: 23,
+                        fontSize: 24,
                         fontFamily: 'Work Sans',
                         fontWeight: FontWeight.w700,
                         height: 1.46,
