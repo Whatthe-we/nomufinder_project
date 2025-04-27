@@ -1,24 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/post.dart'; // 모델 위치 맞춰줘
+import '../../models/post.dart';
 
-/// 찜한 글 목록 관리하는 Provider
-final postFavoritesProvider = StateNotifierProvider<PostFavoritesNotifier, List<Post>>((ref) {
-  return PostFavoritesNotifier();
+final postListProvider = StateNotifierProvider<PostListNotifier, List<Post>>((ref) {
+  return PostListNotifier();
 });
 
-/// 찜한 글들을 저장하는 StateNotifier
-class PostFavoritesNotifier extends StateNotifier<List<Post>> {
-  PostFavoritesNotifier() : super([]);
+class PostListNotifier extends StateNotifier<List<Post>> {
+  PostListNotifier() : super([
+    Post(id: '1', title: '퇴직금 문의', content: '퇴직금 제대로 받는 방법 알려주세요.', author: '사용자A'),
+    Post(id: '2', title: '부당해고 상담', content: '해고 통보 받았습니다.', author: '사용자B'),
+  ]);
 
-  void toggleFavorite(Post post) {
-    if (state.contains(post)) {
-      state = state.where((item) => item.id != post.id).toList();
-    } else {
-      state = [...state, post];
-    }
-  }
-
-  bool isFavorite(Post post) {
-    return state.any((item) => item.id == post.id);
+  void addPost(Post post) {
+    state = [post, ...state];
   }
 }

@@ -43,3 +43,8 @@ def suggest_endpoint(query: str):
 # specialty에 맞는 노무사 필터링 함수
 def filter_lawyers_by_specialty(specialty: str):
     return [lawyer for lawyer in lawyers if lawyer["specialty"] == specialty]
+
+# ✅ 추가 (루트 엔드포인트)
+@app.get("/")
+async def root():
+    return {"message": "Nomu Search Backend is running!"}
