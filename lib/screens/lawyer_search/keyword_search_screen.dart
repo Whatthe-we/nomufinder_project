@@ -48,7 +48,7 @@ const Map<String, String> keywordToCategoryMap = {
   "계약 연장 거절": "근로계약",
 
   // 근무조건
-  "육아단축 근무조건": "근무조건",
+  "근로조건": "근무조건",
   "근무조건 변경": "근무조건",
   "근무조건 실업급여": "근무조건",
   "근무조건 변경 퇴사": "근무조건",
@@ -88,7 +88,9 @@ const Map<String, String> keywordToCategoryMap = {
   "성차별": "직장내차별",
   "나이 차별": "직장내차별",
   "출산휴가 불이익": "직장내차별",
+  "출산휴가": "직장내차별",
   "육아휴직 불이익": "직장내차별",
+  "육아휴직": "직장내차별",
   "직무 차별": "직장내차별",
   "기간제 차별": "직장내차별",
   "비정규직 차별": "직장내차별",
@@ -297,7 +299,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        title: const CommonHeader(), // 로고 포함 공통 헤더
+        title: const CommonHeader(),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -307,7 +309,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
               const AnimatedLogoBanner(),
               const SizedBox(height: 25),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.only(left: 20, right: 8),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF4F2F2),
                   borderRadius: BorderRadius.circular(30),
@@ -317,9 +319,9 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                   alignment: Alignment.center,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 50),
+                      padding: const EdgeInsets.only(left: 10, right: 10),
                       child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 600),
+                        duration: const Duration(milliseconds: 550),
                         transitionBuilder: (child, animation) {
                           final fadeAnimation = CurvedAnimation(
                             parent: animation,
@@ -356,16 +358,16 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                       onChanged: (value) {
                         setState(() {
                           if (value.isEmpty) {
-                            _setRandomPrompt(); // 아무것도 없으면 다시 예시 문구 보여주기
+                            _setRandomPrompt();
                           } else {
-                            currentPrompt = ''; // 입력 있으면 예시 문구 지우기
+                            currentPrompt = '';
                           }
                         });
                         if (value.isNotEmpty) {
-                          _fetchSuggestions(value); // 입력 있을 때만 자동완성 불러오기
+                          _fetchSuggestions(value);
                         } else {
                           setState(() {
-                            suggestions = []; // 입력이 완전히 비면 추천 키워드도 초기화
+                            suggestions = [];
                           });
                         }
                       },
@@ -376,18 +378,46 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                         hintText: '',
                       ),
                     ),
+                    Positioned(
+                      right: 1,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_forward, color: Color(
+                            0xFF0024EE)),
+                        onPressed: () {
+                          final inputText = _controller.text.trim();
+                          if (inputText.isNotEmpty) {
+                            _classifyAndNavigate(inputText);
+                          }
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 17),
               if (suggestions.isNotEmpty) ...[
-                // 1. 먼저 추천 키워드 스크롤
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      "인기 키워드",
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 SizedBox(
                   height: 45,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: suggestions.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: 8),
+                    separatorBuilder: (context, index) =>
+                    const SizedBox(width: 8),
                     itemBuilder: (context, index) {
                       final keyword = suggestions[index];
                       return GestureDetector(
@@ -411,15 +441,17 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                           scale: tappedIndex == index ? 0.95 : 1.0,
                           duration: const Duration(milliseconds: 150),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
                               color: const Color(0xFFF1F3F5),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(15),
                             ),
                             child: Center(
                               child: Text(
                                 keyword,
-                                style: const TextStyle(color: Colors.black87, fontSize: 14),
+                                style: const TextStyle(
+                                    color: Colors.black87, fontSize: 14),
                               ),
                             ),
                           ),
@@ -428,9 +460,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 12),
-
-                // 2. 그 밑에 안내 문구
+                const SizedBox(height: 5),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(8),
@@ -440,7 +470,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                   ),
                   child: const Text(
                     "키워드를 누르면 딱 맞는 노무사를 추천해드려요",
-                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                 ),
