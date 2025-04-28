@@ -3,6 +3,16 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart';
 import 'package:project_nomufinder/services/lawyer_data_loader.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+Future<void> requestLocationPermission() async {
+  var status = await Permission.location.request();
+  if (status.isGranted) {
+    print('위치 권한 허용됨');
+  } else {
+    print('위치 권한 거부됨');
+  }
+}
 
 class RegionMapScreen extends StatefulWidget {
   const RegionMapScreen({Key? key}) : super(key: key);

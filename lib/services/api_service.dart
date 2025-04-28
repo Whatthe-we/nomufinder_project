@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:project_nomufinder/models/lawyer.dart';
 
 class ApiService {
   static final Dio _dio = Dio(
@@ -42,12 +43,12 @@ class ApiService {
   // 카테고리 분류 함수
   static Future<String> classifyText(String text) async {
     final response = await _dio.post(
-      '$searchBaseUrl/classify',
+      '$searchBaseUrl/classify', // 🔥 여기
       data: {'text': text},
       options: Options(headers: {'Content-Type': 'application/json'}),
     );
     if (response.statusCode == 200) {
-      return response.data['category'];
+      return response.data['category']; // 문자열 반환
     } else {
       throw Exception('분류 실패: ${response.statusCode}');
     }
@@ -56,7 +57,7 @@ class ApiService {
   // 자동완성 불러오기
   static Future<Map<String, dynamic>> getSuggestions(String query) async {
     try {
-      final response = await _dio.get('$searchBaseUrl/suggest?query=$query');
+      final response = await _dio.get('$searchBaseUrl/suggest?query=$query'); // 🔥 여기
       if (response.statusCode == 200) {
         final category = response.data['category'];
         final suggestions = (response.data['suggestions'] as List).cast<String>();
