@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart'; // 라우터 이동용
+import 'package:go_router/go_router.dart';
 import '../../widgets/indicator_bar.dart';
 import 'package:project_nomufinder/viewmodels/input_viewmodel.dart';
-import 'package:project_nomufinder/services/firebase_service.dart'; // Firestore 저장 로직
+import 'package:project_nomufinder/services/firebase_service.dart';
 
 class InputFinalScreen extends ConsumerWidget {
   const InputFinalScreen({super.key});
@@ -33,6 +33,7 @@ class InputFinalScreen extends ConsumerWidget {
                 ),
               ),
             ),
+
             // 배경 데코 원 (우상단)
             Positioned(
               right: -screenWidth * 0.2,
@@ -47,18 +48,25 @@ class InputFinalScreen extends ConsumerWidget {
               ),
             ),
 
-            // 내용 영역
+            // 인디케이터 위치 고정
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: UnifiedIndicatorBar(
+                currentIndex: 8,
+                totalSteps: InputStep.values.length,
+                onBack: vm.prevStep,
+              ),
+            ),
+
+            // 본문 내용
             Column(
               children: [
-                // 인디케이터 + 뒤로가기 버튼
-                IndicatorBarWithBack(
-                  currentIndex: 8,
-                  totalSteps: InputStep.values.length,
-                  onBack: () => vm.prevStep(),
-                ),
+                const SizedBox(height: 110),
 
                 const Padding(
-                  padding: EdgeInsets.only(left: 30, top: 20, right: 30),
+                  padding: EdgeInsets.only(left: 30, top: 6, right: 30),
                   child: Align(
                     alignment: Alignment.topLeft,
                     child: Text(
@@ -66,7 +74,7 @@ class InputFinalScreen extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 24,
                         fontFamily: 'Work Sans',
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         height: 1.46,
                         letterSpacing: -0.28,
                         color: Colors.black,
@@ -74,16 +82,16 @@ class InputFinalScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+
                 const Spacer(),
 
+                // 시작하기 버튼
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: GestureDetector(
                     onTap: () async {
-                      // 현재 상태 가져오기
                       final inputState = ref.read(inputViewModelProvider);
 
-                      // 로딩 인디케이터 표시
                       showDialog(
                         context: context,
                         barrierDismissible: false,
@@ -93,16 +101,15 @@ class InputFinalScreen extends ConsumerWidget {
                       );
 
                       try {
-                        // Firestore에 설문 데이터 저장
                         await FirebaseService.saveSurvey(inputState);
 
                         if (context.mounted) {
-                          Navigator.of(context).pop(); // 로딩 닫기
-                          context.go('/home'); // 홈으로 이동
+                          Navigator.of(context).pop();
+                          context.go('/home');
                         }
                       } catch (e) {
                         if (context.mounted) {
-                          Navigator.of(context).pop(); // 로딩 닫기
+                          Navigator.of(context).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('저장 실패: $e')),
                           );
@@ -135,7 +142,7 @@ class InputFinalScreen extends ConsumerWidget {
                 const Padding(
                   padding: EdgeInsets.only(bottom: 24),
                   child: Text(
-                    '서비스 품질 향상을 위해, 입력하신 정보는\n개인정보를 제외한 익명 통계로 활용될 수 있습니다.',
+                    '서비스 품질 향상을 위해,\n입력하신 정보는 익명 통계로 활용될 수 있습니다.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFF9B9B9B),

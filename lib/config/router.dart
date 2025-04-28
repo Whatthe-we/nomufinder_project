@@ -14,7 +14,7 @@ import '../screens/reservation/reservation_success_screen.dart';
 import 'package:project_nomufinder/screens/reservation/my_reservations_screen.dart'; // 내 예약 관리
 import '../screens/chatbot/chatbot_screen.dart'; // ✅ chatbot 화면 import
 import '../screens/favorites/favorites_screen.dart';
-
+import '../screens/lawyer_search/lawyer_list_screen.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -102,6 +102,30 @@ final router = GoRouter(
       ),
     ),
 
+    GoRoute(
+      path: '/lawyer_list',
+      name: 'LawyerList',
+      pageBuilder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+
+        final title = extra?['title'] as String? ?? '노무사 목록';
+        final category = extra?['category'] as String?;
+        final lawyers = (extra?['lawyers'] as List?)?.cast<Lawyer>() ?? [];
+
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: LawyerListScreen(
+            title: title,
+            category: category,
+            lawyers: lawyers,
+          ),
+          transitionDuration: const Duration(milliseconds: 500),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
+        );
+      },
+    ),
+
     // ShellRoute 포함 화면들 (내비게이션 바 있음)
     ShellRoute(
       builder: (context, state, child) {
@@ -182,13 +206,12 @@ final router = GoRouter(
           name: 'Favorites',
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
-            child: const FavoritesScreen(), // 방금 만든 화면
+            child: const FavoritesScreen(),
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
           ),
         ),
-
         GoRoute(
           path: '/reservation',
           builder: (context, state) {
@@ -201,7 +224,7 @@ final router = GoRouter(
           builder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
             final dynamic dateRaw = extra?['date'];
-            final date = dateRaw is DateTime ? dateRaw : DateTime.parse(dateRaw); // string일 경우 파싱
+            final date = dateRaw is DateTime ? dateRaw : DateTime.parse(dateRaw);
             final time = extra?['time'] as String?;
             final lawyerMap = extra?['lawyer'];
 

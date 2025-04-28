@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:intl/intl.dart';
+import 'package:project_nomufinder/widgets/common_header.dart'; // 공통 헤더
 
 class ChatMessage {
   final String text;
@@ -85,7 +85,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     final isUser = message.isUser;
     final bgColor = isUser ? const Color(0xFF5260EF) : const Color(0xFF262628);
     final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final avatar = isUser ? null : Padding(
+    final avatar = isUser
+        ? null
+        : Padding(
       padding: const EdgeInsets.only(right: 8),
       child: CircleAvatar(
         backgroundImage: AssetImage('assets/images/logo.png'),
@@ -94,7 +96,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
       child: Row(
         mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,7 +104,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           if (!isUser) avatar!,
           Flexible(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               decoration: BoxDecoration(
                 color: bgColor,
                 borderRadius: BorderRadius.circular(18),
@@ -111,7 +113,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 message.text,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 14,
+                  fontSize: 15,
                   fontFamily: 'OpenSans',
                   height: 1.5,
                 ),
@@ -127,11 +129,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('노무무 챗봇'),
-        centerTitle: true,
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0.5,
+        elevation: 1,
+        title: const CommonHeader(), // 공통 헤더
       ),
       body: Column(
         children: [
