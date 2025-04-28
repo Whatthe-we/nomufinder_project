@@ -10,19 +10,18 @@ import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart
 import '../favorites/post_list_screen.dart';
 import '../favorites/post_create_screen.dart';
 
-
-
-// 상수 선언
+// Constants
 const double suggestionsBoxHorizontalPadding = 16.0;
 
-// ✅ 배너 데이터
+// Banner Data
 final List<Map<String, String>> bannerData = [
   {'title': '노무무 배너', 'image': 'assets/images/banner1.png'},
   {'title': '5대 의무교육 배너', 'image': 'assets/images/banner2.png'},
   {'title': '리뷰 배너', 'image': 'assets/images/banner3.png'},
   {'title': '노무사 상담 배너', 'image': 'assets/images/banner4.png'},
 ];
-// home_screen.dart 상단에 추가해줘!
+
+// Issue Keyword Mapping
 final Map<String, List<String>> issueKeywordMap = {
   '직장 내 성희롱': ['성희롱', '직장내성희롱', '괴롭힘·성희롱'],
   '직장 내 괴롭힘': ['괴롭힘', '직장내괴롭힘', '괴롭힘·성희롱'],
@@ -33,7 +32,7 @@ final Map<String, List<String>> issueKeywordMap = {
   '산업재해': ['산업재해'],
   '부당해고': ['부당해고'],
   '부당징계': ['부당징계'],
-  '직장 내 차별': ['차별','왕따'],
+  '직장 내 차별': ['차별', '왕따'],
 };
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -51,6 +50,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 5), _autoSlide);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _autoSlide() {
@@ -80,6 +85,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
               _buildSearchBar(context),
@@ -108,7 +114,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // ✅ PageView 배너
+  // PageView Banner
   Widget _buildPageViewBanner() {
     return SizedBox(
       height: 120,
@@ -116,13 +122,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         controller: _pageController,
         itemCount: bannerData.length,
         itemBuilder: (context, index) {
-          final banner = bannerData[index];
-          return _buildBannerItem(banner['image']!);
+          return _buildBannerItem(bannerData[index]['image']!);
         },
         onPageChanged: (index) {
-          setState(() {
-            _currentPage = index;
-          });
+          setState(() => _currentPage = index);
         },
       ),
     );
@@ -131,7 +134,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildBannerItem(String imageUrl) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      height: 140,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -143,8 +145,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-
-  // 사업주 & 근로자 버튼
+  // 사업주 & 근로자 Buttons
   Widget _buildCategorySection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -162,9 +163,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          ref
-              .read(userTypeProvider.notifier)
-              .state =
+          ref.read(userTypeProvider.notifier).state =
           label == '사업주' ? 'employer' : 'worker';
           if (label == '근로자') {
             context.go('/worker');
@@ -194,8 +193,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // 검색창
-  // 수정된 검색창
+  // Search Bar
   Widget _buildSearchBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -206,12 +204,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           decoration: BoxDecoration(
             color: const Color(0xFFF4F2F2),
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: Color(0xFF0024EE), width: 2), // 파란색 두께 추가
+            border: Border.all(color: const Color(0xFF0024EE), width: 2),
           ),
           child: Row(
             children: const [
               Icon(Icons.search, color: Color(0xFF0024EE), size: 24),
-              // 명확한 파란 아이콘
               SizedBox(width: 10),
               Text(
                 '어떤 문제가 있으신가요?',
@@ -228,7 +225,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-
+  // Quick Consultation Buttons
   Widget _buildQuickConsultation(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -266,35 +263,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-
-
   Widget _buildSmallBox(String text, VoidCallback onTap) {
-  return Expanded(
-    child: GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 54,
-        decoration: BoxDecoration(
-          color: const Color(0xFFEFEFFD),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 54,
+          decoration: BoxDecoration(
+            color: const Color(0xFFEFEFFD),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
+
+  // Gray Container
   Widget _buildGrayContainer({required double height}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -307,6 +304,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  // Section Title
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -320,6 +318,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  // Issue Icons
   Widget _buildIssueIcons() {
     final issues = [
       {'icon': Icons.warning_amber_outlined, 'label': '부당해고'},
@@ -354,28 +353,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           return GestureDetector(
             onTap: () {
-              // 필터링 로직 (WorkerIssueScreen과 동일)
+              final normalized = normalizeCategory(label);
+              final keywords = issueKeywordMap[normalized] ?? [label.trim()];
               final filtered = lawyersByRegion.values
                   .expand((list) => list)
-                  .where((lawyer) {
-                final normalized = normalizeCategory(label);
-                final keywords = issueKeywordMap[normalized] ?? [label.trim()];
-                return lawyer.specialties.any((tag) {
-                  return keywords.any((keyword) =>
-                  tag.contains(keyword) || keyword.contains(tag)); // 🔥 양방향 비교!
-                });
-              }).toList();
+                  .where((lawyer) => lawyer.specialties.any((tag) =>
+                  keywords.any((keyword) =>
+                  tag.contains(keyword) || keyword.contains(tag))))
+                  .toList();
 
-              // LawyerListScreen으로 이동
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) =>
-                      LawyerListScreen(
-                        title: label,
-                        category: label,
-                        lawyers: filtered,
-                      ),
+                  builder: (_) => LawyerListScreen(
+                    title: label,
+                    category: label,
+                    lawyers: filtered,
+                  ),
                 ),
               );
             },
@@ -385,8 +379,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 CircleAvatar(
                   backgroundColor: Colors.white,
                   radius: 22,
-                  child: Icon(issue['icon'] as IconData, color: Colors.black87,
-                      size: 20),
+                  child: Icon(issue['icon'] as IconData,
+                      color: Colors.black87, size: 20),
                 ),
                 const SizedBox(height: 6),
                 Text(

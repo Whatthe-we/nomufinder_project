@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:project_nomufinder/services/api_service.dart';
 import 'package:project_nomufinder/models/lawyer.dart';
 import 'package:project_nomufinder/services/lawyer_data_loader.dart';
@@ -8,6 +9,8 @@ import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart
 import 'package:project_nomufinder/widgets/common_header.dart';
 import 'package:project_nomufinder/viewmodels/search_viewmodel.dart';
 import 'package:project_nomufinder/services/lawyer_service.dart';
+
+// 🔥 Flutter용 고정 키워드 → 카테고리 매핑 (생략 가능 시 생략 가능)
 
 class KeywordSearchScreen extends StatefulWidget {
   const KeywordSearchScreen({super.key});
@@ -19,8 +22,8 @@ class KeywordSearchScreen extends StatefulWidget {
 class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
   final TextEditingController _controller = TextEditingController();
   List<String> suggestions = [];
+  int? tappedIndex;
 
-  // ✅ 예시 문장 리스트 및 상태
   final List<String> examplePrompts = [
     "수습 끝나자마자 나오지 말래요 ㅋㅋ",
     "출산휴가 갔다 왔더니 자리 없어짐",
@@ -48,10 +51,12 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
   }
 
   void _setRandomPrompt() {
-    final random = Random();
-    setState(() {
-      currentPrompt = examplePrompts[random.nextInt(examplePrompts.length)];
-    });
+    if (_controller.text.isEmpty) {
+      final random = Random();
+      setState(() {
+        currentPrompt = examplePrompts[random.nextInt(examplePrompts.length)];
+      });
+    }
   }
 
   @override
@@ -73,52 +78,20 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
   Future<void> _classifyAndNavigate(String keyword) async {
     try {
-      // GPT 기반 분류 API 호출
       final category = await ApiService.classifyText(keyword);
-      final normalized = normalizeCategory(category); // 정규화
+      final normalized = normalizeCategory(category);
 
-      // 카테고리 기반으로 노무사 필터링
       final allLawyers = lawyersByRegion.values.expand((list) => list).toList();
-      final filtered = filterLawyersBySpecialty(normalized, allLawyers); // 필터 함수 사용
+      final filtered = filterLawyersBySpecialty(normalized, allLawyers);
 
-      // 해당 카테고리 노무사 리스트로 이동
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => LawyerListScreen(
-            title: category,
-            category: normalized, // 정규화된 카테고리 넘겨 필터링
-            lawyers: filtered,
-          ),
-        ),
-      );
+      context.push('/lawyer_list', extra: {
+        'category': normalized,
+        'title': category,
+        'lawyers': filtered,
+      });
     } catch (e) {
       print("❌ 분류 및 이동 실패: $e");
     }
-  }
-
-  // 유사 키워드 매칭 함수
-  bool _isTagMatching(String keyword, List<String> tags) {
-    return tags.any((tag) =>
-    tag.contains(keyword) || keyword.contains(tag)); // 양방향 대응
-  }
-
-  void _onKeywordTap(String keyword) {
-    final filtered = lawyersByRegion.values
-        .expand((list) => list)
-        .where((lawyer) => _isTagMatching(keyword, lawyer.specialties))
-        .toList();
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => LawyerListScreen(
-          title: keyword,
-          category: keyword,
-          lawyers: filtered,
-        ),
-      ),
-    );
   }
 
   @override
@@ -128,103 +101,168 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        automaticallyImplyLeading: true, // ← 뒤로가기 버튼 활성화
-        title: const CommonHeader(), // 로고 포함 공통 헤더
+        title: const CommonHeader(),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const AnimatedLogoBanner(), // ✅ 애니메이션 로고 추가!
-            const SizedBox(height: 27),
-
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF4F2F2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: TextField(
-                controller: _controller,
-                onChanged: (value) {
-                  if (value.isNotEmpty) _fetchSuggestions(value);
-                },
-                decoration: const InputDecoration(
-                  hintText: '원하는 내용을 입력해보세요',
-                  border: InputBorder.none,
-                  icon: Icon(Icons.search, color: Colors.grey),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const AnimatedLogoBanner(),
+              const SizedBox(height: 25),
+              Container(
+                padding: const EdgeInsets.only(left: 20, right: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4F2F2),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: Color(0xFF0024EE), width: 2),
                 ),
-              ),
-            ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 550),
+                        transitionBuilder: (child, animation) {
+                          final fadeAnimation = CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeInOut,
+                          );
+                          final slideAnimation = Tween<Offset>(
+                            begin: const Offset(0, 0.3),
+                            end: Offset.zero,
+                          ).animate(animation);
 
-            const SizedBox(height: 20),
-
-            // ✅ 예시 문구 애니메이션
-            Center(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
-                transitionBuilder: (child, animation) {
-                  final fadeAnimation = CurvedAnimation(parent: animation, curve: Curves.easeInOut);
-                  final slideAnimation = Tween<Offset>(
-                    begin: const Offset(0, 0.3),
-                    end: Offset.zero,
-                  ).animate(animation);
-
-                  final scaleAnimation = Tween<double>(
-                    begin: 0.95,
-                    end: 1.0,
-                  ).animate(animation);
-
-                  return FadeTransition(
-                    opacity: fadeAnimation,
-                    child: SlideTransition(
-                      position: slideAnimation,
-                      child: ScaleTransition(
-                        scale: scaleAnimation,
-                        child: child,
+                          return FadeTransition(
+                            opacity: fadeAnimation,
+                            child: SlideTransition(
+                              position: slideAnimation,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: Text(
+                          currentPrompt,
+                          key: ValueKey(currentPrompt),
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
-                  );
-                },
-                child: Text(
-                  currentPrompt,
-                  key: ValueKey(currentPrompt),
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ),
-            ),
-
-            if (suggestions.isNotEmpty) ...[
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "추천 키워드:",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: suggestions.map((keyword) {
-                  return GestureDetector(
-                    onTap: () => _classifyAndNavigate(keyword),
-                    child: Chip(
-                      label: Text(keyword),
-                      backgroundColor: const Color(0xFFEFEFFF),
+                    TextField(
+                      controller: _controller,
+                      onChanged: (value) {
+                        setState(() {
+                          if (value.isEmpty) {
+                            _setRandomPrompt();
+                          } else {
+                            currentPrompt = '';
+                          }
+                        });
+                        if (value.isNotEmpty) {
+                          _fetchSuggestions(value);
+                        } else {
+                          setState(() {
+                            suggestions = [];
+                          });
+                        }
+                      },
+                      style: const TextStyle(color: Colors.black),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        icon: Icon(Icons.search, color: Color(0xFF0024EE)),
+                        hintText: '',
+                      ),
                     ),
-                  );
-                }).toList(),
+                    Positioned(
+                      right: 1,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_forward, color: Color(0xFF0024EE)),
+                        onPressed: () {
+                          final inputText = _controller.text.trim();
+                          if (inputText.isNotEmpty) {
+                            _classifyAndNavigate(inputText);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(height: 17),
+              if (suggestions.isNotEmpty) ...[
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      "인기 키워드",
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 45,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: suggestions.length,
+                    separatorBuilder: (context, index) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final keyword = suggestions[index];
+                      return GestureDetector(
+                        onTap: () => _classifyAndNavigate(keyword),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F3F5),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Center(
+                            child: Text(
+                              keyword,
+                              style: const TextStyle(color: Colors.black87, fontSize: 14),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    "키워드를 누르면 딱 맞는 노무사를 추천해드려요",
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-// ✅ 아래는 로고 애니메이션 위젯 (Slide 위아래로 이동)
+// 애니메이션 로고 위젯
 class AnimatedLogoBanner extends StatefulWidget {
   const AnimatedLogoBanner({super.key});
 
@@ -246,7 +284,7 @@ class _AnimatedLogoBannerState extends State<AnimatedLogoBanner> with SingleTick
 
     _animation = Tween<Offset>(
       begin: const Offset(0, 0),
-      end: const Offset(0, 0.05),
+      end: const Offset(0, 0.07),
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
@@ -258,22 +296,27 @@ class _AnimatedLogoBannerState extends State<AnimatedLogoBanner> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _animation,
-      child: Column(
-        children: [
-          Image.asset(
-            'assets/images/logo.png',
-            width: 80,
-            height: 80,
+    return Column(
+      children: [
+        const SizedBox(height: 8),
+        SlideTransition(
+          position: _animation,
+          child: Column(
+            children: [
+              Image.asset(
+                'assets/images/logo.png',
+                width: 80,
+                height: 80,
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "어떤 문제가 있으신가요?",
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
-          const SizedBox(height: 10),
-          const Text(
-            "어떤 문제가 있으신가요?",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

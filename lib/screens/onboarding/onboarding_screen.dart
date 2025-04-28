@@ -13,20 +13,21 @@ class OnboardingScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            IndicatorBarWithBack(
+            // 상단 인디케이터 (뒤로가기 없음)
+            UnifiedIndicatorBar(
               currentIndex: 9,
               totalSteps: InputStep.values.length,
-              onBack: () => context.pop(),
+              onBack: null,
             ),
             const Padding(
-              padding: EdgeInsets.only(left: 30, top: 70, right: 30),
+              padding: EdgeInsets.only(left: 30, top: 25, right: 30),
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
                   '필요한 정보를 더 잘 제공하기 위해,\n간단한 질문 몇 가지를 드릴게요!',
                   style: TextStyle(
                     color: Colors.black,
-                    fontSize: 24,
+                    fontSize: 23,
                     fontFamily: 'Open Sans',
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.28,
@@ -47,7 +48,7 @@ class OnboardingScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(38),
                     ),
                     child: GestureDetector(
-                      onTap: () => context.go('/home'), // ✅ 홈 화면으로 이동
+                      onTap: () => context.go('/home'),
                       child: const Center(
                         child: Text(
                           "I DON'T UNDERSTAND",
