@@ -10,10 +10,13 @@ import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart
 import '../favorites/post_list_screen.dart';
 import '../favorites/post_create_screen.dart';
 
+import 'package:project_nomufinder/viewmodels/youtube_viewmodel.dart'; // ✅ 추가
+import 'package:project_nomufinder/widgets/youtube_card.dart'; // ✅ 추가
+
 // 상수 선언
 const double suggestionsBoxHorizontalPadding = 16.0;
 
-// ✅ 배너 데이터
+// 배너 데이터
 final List<Map<String, String>> bannerData = [
   {'title': '노무무 배너', 'image': 'assets/images/banner1.png'},
   {'title': '5대 의무교육 배너', 'image': 'assets/images/banner2.png'},
@@ -91,7 +94,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               _buildIssueIcons(),
               const SizedBox(height: 30),
               _buildSectionTitle('오늘의 소식'),
-              _buildGrayContainer(height: 200),
+              const SizedBox(height: 10),
+              _buildYoutubeNews(), // ✅ 유튜브 뉴스
               const SizedBox(height: 30),
               _buildSectionTitle('알아두면 좋은 법률 정보'),
               _buildGrayContainer(height: 180),
@@ -106,7 +110,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // ✅ PageView 배너
+  // PageView 배너
   Widget _buildPageViewBanner() {
     return SizedBox(
       height: 120,
@@ -261,8 +265,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-
-
   Widget _buildSmallBox(String text, VoidCallback onTap) {
     return Expanded(
       child: GestureDetector(
@@ -287,6 +289,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // ✅ 유튜브 뉴스
+  Widget _buildYoutubeNews() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      width: double.infinity,
+      height: 300,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0,3),
+          ),
+        ],
+      ),
+      child: Consumer(
+        builder: (context, ref, _) {
+          final youtubeAsync = ref.watch(youtubeNewsProvider);
+
+          return youtubeAsync.when(
+            data: (videos) => PageView.builder(
+              itemCount: videos.length > 5 ? 5 : videos.length,
+              controller: PageController(viewportFraction: 1),
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 0), // ✅ 상하 여백 추가
+                  child: YoutubeCard(video: videos[index]),
+                );
+              },
+            ),
+            loading: () => const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, _) => Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Center(child: Text('유튜브 뉴스 로딩 실패')),
+            ),
+          );
+        },
       ),
     );
   }
