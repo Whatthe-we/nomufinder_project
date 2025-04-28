@@ -47,7 +47,7 @@ class OnboardingScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(38),
                     ),
                     child: GestureDetector(
-                      onTap: () => context.go('/home'), // ✅ 홈 화면으로 이동
+                      onTap: () => context.go('/home'),
                       child: const Center(
                         child: Text(
                           "I DON'T UNDERSTAND",

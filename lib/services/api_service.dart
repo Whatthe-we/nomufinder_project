@@ -14,7 +14,7 @@ class ApiService {
     ),
   );
 
-  // ✅ 검색용 BaseUrl
+  // 검색용 BaseUrl
   static String get searchBaseUrl {
     if (kIsWeb) {
       return dotenv.env['FASTAPI_SEARCH_BASE_URL_WEB'] ?? 'http://localhost:8001';
@@ -27,7 +27,7 @@ class ApiService {
     }
   }
 
-  // ✅ 챗봇용 BaseUrl
+  // 챗봇용 BaseUrl
   static String get chatbotBaseUrl {
     if (kIsWeb) {
       return dotenv.env['FASTAPI_CHATBOT_BASE_URL_WEB'] ?? 'http://localhost:8000';

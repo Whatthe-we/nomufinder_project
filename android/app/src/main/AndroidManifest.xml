@@ -7,6 +7,11 @@
         android:label="project_nomufinder"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCwg2Cul4BORN0Pj4CEIG8Fbk7Si7i_JZk"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
