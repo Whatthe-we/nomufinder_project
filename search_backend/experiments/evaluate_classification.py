@@ -2,6 +2,7 @@ import json
 import sys
 import csv
 import os
+import datetime
 from openai import OpenAI
 from dotenv import load_dotenv
 from sklearn.metrics import classification_report, accuracy_score
@@ -26,30 +27,30 @@ def generate_eval_dataset(path="search_backend/experiments/evaluation_dataset.js
         {"text": "수습 끝나자마자 나가라고 통보 받았어요", "label": "부당해고"},
         {"text": "이유를 듣지도 못했는데 정직 당했어요", "label": "부당징계"},
         {"text": "정당한 사유가 없는데 계약 종료 하겠대요", "label": "부당해고"},
-        {"text": "제 잘못을 소명할 기회 없이 감봉 조치 받았습니다", "label": "부당징계"},
+        {"text": "제 의견을 소명할 기회 없이 감봉 조치 받았습니다", "label": "부당징계"},
         {"text": "회사에서 경고를 계속 줘요", "label": "부당징계"},
         # 부당해고&부당징계 - 사업주
         {"text": "수습 기간 중 실력이 부족한 사원은 내보낼 수 있나요?", "label": "부당해고"},
         {"text": "직원의 불성실한 근태로 인한 징계 절차가 궁금합니다", "label": "부당징계"},
-        {"text": "계약 만료 후 재계약 거절은 부당해고인가요?", "label": "부당해고"},
-        {"text": "경고 조치를 할 때 주의할 점이 있나요?", "label": "부당징계"},
-        {"text": "정직 처분 시 필요한 사전 절차는 무엇인가요?", "label": "부당징계"},
+        {"text": "계약 만료 후 재계약을 거절하면 법적으로 문제되나요?", "label": "부당해고"},
+        {"text": "직원한테 경고 조치를 할 때 주의할 점이 있나요?", "label": "부당징계"},
+        {"text": "정직 처분 시 필요한 절차는 무엇인가요?", "label": "부당징계"},
 
         # 근로계약&근무조건 - 근로자
         {"text": "근로계약서를 작성하지 않았어요", "label": "근로계약"},
         {"text": "주 60시간 넘게 일하고 있어요", "label": "근무조건"},
         {"text": "연차를 쓸 수 없게 막아요", "label": "근무조건"},
         {"text": "근로계약 내용과 실제 근로조건이 달라요", "label": "근로계약"},
-        {"text": "수습 기간이라고 급여를 적게 주네요", "label": "근로계약"},
+        {"text": "계약서에는 주5일 근무인데 실제로는 주6일 일합니다", "label": "근로계약"},
         # 근로계약&근무조건 - 사업주
         {"text": "근로계약서는 언제까지 작성해야 하나요?", "label": "근로계약"},
         {"text": "연장근로 시 수당 지급 기준은 뭔가요?", "label": "근무조건"},
-        {"text": "수습 기간 급여를 조정할 수 있나요?", "label": "근로계약"},
+        {"text": "수습 기간만 급여를 조정할 수 있나요?", "label": "근로계약"},
         {"text": "연차 사용을 회사가 지정할 수 있나요?", "label": "근무조건"},
         {"text": "근로시간 단축 요청을 거부해도 되나요?", "label": "근무조건"},
 
         # 직장내성희롱&괴롭힘 - 근로자
-        {"text": "상사가 외모를 지적했어요", "label": "직장내성희롱"},
+        {"text": "상사가 외모를 자꾸 지적해요", "label": "직장내성희롱"},
         {"text": "성희롱 신고 이후 보복을 당했어요", "label": "직장내성희롱"},
         {"text": "괴롭힘으로 인해 퇴사하고 싶은데 실업급여 받을 수 있나요?", "label": "직장내괴롭힘"},
         {"text": "상사가 욕설을 합니다", "label": "직장내괴롭힘"},
@@ -59,18 +60,18 @@ def generate_eval_dataset(path="search_backend/experiments/evaluation_dataset.js
         {"text": "직장 내 괴롭힘 신고 접수 시 조치 방법은?", "label": "직장내괴롭힘"},
         {"text": "성희롱 신고가 거짓일 경우 대응은?", "label": "직장내성희롱"},
         {"text": "직장 내 괴롭힘 가해자 징계 절차는?", "label": "직장내괴롭힘"},
-        {"text": "직장 내 따돌림 조사 방법이 궁금합니다", "label": "직장내괴롭힘"},
+        {"text": "직장 내 따돌림 신고가 들어왔는데 조사 방법이 궁금합니다", "label": "직장내괴롭힘"},
 
         # 직장내차별 - 근로자
         {"text": "출산휴가 다녀왔더니 부서가 바뀌었어요", "label": "직장내차별"},
         {"text": "비정규직이라 연차를 못 써요", "label": "직장내차별"},
         {"text": "육아휴직 복귀 후 불이익을 당했어요", "label": "직장내차별"},
         {"text": "나이 때문에 승진이 안 된 것 같아요", "label": "직장내차별"},
-        {"text": "장애인 차별을 경험했어요", "label": "직장내차별"},
+        {"text": "장애인이라고 워크샵 오지 말래요", "label": "직장내차별"},
         # 직장내차별 - 사업주
-        {"text": "출산휴가 복귀자 인사이동 가능한가요?", "label": "직장내차별"},
+        {"text": "출산휴가 복귀자 인사 이동 가능한가요?", "label": "직장내차별"},
         {"text": "비정규직 연차 부여 기준이 궁금합니다", "label": "직장내차별"},
-        {"text": "육아휴직 후 다른 부서 배치해도 되나요?", "label": "직장내차별"},
+        {"text": "육아휴직 후 다른 부서로 배치해도 되나요?", "label": "직장내차별"},
         {"text": "정년퇴직자 재고용 의무가 있나요?", "label": "직장내차별"},
         {"text": "장애인 의무고용 비율 미달 시 불이익은?", "label": "직장내차별"},
 
@@ -84,8 +85,8 @@ def generate_eval_dataset(path="search_backend/experiments/evaluation_dataset.js
         {"text": "퇴직금 지급 시기와 방법이 궁금합니다", "label": "임금/퇴직금"},
         {"text": "임금 체불 시 법적 책임은 어떻게 되나요?", "label": "임금/퇴직금"},
         {"text": "퇴직금 계산 기준을 알고 싶어요", "label": "임금/퇴직금"},
-        {"text": "수습 해고 시 임금 지급 의무가 있나요?", "label": "임금/퇴직금"},
-        {"text": "퇴직금 중간정산 가능한가요?", "label": "임금/퇴직금"},
+        {"text": "하루만 나오고 무단결근한 직원한테도 돈을 지급해야 하나요?", "label": "임금/퇴직금"},
+        {"text": "퇴직금 중간정산 꼭 해줘야 하는건가요?", "label": "임금/퇴직금"},
 
         # 산업재해 - 근로자
         {"text": "출근길 교통사고 산재 처리 가능할까요?", "label": "산업재해"},
@@ -97,15 +98,15 @@ def generate_eval_dataset(path="search_backend/experiments/evaluation_dataset.js
         {"text": "산재 신청을 회사가 거부할 수 있나요?", "label": "산업재해"},
         {"text": "업무상 재해 인정 기준이 궁금합니다", "label": "산업재해"},
         {"text": "산재 처리 시 회사 책임 범위는?", "label": "산업재해"},
-        {"text": "출퇴근 사고도 산재로 인정되나요?", "label": "산업재해"},
+        {"text": "회사 밖에서 발생한 출퇴근길 사고도 산재로 인정되나요?", "label": "산업재해"},
         {"text": "산재 예방 조치를 못 하면 어떤 처벌을 받나요?", "label": "산업재해"},
 
         # 노동조합 - 근로자
-        {"text": "노조 가입한다고 했더니 괴롭힘을 당해요", "label": "노동조합"},
+        {"text": "노조 가입한다고 했더니 눈치 줘요", "label": "노동조합"},
         {"text": "노조 활동 때문에 인사 불이익을 받았어요", "label": "노동조합"},
         {"text": "노조 가입비는 반드시 내야 하나요?", "label": "노동조합"},
-        {"text": "노조 가입을 이유로 부당전출 당했어요", "label": "노동조합"},
-        {"text": "파업에 참가하면 징계당할 수 있나요?", "label": "노동조합"},
+        {"text": "노조 가입을 이유로 전출 당했어요", "label": "노동조합"},
+        {"text": "파업에 참가하면 징계 당할 수 있나요?", "label": "노동조합"},
         # 노동조합 - 사업주
         {"text": "교섭대표노조와의 교섭 방법이 궁금합니다", "label": "노동조합"},
         {"text": "노조 활동을 이유로 해고하면 불법인가요?", "label": "노동조합"},
@@ -115,39 +116,24 @@ def generate_eval_dataset(path="search_backend/experiments/evaluation_dataset.js
 
         # 기업자문 - 사업주
         {"text": "취업규칙 개정할 때 필요한 절차는?", "label": "기업자문"},
-        {"text": "근로시간 유연하게 조정하려면 어떻게 해야 하나요?", "label": "기업자문"},
-        {"text": "인사규정 새로 정비하고 싶습니다", "label": "기업자문"},
         {"text": "노무 리스크 예방을 위한 점검 방법은?", "label": "기업자문"},
-        {"text": "직장 내 괴롭힘 예방 매뉴얼 작성 방법은?", "label": "기업자문"},
         {"text": "근로감독 대비 준비할 수 있는 게 뭔가요?", "label": "기업자문"},
         {"text": "정리해고 진행 시 필수 절차가 있나요?", "label": "기업자문"},
-        {"text": "징계 규정 업데이트 방법이 궁금합니다", "label": "기업자문"},
-        {"text": "근로자대표 선출 절차가 필요할까요?", "label": "기업자문"},
-        {"text": "신규 입사자 교육 자료를 준비하려면?", "label": "기업자문"},
+        {"text": "신규 입사자 교육 자료를 사내 규정으로 준비하려 합니다", "label": "기업자문"},
 
         # 컨설팅 - 사업주
-        {"text": "인사평가 제도 컨설팅을 받고 싶어요", "label": "컨설팅"},
-        {"text": "성과급 제도를 도입하고 싶은데 방법은?", "label": "컨설팅"},
+        {"text": "인사평가 제도를 외부기관에 의뢰하고 싶어요", "label": "컨설팅"},
         {"text": "조직문화 진단 컨설팅 받고 싶습니다", "label": "컨설팅"},
         {"text": "ESG 경영 컨설팅 대상이 궁금합니다", "label": "컨설팅"},
-        {"text": "임금피크제 도입 컨설팅 받고 싶어요", "label": "컨설팅"},
+        {"text": "임금피크제 도입을 고민하고 있습니다", "label": "컨설팅"},
         {"text": "직무분석 컨설팅 절차가 궁금해요", "label": "컨설팅"},
-        {"text": "채용 컨설팅을 통해 공정성 확보가 가능한가요?", "label": "컨설팅"},
-        {"text": "4대보험 정산 컨설팅도 가능한가요?", "label": "컨설팅"},
-        {"text": "임금체계 개편 컨설팅 받고 싶어요", "label": "컨설팅"},
-        {"text": "노사관계 개선 컨설팅을 받고 싶어요", "label": "컨설팅"},
 
         # 급여아웃소싱 - 사업주
-        {"text": "급여 아웃소싱을 맡기면 어떤 이점이 있나요?", "label": "급여아웃소싱"},
         {"text": "급여 대행 서비스 이용 비용은 얼마나 하나요?", "label": "급여아웃소싱"},
-        {"text": "퇴직금 정산까지 맡길 수 있나요?", "label": "급여아웃소싱"},
+        {"text": "급여 대행 서비스에 퇴직금 처리까지 포함되나요?", "label": "급여아웃소싱"},
         {"text": "4대보험 신고도 급여 대행에서 해주나요?", "label": "급여아웃소싱"},
-        {"text": "급여명세서 발송은 어떻게 처리되나요?", "label": "급여아웃소싱"},
-        {"text": "급여 이체는 자동으로 이뤄지나요?", "label": "급여아웃소싱"},
         {"text": "비정규직 급여 계산도 대행 가능한가요?", "label": "급여아웃소싱"},
         {"text": "급여자료 제공 방식은 어떻게 되나요?", "label": "급여아웃소싱"},
-        {"text": "급여 대행 업체 선정 시 주의할 점은?", "label": "급여아웃소싱"},
-        {"text": "퇴직 연금 처리도 대행 해주나요?", "label": "급여아웃소싱"}
     ]
     with open(path, "w", encoding="utf-8") as f:
         json.dump(dataset, f, ensure_ascii=False, indent=2)
@@ -199,7 +185,7 @@ def save_misclassified_log(name, y_true, y_pred, dataset, path_prefix="search_ba
     print(f"❗ 오답 로그 저장됨: {full_path}")
 
 # === 평가 함수 ===
-def evaluate_model(name, classify_fn, dataset):
+def evaluate_model(name, classify_fn, dataset, save_dir):
     y_true, y_pred = [], []
     for item in dataset:
         text, label = item["text"], item["label"]
@@ -212,7 +198,7 @@ def evaluate_model(name, classify_fn, dataset):
     report = classification_report(y_true, y_pred, labels=categories, zero_division=0, output_dict=True)
 
     # 오답 저장
-    save_misclassified_log(name, y_true, y_pred, dataset)
+    save_misclassified_log(name, y_true, y_pred, dataset, path_prefix=save_dir)
 
     # ✅ Per-class F1 추가 출력
     print(f"\n📊 [{name}] Per-class F1-score:")
@@ -226,7 +212,7 @@ def evaluate_model(name, classify_fn, dataset):
         "name": name,
         "accuracy": acc,
         "macro_f1": report["macro avg"]["f1-score"],
-        "per_class_f1": per_class_f1  # ✅ 추가!!
+        "per_class_f1": per_class_f1
     }
 
 # === 결과 CSV 저장 ===
@@ -254,17 +240,32 @@ def save_per_class_f1_csv(results: list[dict], path="search_backend/experiments/
                 writer.writerow([name, category, f1])
     print(f"📄 Per-class F1 결과 저장됨: {path}")
 
+# === 평가셋, 결과 저장 폴더 설정 ===
+def make_output_folder(base_path="search_backend/experiments"):
+    now = datetime.datetime.now()
+    folder_name = now.strftime("%Y%m%d_%H%M%S")  # 예: 20250428_102302
+    full_path = os.path.join(base_path, folder_name)
+    os.makedirs(full_path, exist_ok=True)
+    print(f"📁 결과 저장 폴더 생성됨: {full_path}")
+    return full_path
+
 # === 메인 실행 ===
 if __name__ == "__main__":
     print("🚀 평가 시작")
-    dataset = generate_eval_dataset()
 
-    # Few-shot
-    few_result = evaluate_model("Few-shot", classify_text_with_openai, dataset)
+    # 1. 저장할 폴더 만들기
+    save_dir = make_output_folder()
 
-    # Zero-shot
-    zero_result = evaluate_model("Zero-shot", classify_text_zeroshot, dataset)
+    # 2. 평가셋 생성 (폴더 안에 저장)
+    dataset_path = os.path.join(save_dir, "evaluation_dataset.json")
+    dataset = generate_eval_dataset(path=dataset_path)
 
-    # 저장
-    save_results_csv([few_result, zero_result])
-    save_per_class_f1_csv([few_result, zero_result])  # ✅ 추가
+    # 3. Few-shot 평가
+    few_result = evaluate_model("Few-shot", classify_text_with_openai, dataset, save_dir)
+
+    # 4. Zero-shot 평가
+    zero_result = evaluate_model("Zero-shot", classify_text_zeroshot, dataset, save_dir)
+
+    # 5. 결과 저장 (폴더 안에 저장)
+    save_results_csv([few_result, zero_result], path=os.path.join(save_dir, "evaluation_result.csv"))
+    save_per_class_f1_csv([few_result, zero_result], path=os.path.join(save_dir, "per_class_f1_result.csv"))
