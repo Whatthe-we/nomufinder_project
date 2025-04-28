@@ -12,7 +12,7 @@ class QuestionTemplate extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onNext;
   final bool isMultiple;
-  final bool showBackButton; // ✅ 이 줄 추가!
+  final bool showBackButton;
 
   const QuestionTemplate({
     super.key,
@@ -26,12 +26,12 @@ class QuestionTemplate extends StatelessWidget {
     required this.onBack,
     required this.onNext,
     this.isMultiple = false,
-    this.showBackButton = true, // ✅ 기본값 true로 설정
+    this.showBackButton = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    // ✅ 선택 여부 확인
+    // 선택 여부 확인
     bool isSelected = isMultiple
         ? (selectedOptions != null && selectedOptions!.isNotEmpty)
         : (selectedOption != null && selectedOption!.isNotEmpty);
@@ -54,11 +54,11 @@ class QuestionTemplate extends StatelessWidget {
                 child: Text(
                   question,
                   style: const TextStyle(
-                    fontSize: 23, // ✅ 글자 크기 조정
+                    fontSize: 23,
                     fontFamily: 'Open Sans',
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.28,
-                    height: 1.4, // ✅ 줄간격 조정
+                    height: 1.4,
                   ),
                 ),
               ),
@@ -111,7 +111,7 @@ class QuestionTemplate extends StatelessWidget {
               ),
             ),
 
-            // ✅ 선택 안 된 경우 경고 문구
+            // 선택 안 된 경우 경고 문구
             if (!isSelected)
               const Padding(
                 padding: EdgeInsets.only(bottom: 12),
@@ -125,7 +125,7 @@ class QuestionTemplate extends StatelessWidget {
                 ),
               ),
 
-            // ✅ "다음" 버튼 (선택된 경우에만 활성화)
+            // "다음" 버튼 (선택된 경우에만 활성화)
             Padding(
               padding: const EdgeInsets.only(bottom: 40),
               child: ElevatedButton(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 둥근 인디케이터 바
+/// 둥근 인디케이터 바 + 선택적 뒤로가기 버튼
 class UnifiedIndicatorBar extends StatelessWidget {
   final int currentIndex;
   final int totalSteps;
@@ -16,12 +16,12 @@ class UnifiedIndicatorBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 90, // ✅ 전체 고정 높이로 통일
+      height: 90, // 고정 높이
       child: Stack(
         children: [
           // 인디케이터 바 (항상 가운데 아래 위치)
           Align(
-            alignment: const Alignment(0, 0.8), // 아래 정렬 느낌
+            alignment: const Alignment(0, 0.8),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: List.generate(totalSteps, (index) {
@@ -32,8 +32,7 @@ class UnifiedIndicatorBar extends StatelessWidget {
                     width: isActive ? 30 : 12,
                     height: 7,
                     decoration: BoxDecoration(
-                      color: isActive ? const Color(0xFF0010BA) : const Color(
-                          0xFF2A2740),
+                      color: isActive ? const Color(0xFF0010BA) : const Color(0xFF2A2740),
                       borderRadius: BorderRadius.circular(200),
                     ),
                   ),
@@ -42,7 +41,7 @@ class UnifiedIndicatorBar extends StatelessWidget {
             ),
           ),
 
-          // 뒤로가기 버튼 (있을 때만)
+          // 뒤로가기 버튼 (옵션)
           if (onBack != null)
             Positioned(
               top: 20,
@@ -57,8 +56,7 @@ class UnifiedIndicatorBar extends StatelessWidget {
                     border: Border.all(width: 2, color: Colors.black),
                   ),
                   child: const Center(
-                    child: Icon(
-                        Icons.arrow_back, size: 24, color: Colors.black),
+                    child: Icon(Icons.arrow_back, size: 24, color: Colors.black),
                   ),
                 ),
               ),

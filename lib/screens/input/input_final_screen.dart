@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../widgets/indicator_bar.dart'; // ✅ UnifiedIndicatorBar 포함
+import '../../widgets/indicator_bar.dart';
 import 'package:project_nomufinder/viewmodels/input_viewmodel.dart';
 import 'package:project_nomufinder/services/firebase_service.dart';
 
@@ -48,7 +48,7 @@ class InputFinalScreen extends ConsumerWidget {
               ),
             ),
 
-            // ✅ 인디케이터 위치 고정
+            // 인디케이터 위치 고정
             Positioned(
               top: 0,
               left: 0,
@@ -60,10 +60,10 @@ class InputFinalScreen extends ConsumerWidget {
               ),
             ),
 
-            // ✅ 본문 내용
+            // 본문 내용
             Column(
               children: [
-                const SizedBox(height: 110), // 인디케이터 높이 공간 확보
+                const SizedBox(height: 110),
 
                 const Padding(
                   padding: EdgeInsets.only(left: 30, top: 6, right: 30),

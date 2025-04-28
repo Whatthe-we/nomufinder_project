@@ -110,7 +110,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // PageView 배너
+  // PageView Banner
   Widget _buildPageViewBanner() {
     return SizedBox(
       height: 120,
@@ -118,13 +118,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         controller: _pageController,
         itemCount: bannerData.length,
         itemBuilder: (context, index) {
-          final banner = bannerData[index];
-          return _buildBannerItem(banner['image']!);
+          return _buildBannerItem(bannerData[index]['image']!);
         },
         onPageChanged: (index) {
-          setState(() {
-            _currentPage = index;
-          });
+          setState(() => _currentPage = index);
         },
       ),
     );
@@ -133,7 +130,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildBannerItem(String imageUrl) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      height: 140,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -145,7 +141,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // 사업주 & 근로자 버튼
+  // 사업주 & 근로자 Buttons
   Widget _buildCategorySection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -193,8 +189,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // 검색창
-  // 수정된 검색창
+  // Search Bar
   Widget _buildSearchBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -205,12 +200,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           decoration: BoxDecoration(
             color: const Color(0xFFF4F2F2),
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: Color(0xFF0024EE), width: 2), // 파란색 두께 추가
+            border: Border.all(color: const Color(0xFF0024EE), width: 2),
           ),
           child: Row(
             children: const [
               Icon(Icons.search, color: Color(0xFF0024EE), size: 24),
-              // 명확한 파란 아이콘
               SizedBox(width: 10),
               Text(
                 '어떤 문제가 있으신가요?',
@@ -227,7 +221,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // 빠른 상담 등
+  // Quick Consultation Buttons
   Widget _buildQuickConsultation(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -339,6 +333,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  // Gray Container
   Widget _buildGrayContainer({required double height}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -351,6 +346,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  // Section Title
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -364,6 +360,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  // Issue Icons
   Widget _buildIssueIcons() {
     final issues = [
       {'icon': Icons.warning_amber_outlined, 'label': '부당해고'},
@@ -398,28 +395,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           return GestureDetector(
             onTap: () {
-              // 필터링 로직 (WorkerIssueScreen과 동일)
+              final normalized = normalizeCategory(label);
+              final keywords = issueKeywordMap[normalized] ?? [label.trim()];
               final filtered = lawyersByRegion.values
                   .expand((list) => list)
-                  .where((lawyer) {
-                final normalized = normalizeCategory(label);
-                final keywords = issueKeywordMap[normalized] ?? [label.trim()];
-                return lawyer.specialties.any((tag) {
-                  return keywords.any((keyword) =>
-                  tag.contains(keyword) || keyword.contains(tag)); // 🔥 양방향 비교!
-                });
-              }).toList();
+                  .where((lawyer) => lawyer.specialties.any((tag) =>
+                  keywords.any((keyword) =>
+                  tag.contains(keyword) || keyword.contains(tag))))
+                  .toList();
 
-              // LawyerListScreen으로 이동
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) =>
-                      LawyerListScreen(
-                        title: label,
-                        category: label,
-                        lawyers: filtered,
-                      ),
+                  builder: (_) => LawyerListScreen(
+                    title: label,
+                    category: label,
+                    lawyers: filtered,
+                  ),
                 ),
               );
             },
@@ -429,8 +421,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 CircleAvatar(
                   backgroundColor: Colors.white,
                   radius: 22,
-                  child: Icon(issue['icon'] as IconData, color: Colors.black87,
-                      size: 20),
+                  child: Icon(issue['icon'] as IconData,
+                      color: Colors.black87, size: 20),
                 ),
                 const SizedBox(height: 6),
                 Text(

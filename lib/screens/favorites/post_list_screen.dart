@@ -23,10 +23,12 @@ class PostListScreen extends ConsumerWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => PostCreateScreen(onPostCreated: (post) {
-                    ref.read(postListProvider.notifier).addPost(post); // 글 추가!
-                    Navigator.pop(context);
-                  }),
+                  builder: (_) =>
+                      PostCreateScreen(onPostCreated: (post) {
+                        ref.read(postListProvider.notifier).addPost(
+                            post); // 글 추가!
+                        Navigator.pop(context);
+                      }),
                 ),
               );
             },
