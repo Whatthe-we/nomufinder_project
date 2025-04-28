@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:intl/intl.dart';
-import 'package:project_nomufinder/widgets/common_header.dart'; // ✅ 추가
+import 'package:project_nomufinder/widgets/common_header.dart'; // 공통 헤더
 
 class ChatMessage {
   final String text;
@@ -86,7 +85,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     final isUser = message.isUser;
     final bgColor = isUser ? const Color(0xFF5260EF) : const Color(0xFF262628);
     final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final avatar = isUser ? null : Padding(
+    final avatar = isUser
+        ? null
+        : Padding(
       padding: const EdgeInsets.only(right: 8),
       child: CircleAvatar(
         backgroundImage: AssetImage('assets/images/logo.png'),
@@ -130,7 +131,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        title: const CommonHeader(), // 🔥 NOMU FINDER 로고 + 이름
+        title: const CommonHeader(), // 공통 헤더
       ),
       body: Column(
         children: [

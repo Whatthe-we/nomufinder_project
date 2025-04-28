@@ -14,8 +14,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Firebase 초기화
-  if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    print("⚠️ Firebase 초기화 무시됨: $e");
   }
 
   // JSON 데이터 로드
@@ -23,7 +27,7 @@ Future<void> main() async {
 
   // 환경변수 로드
   final isEmulator = await _isRunningOnEmulator();
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: ".env"); // ✅ 상대 경로
 
   runApp(
     const ProviderScope(
