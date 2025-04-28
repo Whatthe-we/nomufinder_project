@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_nomufinder/models/lawyer.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart';
 import 'package:project_nomufinder/services/lawyer_data_loader.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

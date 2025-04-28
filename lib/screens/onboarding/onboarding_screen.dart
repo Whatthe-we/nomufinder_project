@@ -13,10 +13,11 @@ class OnboardingScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
+            // 상단 인디케이터 (뒤로가기 없음)
             UnifiedIndicatorBar(
               currentIndex: 9,
               totalSteps: InputStep.values.length,
-              onBack: null, // 뒤로가기 없으니까 null
+              onBack: null,
             ),
             const Padding(
               padding: EdgeInsets.only(left: 30, top: 25, right: 30),

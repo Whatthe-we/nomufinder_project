@@ -206,7 +206,7 @@ final router = GoRouter(
           name: 'Favorites',
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
-            child: const FavoritesScreen(), // ✅ 방금 만든 화면
+            child: const FavoritesScreen(),
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
@@ -224,7 +224,7 @@ final router = GoRouter(
           builder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
             final dynamic dateRaw = extra?['date'];
-            final date = dateRaw is DateTime ? dateRaw : DateTime.parse(dateRaw); // string일 경우 파싱
+            final date = dateRaw is DateTime ? dateRaw : DateTime.parse(dateRaw);
             final time = extra?['time'] as String?;
             final lawyerMap = extra?['lawyer'];
 
