@@ -6,15 +6,17 @@ import '../screens/splash/splash_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/input/input_screen.dart';
 import '../screens/home/home_screen.dart';
-import '../screens/worker/worker_screen.dart'; // 상황별/지역별 통합 탭 화면
-import '../screens/lawyer_search/keyword_search_screen.dart'; // 🔍 검색 화면 추가
+import '../screens/worker/worker_screen.dart';
+import '../screens/lawyer_search/keyword_search_screen.dart';
 import '../screens/auth/my_page_screen.dart';
 import '../screens/reservation/reservation_screen.dart';
 import '../screens/reservation/reservation_success_screen.dart';
-import 'package:project_nomufinder/screens/reservation/my_reservations_screen.dart'; // 내 예약 관리
-import '../screens/chatbot/chatbot_screen.dart'; // ✅ chatbot 화면 import
+import '../screens/reservation/my_reservations_screen.dart';
+import '../screens/chatbot/chatbot_screen.dart';
 import '../screens/favorites/favorites_screen.dart';
 import '../screens/lawyer_search/lawyer_list_screen.dart';
+import '../screens/reviews/review_create_screen.dart';
+import '../screens/reviews/my_reviews_screen.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -73,7 +75,7 @@ class MyBottomNavigationBar extends StatelessWidget {
 final router = GoRouter(
   initialLocation: '/splash',
   routes: [
-    // 초기 단일 화면들 (내비게이션 바 없음)
+    // 1. Splash, Input, Onboarding
     GoRoute(
       path: '/splash',
       name: 'Splash',
@@ -102,12 +104,12 @@ final router = GoRouter(
       ),
     ),
 
+    // 2. LawyerList
     GoRoute(
       path: '/lawyer_list',
       name: 'LawyerList',
       pageBuilder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
-
         final title = extra?['title'] as String? ?? '노무사 목록';
         final category = extra?['category'] as String?;
         final lawyers = (extra?['lawyers'] as List?)?.cast<Lawyer>() ?? [];
@@ -126,7 +128,7 @@ final router = GoRouter(
       },
     ),
 
-    // ShellRoute 포함 화면들 (내비게이션 바 있음)
+    // 3. ShellRoute (하단 바 포함되는 화면들)
     ShellRoute(
       builder: (context, state, child) {
         return Scaffold(
@@ -151,7 +153,7 @@ final router = GoRouter(
           name: 'Worker',
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
-            child: const WorkerScreen(), // 상황별/지역별 통합 탭 화면
+            child: const WorkerScreen(),
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
@@ -159,7 +161,7 @@ final router = GoRouter(
         ),
         GoRoute(
           path: '/search',
-          name: 'KeywordSearch',
+          name: 'Search',
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
             child: const KeywordSearchScreen(),
@@ -169,7 +171,7 @@ final router = GoRouter(
           ),
         ),
         GoRoute(
-          path: '/chatbot', // ✅ 챗봇 경로 추가
+          path: '/chatbot',
           name: 'Chatbot',
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
@@ -180,11 +182,22 @@ final router = GoRouter(
           ),
         ),
         GoRoute(
+          path: '/favorites',
+          name: 'Favorites',
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: const FavoritesScreen(),
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                FadeTransition(opacity: animation, child: child),
+          ),
+        ),
+        GoRoute(
           path: '/mypage',
           name: 'MyPage',
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
-            child: const MyPageScreen(), // 마이페이지 화면
+            child: const MyPageScreen(),
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
@@ -202,42 +215,51 @@ final router = GoRouter(
           ),
         ),
         GoRoute(
-          path: '/favorites',
-          name: 'Favorites',
+          path: '/my-reviews',
+          name: 'MyReviews',
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
-            child: const FavoritesScreen(), // ✅ 방금 만든 화면
+            child: const MyReviewsScreen(),
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
           ),
         ),
-        GoRoute(
-          path: '/reservation',
-          builder: (context, state) {
-            final lawyer = state.extra as Lawyer;
-            return ReservationScreen(lawyer: lawyer);
-          },
-        ),
-        GoRoute(
-          path: '/reservation_success',
-          builder: (context, state) {
-            final extra = state.extra as Map<String, dynamic>?;
-            final dynamic dateRaw = extra?['date'];
-            final date = dateRaw is DateTime ? dateRaw : DateTime.parse(dateRaw); // string일 경우 파싱
-            final time = extra?['time'] as String?;
-            final lawyerMap = extra?['lawyer'];
-
-            final lawyer = lawyerMap != null ? Lawyer.fromJson(lawyerMap) : null;
-
-            return ReservationSuccessScreen(
-              date: date,
-              time: time ?? '',
-              lawyer: lawyer!,
-            );
-          },
-        ),
       ],
+    ),
+
+    // 4. 예약 관련 (ShellRoute 밖에 있음)
+    GoRoute(
+      path: '/reservation',
+      builder: (context, state) {
+        final lawyer = state.extra as Lawyer;
+        return ReservationScreen(lawyer: lawyer);
+      },
+    ),
+    GoRoute(
+      path: '/review-create',
+      builder: (context, state) {
+        final lawyer = state.extra as Lawyer;
+        return ReviewCreateScreen(lawyer: lawyer);
+      },
+    ),
+    GoRoute(
+      path: '/reservation_success',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        final dynamic dateRaw = extra?['date'];
+        final date = dateRaw is DateTime ? dateRaw : DateTime.parse(dateRaw);
+        final time = extra?['time'] as String?;
+        final lawyerMap = extra?['lawyer'];
+
+        final lawyer = lawyerMap != null ? Lawyer.fromJson(lawyerMap) : null;
+
+        return ReservationSuccessScreen(
+          date: date,
+          time: time ?? '',
+          lawyer: lawyer!,
+        );
+      },
     ),
   ],
 );
