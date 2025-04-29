@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
-import 'package:project_nomufinder/models/lawyer.dart';
 
 class ApiService {
   static final Dio _dio = Dio(
