@@ -94,7 +94,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               _buildIssueIcons(),
               const SizedBox(height: 30),
               _buildSectionTitle('오늘의 소식'),
-              const SizedBox(height: 10),
+              const SizedBox(height: 5),
               _buildYoutubeNews(), // ✅ 유튜브 뉴스
               const SizedBox(height: 30),
               _buildSectionTitle('알아두면 좋은 법률 정보'),
@@ -289,21 +289,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // ✅ 유튜브 뉴스
   Widget _buildYoutubeNews() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      width: double.infinity,
-      height: 300,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0,3),
-          ),
-        ],
-      ),
+    return SizedBox(
+      width: double.infinity, // 가로 꽉 채움
+      height: 300,             // 높이 300 고정
       child: Consumer(
         builder: (context, ref, _) {
           final youtubeAsync = ref.watch(youtubeNewsProvider);
@@ -313,20 +301,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               itemCount: videos.length > 5 ? 5 : videos.length,
               controller: PageController(viewportFraction: 1),
               itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 0), // ✅ 상하 여백 추가
-                  child: YoutubeCard(video: videos[index]),
-                );
+                return YoutubeCard(video: videos[index]); // ✅ 바로 YoutubeCard만
               },
             ),
-            loading: () => const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (e, _) => Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(child: Text('유튜브 뉴스 로딩 실패')),
-            ),
+            loading: () => const Center(child: CircularProgressIndicator()), // 로딩 중
+            error: (e, _) => const Center(child: Text('유튜브 뉴스 로딩 실패')), // 에러
           );
         },
       ),
