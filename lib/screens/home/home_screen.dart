@@ -292,7 +292,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildYoutubeNews() {
     return SizedBox(
       width: double.infinity,
-      height: 300,
+      height: 310,
       child: Consumer(
         builder: (context, ref, _) {
           final youtubeAsync = ref.watch(youtubeNewsProvider);

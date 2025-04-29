@@ -54,6 +54,7 @@ class YoutubeService {
         title: item['snippet']['title'],
         description: item['snippet']['description'],
         thumbnailUrl: item['snippet']['thumbnails']['medium']['url'],
+        channelTitle: item['snippet']['channelTitle'], // ✅ 추가
       ))
           .toList();
     } else {
