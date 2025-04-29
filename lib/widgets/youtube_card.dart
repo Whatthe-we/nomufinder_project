@@ -38,31 +38,35 @@ class YoutubeCard extends StatelessWidget {
 
   TextStyle _getTitleStyle() {
     switch (variant) {
-      case 'law': // 👉 법률정보용
+      case 'law':
         return const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: Colors.black54,
         );
-      case 'news': // 👉 뉴스용
+      case 'news':
         return const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w500,
           color: Colors.black87,
         );
-      case 'edu': // 👉 법정의무교육용
+      case 'edu':
         return const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
           color: Colors.black87,
         );
-      default: // 👉 기본
+      default:
         return const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: Colors.black87,
         );
     }
+  }
+
+  String _formatPublishedAt(DateTime dateTime) {
+    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -140,10 +144,9 @@ class YoutubeCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-
               Container(
-                height: variant == 'law' ? 70 : null, // 법률정보 글자칸 높이 조절
-                width: variant == 'law' ? width : null,  // 법률정보 글자칸 너비 조절
+                height: variant == 'law' ? 70 : null,
+                width: variant == 'law' ? width : null,
                 alignment: Alignment.centerLeft,
                 child: Text(
                   decodedTitle,
@@ -152,6 +155,30 @@ class YoutubeCard extends StatelessWidget {
                   style: _getTitleStyle(),
                 ),
               ),
+              if (variant == 'news') // 뉴스에만 출처+업로드일 표시
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0, left: 10.0, right: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (video.publishedAt != null)
+                        Text(
+                          _formatPublishedAt(DateTime.parse(video.publishedAt!)),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      Text(
+                        'Youtube_${video.channelTitle ?? ''}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),
