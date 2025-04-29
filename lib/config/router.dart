@@ -6,18 +6,17 @@ import '../screens/splash/splash_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/input/input_screen.dart';
 import '../screens/home/home_screen.dart';
-import '../screens/worker/worker_screen.dart'; // 상황별/지역별 통합 탭 화면
-import '../screens/lawyer_search/keyword_search_screen.dart'; // 🔍 검색 화면 추가
+import '../screens/worker/worker_screen.dart';
+import '../screens/lawyer_search/keyword_search_screen.dart';
 import '../screens/auth/my_page_screen.dart';
 import '../screens/reservation/reservation_screen.dart';
 import '../screens/reservation/reservation_success_screen.dart';
-import 'package:project_nomufinder/screens/reservation/my_reservations_screen.dart'; // 내 예약 관리
-import '../screens/chatbot/chatbot_screen.dart'; // ✅ chatbot 화면 import
+import '../screens/reservation/my_reservations_screen.dart';
+import '../screens/chatbot/chatbot_screen.dart';
 import '../screens/favorites/favorites_screen.dart';
 import '../screens/lawyer_search/lawyer_list_screen.dart';
-import 'package:project_nomufinder/screens/reviews/review_create_screen.dart';
-import 'package:project_nomufinder/screens/reviews/my_reviews_screen.dart';
-
+import '../screens/reviews/review_create_screen.dart';
+import '../screens/reviews/my_reviews_screen.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -105,7 +104,7 @@ final router = GoRouter(
       ),
     ),
 
-    // 2. LawyerList (개별)
+    // 2. LawyerList
     GoRoute(
       path: '/lawyer_list',
       name: 'LawyerList',
@@ -216,7 +215,7 @@ final router = GoRouter(
           ),
         ),
         GoRoute(
-          path: '/my-reviews', // ✅ 내 후기 추가
+          path: '/my-reviews',
           name: 'MyReviews',
           pageBuilder: (context, state) => CustomTransitionPage(
             key: state.pageKey,
@@ -229,7 +228,7 @@ final router = GoRouter(
       ],
     ),
 
-    // 4. Reservation 관련
+    // 4. 예약 관련 (ShellRoute 밖에 있음)
     GoRoute(
       path: '/reservation',
       builder: (context, state) {
@@ -264,4 +263,3 @@ final router = GoRouter(
     ),
   ],
 );
-
