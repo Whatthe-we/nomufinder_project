@@ -38,16 +38,6 @@ FAISS_INDEX_PATH = "faiss_index_nomu_final"
 BM25_DATA_PATH = "split_texts_for_bm25.pkl"
 FIREBASE_SERVICE_ACCOUNT_KEY = "serviceAccountKey.json"
 
-# ===> 모델 설정 수정 <===
-# <<<<<<< HEAD
-# EMBEDDING_MODEL_NAME = "text-embedding-ada-002" # OpenAI 임베딩 모델
-# LLM_MODEL_NAME = "gpt-4.1-nano"                 # 사용할 LLM 모델
-# =======
-# EMBEDDING_MODEL_NAME = "text-embedding-3-large" # OpenAI 임베딩 모델
-# LLM_MODEL_NAME = "gpt-4.1"                      # ✅ 사용할 LLM 모델
-# >>>>>>> 6896967eaa21886e09164a5da4991c62437f5a73
-# =====================
-
 # ===> 모델 설정 수정 (변경) <===
 EMBEDDING_MODEL_NAME = "text-embedding-3-large"  # OpenAI 임베딩 모델
 LLM_MODEL_NAME = "gpt-4.1"                       # 사용할 LLM 모델
