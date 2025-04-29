@@ -26,34 +26,34 @@ class YoutubeCard extends StatelessWidget {
     final decodedTitle = unescape.convert(video.title);
 
     return Card(
+      color: Colors.white, // ✅ 카드 전체 배경을 흰색으로 통일
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(0),
+        borderRadius: BorderRadius.circular(20),
       ),
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       child: InkWell(
         onTap: () => _launchYoutube(video.videoId),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ 이미지 부분
+            // ✅ 썸네일 이미지 부분
             ClipRRect(
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(0),
-                topRight: Radius.circular(0),
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
               child: Image.network(
                 video.thumbnailUrl,
                 width: double.infinity,
-                height: 222,
+                height: 225,
                 fit: BoxFit.cover,
               ),
             ),
             // ✅ 제목 부분
             Container(
               width: double.infinity,
-              color: Colors.white, // ✅ 흰색 배경
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
               child: Text(
                 decodedTitle,
                 maxLines: 2,
