@@ -5,3 +5,7 @@ import '../models/youtube_video.dart';
 final youtubeNewsProvider = FutureProvider<List<YoutubeVideo>>((ref) async {
   return await YoutubeService.fetchLaborNewsVideos();
 });
+
+final youtubePlaylistProvider = FutureProvider.family<List<YoutubeVideo>, String>((ref, playlistId) async {
+  return await YoutubeService.fetchPlaylistVideos(playlistId);
+});
