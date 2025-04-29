@@ -10,8 +10,9 @@ import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart
 import '../favorites/post_list_screen.dart';
 import '../favorites/post_create_screen.dart';
 
-import 'package:project_nomufinder/viewmodels/youtube_viewmodel.dart'; // ✅ 추가
-import 'package:project_nomufinder/widgets/youtube_card.dart'; // ✅ 추가
+import 'package:project_nomufinder/viewmodels/youtube_viewmodel.dart';
+import 'package:project_nomufinder/widgets/youtube_card.dart';
+import 'package:project_nomufinder/models/youtube_video.dart';
 
 // 상수 선언
 const double suggestionsBoxHorizontalPadding = 16.0;
@@ -94,14 +95,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               _buildIssueIcons(),
               const SizedBox(height: 30),
               _buildSectionTitle('오늘의 소식'),
-              const SizedBox(height: 5),
-              _buildYoutubeNews(), // ✅ 유튜브 뉴스
+              _buildYoutubeNews(),
               const SizedBox(height: 30),
               _buildSectionTitle('알아두면 좋은 법률 정보'),
-              _buildGrayContainer(height: 180),
+              _buildMergedLawInfoSection(),
               const SizedBox(height: 30),
               _buildSectionTitle('법정의무교육'),
-              _buildGrayContainer(height: 180),
+              const SizedBox(height: 5),
+              _buildYoutubePlaylistSection('PLRxCdWcfSSnpfw9auYADoTsVAGkQGZsd7', isEducation: true), // 법정의무교육
               const SizedBox(height: 40),
             ],
           ),
@@ -287,11 +288,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // ✅ 유튜브 뉴스
+  // 1) 뉴스 섹션
   Widget _buildYoutubeNews() {
     return SizedBox(
-      width: double.infinity, // 가로 꽉 채움
-      height: 300,             // 높이 300 고정
+      width: double.infinity,
+      height: 300,
       child: Consumer(
         builder: (context, ref, _) {
           final youtubeAsync = ref.watch(youtubeNewsProvider);
@@ -301,13 +302,104 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               itemCount: videos.length > 5 ? 5 : videos.length,
               controller: PageController(viewportFraction: 1),
               itemBuilder: (context, index) {
-                return YoutubeCard(video: videos[index]); // ✅ 바로 YoutubeCard만
+                return YoutubeCard(
+                  video: videos[index],
+                  width: 500,
+                  thumbnailHeight: 200,
+                  variant: 'news',
+                );
               },
             ),
-            loading: () => const Center(child: CircularProgressIndicator()), // 로딩 중
-            error: (e, _) => const Center(child: Text('유튜브 뉴스 로딩 실패')), // 에러
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => const Center(child: Text('유튜브 뉴스 로딩 실패')),
           );
         },
+      ),
+    );
+  }
+
+  // 2) 법률정보 섹션
+  List<YoutubeVideo>? _cachedMergedVideos;
+  DateTime? _lastShuffleTime;
+
+  Widget _buildMergedLawInfoSection() {
+    final asyncVideos1 = ref.watch(youtubePlaylistProvider('PLw3rGaCM7CWWWVmo4NciygQdoOLV95n0Q'));
+    final asyncVideos2 = ref.watch(youtubePlaylistProvider('PLw3rGaCM7CWXNty2HKfoLJZC6-o0rzoPr'));
+
+    return SizedBox(
+      height: 250,
+      child: asyncVideos1.when(
+        data: (videos1) => asyncVideos2.when(
+          data: (videos2) {
+            final now = DateTime.now();
+            if (_cachedMergedVideos == null ||
+                _lastShuffleTime == null ||
+                now.difference(_lastShuffleTime!).inMinutes >= 30) {
+              _cachedMergedVideos = [...videos1, ...videos2]..shuffle();
+              _lastShuffleTime = now;
+            }
+
+            final mergedVideos = _cachedMergedVideos!;
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: mergedVideos.length,
+              itemBuilder: (context, index) {
+                return YoutubeCard(
+                  video: mergedVideos[index],
+                  width: 220,
+                  thumbnailWidth: 100,
+                  thumbnailHeight: 140,
+                  variant: 'law',
+                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                );
+              },
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => const Center(child: Text('법률정보(이노무지식) 불러오기 실패')),
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => const Center(child: Text('법률정보(랜선노동법) 불러오기 실패')),
+      ),
+    );
+  }
+
+  // 3) 법정의무교육 섹션
+  Widget _buildYoutubePlaylistSection(
+      String playlistId, {
+        bool isEducation = false,
+      }) {
+    final asyncVideos = ref.watch(youtubePlaylistProvider(playlistId));
+
+    return SizedBox(
+      height: isEducation ? 300 : null,
+      child: asyncVideos.when(
+        data: (videos) {
+          if (isEducation) {
+            return Scrollbar( // 스크롤바 추가
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: videos.length,
+                itemBuilder: (context, index) {
+                  return YoutubeCard(
+                    video: videos[index],
+                    isHorizontal: true,
+                    thumbnailHeight: 100,
+                    thumbnailWidth: 140,
+                    variant: 'edu',
+                    margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  );
+                },
+              ),
+            );
+          } else {
+            return const SizedBox();
+          }
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => const Center(child: Text('법정의무교육 영상 불러오기 실패')),
       ),
     );
   }
