@@ -31,6 +31,7 @@ class QuestionTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 선택 여부 확인
     bool isSelected = isMultiple
         ? (selectedOptions != null && selectedOptions!.isNotEmpty)
         : (selectedOption != null && selectedOption!.isNotEmpty);
@@ -40,6 +41,7 @@ class QuestionTemplate extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
+            // 상단 인디케이터 + 뒤로가기
             UnifiedIndicatorBar(
               currentIndex: currentIndex,
               totalSteps: totalSteps,
@@ -108,6 +110,8 @@ class QuestionTemplate extends StatelessWidget {
                 },
               ),
             ),
+
+            // 선택 안 된 경우 경고 문구
             if (!isSelected)
               const Padding(
                 padding: EdgeInsets.only(bottom: 12),
@@ -120,6 +124,8 @@ class QuestionTemplate extends StatelessWidget {
                   ),
                 ),
               ),
+
+            // "다음" 버튼 (선택된 경우에만 활성화)
             Padding(
               padding: const EdgeInsets.only(bottom: 40),
               child: ElevatedButton(
