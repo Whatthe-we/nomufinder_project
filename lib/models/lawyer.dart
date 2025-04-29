@@ -1,7 +1,9 @@
 import '../viewmodels/search_viewmodel.dart';
+import 'review.dart';
 
 class Lawyer {
   final int licenseNumber; // licenseNumber
+  final String id;
   final String name;
   final String description;
   final List<String> specialties;
@@ -15,9 +17,10 @@ class Lawyer {
   final String phone;   // 연락처
   final List<String> badges;
   final String comment;
-  final int reviews;
+  final List<Review> reviews; // 👈 int에서 List<Review>로 변경
 
   Lawyer({
+    required this.id, // 이제 fromJson에서 값을 할당받도록 수정
     required this.licenseNumber, // licenseNumber
     required this.name,
     required this.description,
@@ -47,14 +50,15 @@ class Lawyer {
       feeMap[type] = int.tryParse(priceStr) ?? 0;
     }
 
+    // JSON 데이터의 'reviews' 필드가 정수(리뷰 개수)라고 가정하고 처리
+    int reviewCount = json['reviews'] ?? 0;
+
     return Lawyer(
+      id: json['lawyer_id'] ?? '',
       licenseNumber: json['license_number'] ?? 0,
       name: json['name'] ?? '',
       description: json['desc'] ?? '',
-      specialties: (json['specialty'] as List<dynamic>)
-          .expand((e) => e is List ? e : [e])
-          .cast<String>()
-          .toList(),
+      specialties: (json['specialty'] as List<dynamic>?)?.cast<String>().toList() ?? [],
       phoneFee: feeMap['전화상담'] ?? 0,
       videoFee: feeMap['영상상담'] ?? 0,
       visitFee: feeMap['방문상담'] ?? 0,
@@ -63,15 +67,16 @@ class Lawyer {
       gender: json['gender'] ?? '',
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
-      badges: List<String>.from(json['badges']),
-      comment: json['comment'],
-      reviews: json['reviews'],
+      badges: (json['badges'] as List<dynamic>?)?.cast<String>().toList() ?? [],
+      comment: json['comment'] ?? '',
+      reviews: [], // 리뷰 개수를 저장하는 것이 아니라 빈 리스트로 초기화
     );
   }
 
   // ✅ 객체 → JSON 직렬화
   Map<String, dynamic> toJson() {
     return {
+      'lawyer_id': id, // 👈 추가됨: JSON으로 직렬화할 때 id 포함
       'license_number': licenseNumber,
       'name': name,
       'desc': description,
@@ -89,7 +94,7 @@ class Lawyer {
       'phone': phone,
       'badges': badges,
       'comment': comment,
-      'reviews': reviews,
+      'reviews': reviews.map((review) => review.toJson()).toList(), // 리뷰 리스트를 JSON 형태로 변환
     };
   }
 }
