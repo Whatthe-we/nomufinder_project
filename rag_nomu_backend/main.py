@@ -59,11 +59,7 @@ ENSEMBLE_WEIGHTS = [0.7, 0.3] # BM25=0.7, FAISS=0.3
 # === FastAPI 앱 인스턴스 ===
 app = FastAPI()
 
-<<<<<<< HEAD
-# === 질문 재처리 ===
-=======
 # === ✅ 질문 재처리 ===
->>>>>>> 6896967eaa21886e09164a5da4991c62437f5a73
 PROCESSED_IDS_JSON_PATH = "processed_ids.json"
 PROCESSED_IDS_BACKUP_PATH = "processed_ids_backup.json"
 MAX_PROCESSED_IDS = 100
