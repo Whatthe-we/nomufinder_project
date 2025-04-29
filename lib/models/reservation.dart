@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'lawyer.dart';
 
 class Reservation {
   final String id;
@@ -10,6 +11,7 @@ class Reservation {
   final String type;
   final String userName;
   final String userPhone;
+  bool isReviewed;
 
   Reservation({
     required this.id,
@@ -21,6 +23,7 @@ class Reservation {
     required this.type,
     required this.userName,
     required this.userPhone,
+    this.isReviewed = false,
   });
 
   factory Reservation.fromDoc(String id, Map<String, dynamic> json) {
@@ -45,6 +48,29 @@ class Reservation {
       type: json['type'] ?? '',
       userName: json['userName'] ?? '',
       userPhone: json['userPhone'] ?? '',
+      isReviewed: json['isReviewed'] ?? false, // 🔥 Firestore에 저장하는 경우 대비
+    );
+  }
+}
+extension ReservationExtension on Reservation {
+  Lawyer toLawyer() {
+    return Lawyer(
+      id: lawyerId,
+      licenseNumber: 0, // 없으니까 기본값
+      name: lawyerName,
+      description: '',
+      specialties: [],
+      phoneFee: 0,
+      videoFee: 0,
+      visitFee: 0,
+      profileImage: '',
+      address: '',
+      gender: '',
+      email: lawyerEmail,
+      phone: '',
+      badges: [],
+      comment: '',
+      reviews: [],
     );
   }
 }
