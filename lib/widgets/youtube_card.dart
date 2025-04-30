@@ -41,8 +41,8 @@ class YoutubeCard extends StatelessWidget {
       case 'law':
         return const TextStyle(
           fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: Colors.black54,
+          fontWeight: FontWeight.w400,
+          color: Colors.black87,
         );
       case 'news':
         return const TextStyle(
@@ -52,7 +52,7 @@ class YoutubeCard extends StatelessWidget {
         );
       case 'edu':
         return const TextStyle(
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
           color: Colors.black87,
         );
@@ -107,14 +107,14 @@ class YoutubeCard extends StatelessWidget {
                   children: [
                     Text(
                       decodedTitle,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: _getTitleStyle(),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       decodedDesc,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Colors.black54,
@@ -155,6 +155,7 @@ class YoutubeCard extends StatelessWidget {
                   style: _getTitleStyle(),
                 ),
               ),
+              const Spacer(), // 하단 고정 효과를 위한 공간 확보
               if (variant == 'news') // 뉴스에만 출처+업로드일 표시
                 Padding(
                   padding: const EdgeInsets.only(top: 4.0, left: 10.0, right: 8.0),
@@ -164,17 +165,11 @@ class YoutubeCard extends StatelessWidget {
                       if (video.publishedAt != null)
                         Text(
                           _formatPublishedAt(DateTime.parse(video.publishedAt!)),
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey[700],
-                          ),
+                          style: TextStyle(fontSize: 9, color: Colors.grey[700]),
                         ),
                       Text(
-                        'Youtube_${video.channelTitle ?? ''}',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey[700],
-                        ),
+                        video.channelTitle ?? '',
+                        style: TextStyle(fontSize: 9, color: Colors.grey[700]),
                       ),
                     ],
                   ),
