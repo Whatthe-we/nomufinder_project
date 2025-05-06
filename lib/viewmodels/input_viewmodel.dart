@@ -125,6 +125,10 @@ class InputViewModel extends StateNotifier<InputState> {
     }
     state = state.copyWith(infoNeeds: current);
   }
+
+  void reset() {
+    state = InputState(); // 기본값 (step = InputStep.gender 등)으로 초기화
+  }
 }
 
 final inputViewModelProvider =

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/indicator_bar.dart';
 import '../../viewmodels/input_viewmodel.dart';
+import '../../services/firebase_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends ConsumerWidget { // ✅ 변경
   const OnboardingScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -40,15 +42,20 @@ class OnboardingScreen extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 40),
               child: Column(
                 children: [
-                  Container(
-                    width: 324,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F1F1),
-                      borderRadius: BorderRadius.circular(38),
-                    ),
-                    child: GestureDetector(
-                      onTap: () => context.go('/home'),
+                  // ❌ 바로 홈 이동 버튼
+                  GestureDetector(
+                    onTap: () async {
+                      await FirebaseService.updateIsFirstLoginAndSurveyCompleted();
+                      await Future.delayed(const Duration(milliseconds: 200));
+                      if (context.mounted) context.go('/home');
+                    },
+                    child: Container(
+                      width: 324,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F1F1),
+                        borderRadius: BorderRadius.circular(38),
+                      ),
                       child: const Center(
                         child: Text(
                           "I DON'T UNDERSTAND",
@@ -64,8 +71,13 @@ class OnboardingScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
+                  // ✅ 설문 시작 버튼
                   GestureDetector(
-                    onTap: () => context.go('/input'),
+                    onTap: () async {
+                      ref.read(inputViewModelProvider.notifier).reset(); // ← 핵심
+                      await FirebaseService.updateIsFirstLoginFalse();
+                      if (context.mounted) context.go('/input');
+                    },
                     child: Container(
                       width: 324,
                       height: 64,

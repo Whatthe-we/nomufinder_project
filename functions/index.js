@@ -31,6 +31,10 @@ function createHtmlContent({ userName, date, time, type, isCanceled = false }) {
           <td style="padding: 8px;">${userName}</td>
         </tr>
         <tr>
+          <td style="padding: 8px;"><strong>📞 연락처</strong></td>
+          <td style="padding: 8px;">${userPhone}</td>
+        </tr>
+        <tr>
           <td style="padding: 8px;"><strong>📅 일시</strong></td>
           <td style="padding: 8px;">${date} ${time}</td>
         </tr>
@@ -59,6 +63,7 @@ exports.sendReservationEmail = functions.firestore
       subject: `[NomuFinder] ${data.userName}님의 예약 알림`,
       html: createHtmlContent({
         userName: data.userName,
+        userPhone: data.userPhone,  // 👈 추가!
         date: data.date,
         time: data.time,
         type: data.type,
@@ -87,6 +92,7 @@ exports.sendCancellationEmail = functions.firestore
       subject: `[취소됨][NomuFinder] ${data.userName}님의 예약`,
       html: createHtmlContent({
         userName: data.userName,
+        userPhone: data.userPhone,  // 👈 추가!
         date: data.date,
         time: data.time,
         type: data.type,

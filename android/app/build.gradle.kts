@@ -27,7 +27,7 @@ android {
         applicationId = "com.example.project_nomufinder"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 23                              // ✅ SOK 버전 상향
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

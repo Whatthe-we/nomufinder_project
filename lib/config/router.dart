@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:project_nomufinder/models/lawyer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../screens/splash/splash_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
@@ -17,6 +18,9 @@ import '../screens/favorites/favorites_screen.dart';
 import '../screens/lawyer_search/lawyer_list_screen.dart';
 import '../screens/reviews/review_create_screen.dart';
 import '../screens/reviews/my_reviews_screen.dart';
+
+import '../screens/auth/login_screen.dart';
+import '../services/firebase_service.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -74,12 +78,47 @@ class MyBottomNavigationBar extends StatelessWidget {
 
 final router = GoRouter(
   initialLocation: '/splash',
+
+  redirect: (context, state) async {
+    if (state.fullPath == '/splash') return null;
+    final user = FirebaseAuth.instance.currentUser;
+
+    // 로그인 안 한 경우 → 로그인 페이지
+    if (user == null) return '/login';
+
+    final userMeta = await FirebaseService.getUserMeta();
+
+    // ✅ 최초 로그인 시 문서 없으면 → 온보딩으로 이동
+    if (userMeta == null) return '/onboarding';
+
+    final isFirstLogin = userMeta['isFirstLogin'] ?? true;
+    final surveyCompleted = userMeta['surveyCompleted'] ?? false;
+
+    // ✅ 최초 로그인 플래그가 true → 온보딩
+    if (isFirstLogin) return '/onboarding';
+
+    // ✅ 설문 미완료 → input 화면
+    if (!surveyCompleted &&
+        state.fullPath != '/input' &&
+        state.fullPath != '/onboarding') {
+      return '/input';
+    }
+
+    // ✅ 모두 완료 → 현재 경로 유지
+    return null;
+  },
+
   routes: [
-    // 1. Splash, Input, Onboarding
+    // 1. Splash, Login, Input, Onboarding
     GoRoute(
       path: '/splash',
       name: 'Splash',
       builder: (context, state) => const SplashScreen(),
+    ),
+    GoRoute(
+      path: '/login',
+      name: 'Login',
+      builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
       path: '/input',

@@ -12,33 +12,49 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.3.0
-  html: ^0.15.4
-  file_selector: ^0.9.0
-  image_picker: ^1.1.2
-  path_provider: ^2.1.5
-  path: ^1.9.1
-  permission_handler: ^11.4.0
-  http_parser: ^4.0.0
-  csv: ^5.0.0  # csv 패키지 추가
-  flutter_dotenv: ^5.1.0
-  url_launcher: ^6.2.5
-  cached_network_image: ^3.3.1
+
+  # ▶️ 기본 Flutter 유틸리티
+  cupertino_icons: ^1.0.8
   intl: ^0.18.1
-  flutter_riverpod: ^2.4.0
-  go_router: ^13.0.0
-  firebase_core: ^2.24.2
-  cloud_firestore: ^4.13.2
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  permission_handler: ^11.4.0
+  shared_preferences: ^2.2.2
   device_info_plus: ^9.0.3
+
+  # 🌐 네트워크 및 데이터 처리
+  http: ^1.3.0
   dio: ^5.4.0
+  csv: ^5.0.0
+  html: ^0.15.4
+  http_parser: ^4.0.0
+  flutter_dotenv: ^5.1.0
+
+  # 🔥 Firebase
+  firebase_core: ^2.25.4
+  firebase_auth: ^4.17.3
+  cloud_firestore: ^4.13.2
+  firebase_database: ^10.4.2
+
+  # 🌍 지도 및 캘린더
+  google_maps_flutter: ^2.3.0
   table_calendar: ^3.0.9
   add_2_calendar: ^3.0.1
-  firebase_database: ^10.4.2
-  shared_preferences: ^2.2.2
-  google_maps_flutter: ^2.3.0  # ✅ 충돌 해결 후 추가됨
-  html_unescape: ^2.0.0
 
-  cupertino_icons: ^1.0.8
+  # 🖼️ 이미지 및 파일 관련
+  file_selector: ^0.9.0
+  image_picker: ^1.1.2
+  cached_network_image: ^3.3.1
+
+  # 📦 라우팅 / 상태관리
+  go_router: ^13.0.0
+  flutter_riverpod: ^2.4.0
+
+  # 🔗 기타 기능
+  url_launcher: ^6.2.5
+  html_unescape: ^2.0.0 # 유튜브 관련 디코딩
+  google_sign_in: ^6.1.4 # Google 로그인
+
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +78,7 @@ flutter:
     - assets/images/banner2.png
     - assets/images/banner3.png
     - assets/images/banner4.png
+    - assets/images/default_user.png
 
   fonts:
     - family: Open Sans

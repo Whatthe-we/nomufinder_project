@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:project_nomufinder/services/logout_service.dart';
+
+final GoogleSignIn _googleSignIn = GoogleSignIn();
 
 class MyPageScreen extends StatelessWidget {
   const MyPageScreen({super.key});
@@ -154,8 +159,8 @@ class MyPageScreen extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () {
-                          // TODO: 로그아웃 처리
-                          Navigator.pop(ctx);
+                          Navigator.pop(ctx);  // 다이얼로그 닫기
+                          handleLogout(context); // 로그아웃 실행
                         },
                         child: const Text("로그아웃"),
                       ),
@@ -173,16 +178,23 @@ class MyPageScreen extends StatelessWidget {
 
   // 프로필 섹션 위젯
   Widget _profileSection(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 20),
       child: ListTile(
-        leading: const CircleAvatar(
-          backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=3'),
+        leading: CircleAvatar(
+          backgroundImage: user?.photoURL != null
+              ? NetworkImage(user!.photoURL!)
+              : const AssetImage('assets/images/default_user.png') as ImageProvider,
           radius: 28,
         ),
-        title: const Text('홍길동', style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: const Text('honggildong@email.com'),
+        title: Text(
+          user?.displayName ?? '사용자',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(user?.email ?? '이메일 없음'),
         trailing: IconButton(
           icon: const Icon(Icons.edit),
           onPressed: () {

@@ -8,7 +8,7 @@ class YoutubeService {
   static final _apiKey = dotenv.env['YOUTUBE_API_KEY'] ?? '';
   static const _baseUrl = 'https://www.googleapis.com/youtube/v3/search';
 
-  static final List<String> _keywords = ['직장 뉴스', '노동 뉴스', '기업 뉴스', '고용 뉴스'];
+  static final List<String> _keywords = ['직장 뉴스', '노동 뉴스'];
 
   static Future<List<YoutubeVideo>> fetchLaborNewsVideos() async {
     final keyword = (_keywords..shuffle()).first;

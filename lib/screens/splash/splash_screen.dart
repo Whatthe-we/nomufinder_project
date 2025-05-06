@@ -1,85 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/firebase_service.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(const Duration(seconds: 2), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(seconds: 2));
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        if (context.mounted) context.go('/login');
+        return;
+      }
+
+      final userMeta = await FirebaseService.getUserMeta();
+      final isFirstLogin = userMeta?['isFirstLogin'] ?? true;
+      final surveyCompleted = userMeta?['surveyCompleted'] ?? false;
+
       if (context.mounted) {
-        // GoRouter로 자동 이동
-        context.go('/onboarding');
+        if (isFirstLogin) {
+          context.go('/onboarding');
+        } else if (!surveyCompleted) {
+          context.go('/input');
+        } else {
+          context.go('/home');
+        }
       }
     });
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // 상태바 (9:41 등)
-          Positioned(
-            left: 20,
-            top: 14,
-            child: Text(
-              '9:41',
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image(
+              image: AssetImage('assets/images/logo.png'),
+              width: 90,
+              height: 90,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(height: 24),
+            Text(
+              'NOMU\nFINDER',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.black,
-                fontSize: 15,
-                fontFamily: 'Open Sans',
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.17,
-              ),
-            ),
-          ),
-          Positioned(
-            right: 20,
-            top: 20,
-            child: Container(
-              width: 18,
-              height: 8,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-
-          // 로고 화면
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  'assets/images/logo.png',
-                  width: 90,
-                  height: 90,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'NOMU\nFINDER',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontFamily: 'Anybody',
-                    fontWeight: FontWeight.w700,
-                    fontStyle: FontStyle.italic,
-                    letterSpacing: -0.5,
-                    color: Color(0xFF000FBA),
-                    shadows: [
-                      Shadow(
-                        offset: Offset(0, 4),
-                        blurRadius: 4,
-                        color: Color(0x40000000), // 반투명 검정
-                      ),
-                    ],
+                fontSize: 36,
+                fontFamily: 'Anybody',
+                fontWeight: FontWeight.w700,
+                fontStyle: FontStyle.italic,
+                letterSpacing: -0.5,
+                color: Color(0xFF000FBA),
+                shadows: [
+                  Shadow(
+                    offset: Offset(0, 4),
+                    blurRadius: 4,
+                    color: Color(0x40000000),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
