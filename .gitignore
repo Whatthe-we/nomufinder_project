@@ -40,7 +40,9 @@ android/app/build/
 # Python 관련 (백엔드)
 __pycache__/
 *.pyc
+*.faiss
 *.pkl
+*.json
 venv/
 main.pyc
 requirements.txt.lock
@@ -68,3 +70,4 @@ migrate_working_dir/
 # 기타 - 심볼/오버퓨스케이션 관련
 *.symbols
 *.map.json
+rag_nomu_backend/

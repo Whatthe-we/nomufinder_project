@@ -3,6 +3,7 @@ import random
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional
+from typing import List
 from openai import OpenAI
 from datetime import datetime
 import time
@@ -37,7 +38,6 @@ autocomplete_map = {
     "컨설팅": ["인사노무 컨설팅", "노무사 컨설팅", "노무 컨설팅 비용", "급여 컨설팅" "IT 컨설팅", "성과관리 컨설팅", "직무분석 컨설팅", "ESG 컨설팅", "평가제도 컨설팅", "채용 컨설팅"],
     "급여아웃소싱": ["급여 프로그램", "급여 관리", "급여 대행", "노무법인 급여 아웃소싱", "급여 아웃소싱 후기", "급여 아웃소싱 수수료", "퇴직금 정산", "4대 보험 신고 대행", "4대보험 및 원천징수", "급여 명세서 발급"]
 }
-# 카테고리 목록
 categories = list(autocomplete_map.keys())
 
 # Few-shot 예시
@@ -93,7 +93,7 @@ casual_examples = [
 
 fewshot_base = business_examples + worker_examples + casual_examples
 
-# 생성 함수
+# -------------------- 1. 카테고리 분류 --------------------
 def generate_prompt(user_input: str, examples: list[str], categories: list[str]) -> str:
     return f"""당신은 한국의 노동문제를 분류하는 AI 어시스턴트입니다.
 
@@ -139,7 +139,7 @@ def clean_category_output(result: str) -> str:
 def classify_text_with_openai(user_input: str) -> str:
     start = time.time()
 
-    # ✅ 중요한 오답 포인트는 항상 포함
+    # 중요한 오답 포인트는 항상 포함
     core_examples = [
         '"이유도 모르고 정직 처분 받았어요" -> 부당징계',
         '"하루 아침에 나가라는 통보를 받았어요" -> 부당해고',
@@ -148,7 +148,7 @@ def classify_text_with_openai(user_input: str) -> str:
         '"취업규칙 개정할 때 필요한 절차는?" -> 기업자문',
     ]
 
-    # ✅ 추가로 랜덤 샘플
+    # 추가로 랜덤 샘플
     examples = (
         core_examples +
         random.sample(business_examples, 2) +
@@ -176,13 +176,50 @@ def classify_text_with_openai(user_input: str) -> str:
         print("❌ OpenAI API 오류:", e)
         return "분류 실패"
 
-# FastAPI 엔드포인트
+# -------------------- 2. 자동완성 키워드 추천 --------------------
+# 추천 키워드 3개 뽑기 위한 프롬프트
+def get_ranked_keywords_prompt(user_input: str, category: str, keywords: List[str]) -> str:
+    return f"""
+문장: "{user_input}"
+카테고리: {category}
+가능한 키워드: {', '.join(keywords)}
+
+이 문장과 가장 관련 높은 3개의 키워드를 순위대로 출력해주세요.
+형식: ["키워드1", "키워드2", "키워드3"]
+"""
+
+# GPT에게 추천 요청
+def get_top3_keywords_with_gpt(user_input: str, category: str, keywords: List[str]) -> List[str]:
+    try:
+        prompt = get_ranked_keywords_prompt(user_input, category, keywords)
+        response = client.chat.completions.create(
+            model="gpt-4",  # 또는 "gpt-3.5-turbo"로도 가능
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+        )
+        output = response.choices[0].message.content
+        print("🎯 GPT 키워드 추천:", output)
+        start = output.index("[")
+        end = output.index("]", start)
+        return eval(output[start:end+1])  # 문자열 → 리스트 변환
+    except Exception as e:
+        print("❌ 키워드 추천 실패:", e)
+        return keywords[:3]  # 실패 시 앞 3개 반환
+
+# 전체 키워드 중 우선순위 3개 + 나머지를 정렬하여 반환
+def get_llm_sorted_suggestions(user_input: str, category: str) -> List[str]:
+    keywords = autocomplete_map.get(category, [])
+    top3 = get_top3_keywords_with_gpt(user_input, category, keywords)
+    remaining = [kw for kw in keywords if kw not in top3]
+    return top3 + remaining
+
+# ------------------- FastAPI 엔드포인트 --------------------
 @router.post("/classify")
 async def classify_endpoint(user_input: UserInput):
     result = classify_text_with_openai(user_input.text)
 
     # 자동완성 키워드 매칭
-    suggestions = autocomplete_map.get(result, [])
+    suggestions = get_llm_sorted_suggestions(user_input.text, result)
 
     return {
         "category": result,

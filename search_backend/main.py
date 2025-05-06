@@ -2,7 +2,7 @@ from fastapi import FastAPI, Query
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
-from classifier import router, set_openai_api_key, classify_text_with_openai
+from classifier import router, set_openai_api_key, classify_text_with_openai, get_llm_sorted_suggestions
 from routers import reservation_router
 
 # 환경변수 불러오기
@@ -35,7 +35,7 @@ def suggest_endpoint(query: str):
 
     # 자동완성 추천 (classifier.py에서 제공하는 키워드 맵 사용)
     from classifier import autocomplete_map  # 이 부분을 import하여 사용
-    suggestions = autocomplete_map.get(category_result, [])
+    suggestions = get_llm_sorted_suggestions(query, category_result)
     print(f"Suggestions for category '{category_result}': {suggestions}")
 
     return {"category": category_result, "suggestions": suggestions}

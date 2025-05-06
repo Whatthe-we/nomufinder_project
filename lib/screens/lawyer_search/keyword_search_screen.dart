@@ -379,7 +379,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                       ),
                     ),
                     Positioned(
-                      right: 1,
+                      right: -2,
                       child: IconButton(
                         icon: const Icon(Icons.arrow_forward, color: Color(
                             0xFF0024EE)),
@@ -401,7 +401,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
-                      "인기 키워드",
+                      "추천 키워드",
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -410,16 +410,18 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 5),
                 SizedBox(
                   height: 45,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: suggestions.length,
                     separatorBuilder: (context, index) =>
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 7),
                     itemBuilder: (context, index) {
                       final keyword = suggestions[index];
+                      final isHighlighted = index < 2; // 🔥 상위 2개 강조
+
                       return GestureDetector(
                         onTapDown: (_) {
                           setState(() {
@@ -441,17 +443,22 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                           scale: tappedIndex == index ? 0.95 : 1.0,
                           duration: const Duration(milliseconds: 150),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
                               color: const Color(0xFFF1F3F5),
-                              borderRadius: BorderRadius.circular(15),
+                              borderRadius: BorderRadius.circular(30),
+                              border: isHighlighted
+                                  ? Border.all(color: Color(0xFF0024EE), width: 1, style: BorderStyle.solid) // 스타일은 dotted로 못 하지만, 흉내 가능
+                                  : null,
                             ),
                             child: Center(
                               child: Text(
                                 keyword,
-                                style: const TextStyle(
-                                    color: Colors.black87, fontSize: 14),
+                                style: TextStyle(
+                                  color: isHighlighted ? Colors.black87 : Colors.black87,
+                                  fontSize: 14,
+                                  fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+                                ),
                               ),
                             ),
                           ),
@@ -460,7 +467,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height:7),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(8),
