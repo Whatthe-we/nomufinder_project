@@ -18,6 +18,7 @@ import '../screens/lawyer_search/lawyer_list_screen.dart';
 import '../screens/reviews/review_create_screen.dart';
 import '../screens/reviews/my_reviews_screen.dart';
 
+
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
 
@@ -119,7 +120,6 @@ final router = GoRouter(
           child: LawyerListScreen(
             title: title,
             category: category,
-            lawyers: lawyers,
           ),
           transitionDuration: const Duration(milliseconds: 500),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
@@ -243,6 +243,7 @@ final router = GoRouter(
         return ReviewCreateScreen(lawyer: lawyer);
       },
     ),
+
     GoRoute(
       path: '/reservation_success',
       builder: (context, state) {

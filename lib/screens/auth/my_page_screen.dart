@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:project_nomufinder/services/firebase_lawyer_uploader.dart';
 
 class MyPageScreen extends StatelessWidget {
   const MyPageScreen({super.key});
@@ -20,6 +21,12 @@ class MyPageScreen extends StatelessWidget {
           _profileSection(context),
 
           _sectionTitle("내 활동"),
+          _linkTile("🔥 노무사 Firestore 재업로드", Icons.cloud_upload, () async {
+            await FirebaseLawyerUploader.uploadLawyersFromJson();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("✅ 노무사 업로드 완료")),
+            );
+          }),
           _linkTile("관심노무사", Icons.favorite_border, () {
             // TODO: 관심노무사 이동
           }),
@@ -212,3 +219,5 @@ class MyPageScreen extends StatelessWidget {
     );
   }
 }
+
+

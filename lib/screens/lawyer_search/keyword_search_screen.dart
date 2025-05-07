@@ -286,7 +286,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
             LawyerListScreen(
               title: keyword,
               category: keyword,
-              lawyers: filtered,
             ),
       ),
     );

@@ -481,7 +481,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   builder: (_) => LawyerListScreen(
                     title: label,
                     category: label,
-                    lawyers: filtered,
                   ),
                 ),
               );

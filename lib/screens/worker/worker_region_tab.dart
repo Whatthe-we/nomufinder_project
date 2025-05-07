@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project_nomufinder/models/lawyer.dart';
 import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart';
 import 'package:project_nomufinder/services/lawyer_data_loader.dart';
 import 'package:project_nomufinder/screens/worker/region_map_screen.dart';
+import 'package:project_nomufinder/viewmodels/search_viewmodel.dart';
 
-class WorkerRegionScreen extends StatelessWidget {
+class WorkerRegionScreen extends ConsumerWidget {
   const WorkerRegionScreen({super.key});
 
   final List<String> regions = const [
@@ -17,7 +19,7 @@ class WorkerRegionScreen extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Padding(
@@ -47,17 +49,20 @@ class WorkerRegionScreen extends StatelessWidget {
                   return;
                 }
 
-                // 지역에 맞는 노무사 목록을 가져옴
+                // 🔧 필터 상태 초기화 및 지역 설정
+                ref.read(selectedRegionProvider.notifier).state = region;
+                ref.read(categoryProvider.notifier).state = null;
+                ref.read(selectedGenderProvider.notifier).state = '전체';
+
                 final lawyers = lawyersByRegion[region] ?? [];
 
-                // LawyerListScreen으로 카테고리와 노무사 목록 전달
+                // LawyerListScreen으로 지역 기반 노무사 목록 전달
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => LawyerListScreen(
-                      title: region,  // 지역명을 제목으로 사용
-                      lawyers: lawyers,  // 지역에 맞는 노무사 리스트
-                      category: region, // ✅ category 파라미터에 region 값을 전달합니다.
+                      title: region,
+                      category: null,
                     ),
                   ),
                 );
