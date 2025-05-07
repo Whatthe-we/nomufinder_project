@@ -21,6 +21,7 @@ import '../screens/reviews/my_reviews_screen.dart';
 
 import '../screens/auth/login_screen.dart';
 import '../services/firebase_service.dart';
+import '../screens/auth/register_screen.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -83,8 +84,15 @@ final router = GoRouter(
     if (state.fullPath == '/splash') return null;
     final user = FirebaseAuth.instance.currentUser;
 
-    // 로그인 안 한 경우 → 로그인 페이지
-    if (user == null) return '/login';
+    // 로그인 안 한 경우 → 로그인 또는 회원가입 페이지
+    const publicPaths = ['/login', '/register', '/onboarding'];
+    if (user == null) {
+      if (!publicPaths.contains(state.fullPath)) {
+        return '/login';
+      } else {
+        return null;
+      }
+    }
 
     final userMeta = await FirebaseService.getUserMeta();
 
@@ -95,7 +103,9 @@ final router = GoRouter(
     final surveyCompleted = userMeta['surveyCompleted'] ?? false;
 
     // ✅ 최초 로그인 플래그가 true → 온보딩
-    if (isFirstLogin) return '/onboarding';
+    if (isFirstLogin && state.fullPath != '/onboarding') {
+      return '/onboarding';
+    }
 
     // ✅ 설문 미완료 → input 화면
     if (!surveyCompleted &&
@@ -119,6 +129,11 @@ final router = GoRouter(
       path: '/login',
       name: 'Login',
       builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: '/register',
+      name: 'Register',
+      builder: (context, state) => const RegisterScreen(),
     ),
     GoRoute(
       path: '/input',

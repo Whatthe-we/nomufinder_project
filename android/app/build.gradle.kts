@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.example.project_nomufinder"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35 // ✅ 35로 명시
     //ndkVersion = flutter.ndkVersion
     ndkVersion = "27.0.12077973"
 
@@ -28,7 +28,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 23                              // ✅ SOK 버전 상향
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 35   // ✅ 함께 상향
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

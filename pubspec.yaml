@@ -79,6 +79,7 @@ flutter:
     - assets/images/banner3.png
     - assets/images/banner4.png
     - assets/images/default_user.png
+    - assets/images/google_logo.png
 
   fonts:
     - family: Open Sans

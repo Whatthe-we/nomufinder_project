@@ -38,7 +38,7 @@ class Lawyer {
     required this.reviews,
   }) : specialties = List.from(specialties); // ← 이렇게 초기화하면 가변 리스트 됨
 
-  // ✅ JSON → 객체로 역직렬화
+  // JSON → 객체로 역직렬화
   factory Lawyer.fromJson(Map<String, dynamic> json) {
     Map<String, int> feeMap = {};
     for (int i = 0; i < (json['consult']?.length ?? 0); i++) {
@@ -50,8 +50,13 @@ class Lawyer {
       feeMap[type] = int.tryParse(priceStr) ?? 0;
     }
 
-    // JSON 데이터의 'reviews' 필드가 정수(리뷰 개수)라고 가정하고 처리
-    int reviewCount = json['reviews'] ?? 0;
+    // ✅ 리뷰 데이터 처리를 수정
+    List<Review> reviewsList = [];
+    if (json['reviews'] is List) {
+      reviewsList = (json['reviews'] as List)
+          .map((reviewJson) => Review.fromJson(reviewJson))
+          .toList();
+    }
 
     return Lawyer(
       id: json['lawyer_id'] ?? '',
@@ -69,14 +74,14 @@ class Lawyer {
       phone: json['phone'] ?? '',
       badges: (json['badges'] as List<dynamic>?)?.cast<String>().toList() ?? [],
       comment: json['comment'] ?? '',
-      reviews: [], // 리뷰 개수를 저장하는 것이 아니라 빈 리스트로 초기화
+      reviews: reviewsList, // ✅ 수정된 리뷰 리스트 사용
     );
   }
 
-  // ✅ 객체 → JSON 직렬화
+  // 객체 → JSON 직렬화
   Map<String, dynamic> toJson() {
     return {
-      'lawyer_id': id, // 👈 추가됨: JSON으로 직렬화할 때 id 포함
+      'lawyer_id': id,
       'license_number': licenseNumber,
       'name': name,
       'desc': description,
