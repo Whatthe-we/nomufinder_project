@@ -1,0 +1,9 @@
+# 🛠️ CRLF → LF 변환 방지 설정
+* text=auto
+*.dart text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+*.swift text eol=lf
+*.cc text eol=lf
+*.h text eol=lf
+*.cmake text eol=lf
