@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:project_nomufinder/services/logout_service.dart';
+import 'package:project_nomufinder/services/firebase_lawyer_uploader.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn();
 
@@ -25,6 +26,12 @@ class MyPageScreen extends StatelessWidget {
           _profileSection(context),
 
           _sectionTitle("내 활동"),
+          _linkTile("🔥 노무사 Firestore 재업로드", Icons.cloud_upload, () async {
+            await FirebaseLawyerUploader.uploadLawyersFromJson();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("✅ 노무사 업로드 완료")),
+            );
+          }),
           _linkTile("관심노무사", Icons.favorite_border, () {
             // TODO: 관심노무사 이동
           }),
@@ -38,7 +45,6 @@ class MyPageScreen extends StatelessWidget {
           _linkTile("내 후기", Icons.rate_review, () {
             context.push('/my-reviews'); // ✅ 후기 목록 화면으로 이동
           }),
-
 
           const Divider(height: 32),
 
@@ -143,6 +149,7 @@ class MyPageScreen extends StatelessWidget {
           }),
 
           const SizedBox(height: 30),
+
           // 5. 로그아웃 확인 다이얼로그 추가
           Center(
             child: TextButton(
@@ -176,7 +183,7 @@ class MyPageScreen extends StatelessWidget {
     );
   }
 
-  // 프로필 섹션 위젯
+  // ✅ 프로필 섹션 위젯
   Widget _profileSection(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 

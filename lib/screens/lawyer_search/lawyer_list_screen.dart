@@ -5,16 +5,15 @@ import 'package:project_nomufinder/screens/lawyer_search/lawyer_detail_screen.da
 import 'package:project_nomufinder/screens/reservation/reservation_screen.dart';
 import 'package:project_nomufinder/widgets/filter_bottom_sheet.dart';
 import 'package:project_nomufinder/viewmodels/search_viewmodel.dart';
+import 'package:project_nomufinder/services/firebase_lawyer_service.dart';
 
 class LawyerListScreen extends ConsumerStatefulWidget {
   final String title;
-  final List<Lawyer> lawyers;
-  final String? category; // nullable로 변경해도 안전하게 처리
+  final String? category;
 
   const LawyerListScreen({
     super.key,
     required this.title,
-    required this.lawyers,
     this.category,
   });
 
@@ -23,21 +22,24 @@ class LawyerListScreen extends ConsumerStatefulWidget {
 }
 
 class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
+  late Future<List<Lawyer>> _lawyersFuture;
+
   @override
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      ref.read(allLawyersProvider.notifier).state = widget.lawyers;
+    _lawyersFuture = FirebaseLawyerService.fetchLawyers().then((lawyers) {
+      ref.read(allLawyersProvider.notifier).state = lawyers;
 
-      // normalize 적용
-      final normalizedCategory = normalizeCategory(widget.category ?? '');
-      print('🧪 normalizedCategory: $normalizedCategory');
-
-      // 지역명이 아닌 경우에만 카테고리 상태로 반영
-      if (!regionKeywords.keys.contains(normalizedCategory)) {
-        ref.read(categoryProvider.notifier).state = normalizedCategory;
+      if (widget.category != null && widget.category!.isNotEmpty) {
+        final normalizedCategory = normalizeCategory(widget.category!);
+        if (!regionKeywords.keys.contains(normalizedCategory)) {
+          ref.read(categoryProvider.notifier).state = normalizedCategory;
+        }
       }
+
+
+      return lawyers;
     });
   }
 
@@ -48,23 +50,45 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(widget.title, style: const TextStyle(fontFamily: 'OpenSans')),
+        title: Text(
+          widget.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis, // 🔄 줄바꿈 없이 말줄임표 처리
+          style: const TextStyle(
+            fontFamily: 'OpenSans',
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       body: Stack(
         children: [
-          ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-            itemCount: filteredLawyers.length,
-            itemBuilder: (context, index) {
-              final lawyer = filteredLawyers[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => LawyerDetailScreen(lawyer: lawyer)));
+          FutureBuilder(
+            future: _lawyersFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                itemCount: filteredLawyers.length,
+                itemBuilder: (context, index) {
+                  final lawyer = filteredLawyers[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => LawyerDetailScreen(lawyerId: lawyer.id), // ID만 넘기기
+                        ),
+                      );
+                    },
+                    child: _buildLawyerCard(context, lawyer),
+                  );
                 },
-                child: _buildLawyerCard(context, lawyer),
               );
             },
           ),
@@ -170,7 +194,7 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
               _buildFee('방문상담', lawyer.visitFee),
               const Spacer(),
               Icon(Icons.star, color: Colors.orange, size: 14),
-              Text('${lawyer.reviews} 후기', style: const TextStyle(fontSize: 12, fontFamily: 'OpenSans')),
+              Text('${lawyer.reviews.length} 후기', style: const TextStyle(fontSize: 12, fontFamily: 'OpenSans')),
             ],
           ),
         ],

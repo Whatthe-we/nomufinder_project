@@ -239,7 +239,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
   Future<void> _classifyAndNavigate(String keyword) async {
     try {
-      // 1️⃣ 강제 매핑 먼저 체크
+      // 1. 강제 매핑 먼저 체크
       final mappedCategory = keywordToCategoryMap[keyword];
       String finalCategory;
 
@@ -247,7 +247,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
         // 매핑된 카테고리로 바로 이동
         finalCategory = mappedCategory;
       } else {
-        // 2️⃣ 매핑 없으면 GPT API 분류
+        // 2️. 매핑 없으면 GPT API 분류
         final category = await ApiService.classifyText(keyword);
         finalCategory = normalizeCategory(category);
       }

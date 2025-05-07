@@ -84,7 +84,7 @@ final router = GoRouter(
     if (state.fullPath == '/splash') return null;
     final user = FirebaseAuth.instance.currentUser;
 
-    // 로그인 안 한 경우 → 로그인 또는 회원가입 페이지
+    // ✅ 로그인 안 한 경우 → 로그인 또는 회원가입 페이지
     const publicPaths = ['/login', '/register', '/onboarding'];
     if (user == null) {
       if (!publicPaths.contains(state.fullPath)) {
@@ -119,7 +119,7 @@ final router = GoRouter(
   },
 
   routes: [
-    // 1. Splash, Login, Input, Onboarding
+    // ✅ 1. Splash, Login, Register, Input, Onboarding
     GoRoute(
       path: '/splash',
       name: 'Splash',
@@ -173,7 +173,6 @@ final router = GoRouter(
           child: LawyerListScreen(
             title: title,
             category: category,
-            lawyers: lawyers,
           ),
           transitionDuration: const Duration(milliseconds: 500),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project_nomufinder/models/lawyer.dart';
 import 'package:project_nomufinder/screens/lawyer_search/lawyer_list_screen.dart';
 import 'package:project_nomufinder/services/lawyer_data_loader.dart';
@@ -17,7 +18,7 @@ final Map<String, List<String>> issueKeywordMap = {
   '직장 내 차별': ['차별'],
 };
 
-class WorkerIssueScreen extends StatelessWidget {
+class WorkerIssueScreen extends ConsumerWidget {
   const WorkerIssueScreen({super.key});
 
   final List<String> issues = const [
@@ -29,7 +30,7 @@ class WorkerIssueScreen extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final List<String> fullList = [
       ...issues,
       '',
@@ -55,32 +56,28 @@ class WorkerIssueScreen extends StatelessWidget {
             onTap: () {
               if (isEmpty) return;
 
-              // 전체보기일 경우 모든 노무사 가져오기
+              // 🔧 필터 상태 초기화 및 설정
+              ref.read(selectedRegionProvider.notifier).state = '전국';
+              ref.read(selectedGenderProvider.notifier).state = '전체';
+              ref.read(categoryProvider.notifier).state = isLast ? null : issue;
+
               final filtered = isLast
                   ? lawyersByRegion.values.expand((list) => list).toList()
                   : lawyersByRegion.values
                   .expand((list) => list)
-                  .where((lawyer) {
-                final normalized = normalizeCategory(issue);
-                final keywords = issueKeywordMap[normalized] ?? [normalized];
-                return lawyer.specialties.any(
-                      (tag) => keywords.any((keyword) => tag.contains(keyword)),
-                );
-              }).toList();
+                  .where((lawyer) => lawyer.specialties.contains(issue))
+                  .toList();
 
-              // 노무사 리스트 화면으로 이동
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => LawyerListScreen(
                     title: isLast ? '전체보기' : issue,
                     category: isLast ? '' : issue,
-                    lawyers: filtered,
                   ),
                 ),
               );
             },
-
             child: Container(
               decoration: BoxDecoration(
                 color: isEmpty
@@ -89,8 +86,7 @@ class WorkerIssueScreen extends StatelessWidget {
                     ? Colors.white
                     : const Color(0xFFF2F1FA),
                 borderRadius: BorderRadius.circular(12),
-                border:
-                isLast ? Border.all(color: Colors.grey.shade300) : null,
+                border: isLast ? Border.all(color: Colors.grey.shade300) : null,
               ),
               child: Center(
                 child: Text(

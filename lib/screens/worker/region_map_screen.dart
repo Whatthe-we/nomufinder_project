@@ -56,7 +56,6 @@ class _RegionMapScreenState extends State<RegionMapScreen> {
                     builder: (_) => LawyerListScreen(
                       title: entry.key,
                       category: entry.key,
-                      lawyers: lawyers,
                     ),
                   ),
                 );
