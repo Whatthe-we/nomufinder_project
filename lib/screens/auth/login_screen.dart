@@ -223,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
-                          width: 20,
+                          width: 12,
                           height: 20,
                           child: Checkbox(
                             value: _keepSignedIn,
@@ -233,14 +233,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               });
                             },
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(5),
                             ),
                             side: const BorderSide(color: Colors.black38),
                             activeColor: Color(0xFFBDBDBD),
                             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
                         ),
-                        const SizedBox(width: 3),
+                        const SizedBox(width: 8),
                         const Text(
                           '로그인 상태 유지',
                           style: TextStyle(
