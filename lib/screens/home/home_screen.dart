@@ -13,17 +13,11 @@ import '../favorites/post_create_screen.dart';
 import 'package:project_nomufinder/viewmodels/youtube_viewmodel.dart';
 import 'package:project_nomufinder/widgets/youtube_card.dart';
 import 'package:project_nomufinder/models/youtube_video.dart';
+import 'package:project_nomufinder/screens/banner/banner_detail_screen.dart';
 
 // 상수 선언
 const double suggestionsBoxHorizontalPadding = 16.0;
 
-// 배너 데이터
-final List<Map<String, String>> bannerData = [
-  {'title': '노무무 배너', 'image': 'assets/images/banner1.png'},
-  {'title': '5대 의무교육 배너', 'image': 'assets/images/banner2.png'},
-  {'title': '리뷰 배너', 'image': 'assets/images/banner3.png'},
-  {'title': '노무사 상담 배너', 'image': 'assets/images/banner4.png'},
-];
 // home_screen.dart 상단에 추가해줘!
 final Map<String, List<String>> issueKeywordMap = {
   '직장 내 성희롱': ['성희롱', '직장내성희롱', '괴롭힘·성희롱'],
@@ -37,6 +31,14 @@ final Map<String, List<String>> issueKeywordMap = {
   '부당징계': ['부당징계'],
   '직장 내 차별': ['차별','왕따'],
 };
+
+// 배너 데이터
+final List<Map<String, String>> bannerData = [
+  {'title': '노무무 배너', 'image': 'assets/images/banner1.png'},
+  {'title': '5대 의무교육 배너', 'image': 'assets/images/banner2.png'},
+  {'title': '리뷰 배너', 'image': 'assets/images/banner3.png'},
+  {'title': '노무사 상담 배너', 'image': 'assets/images/banner4.png'},
+];
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -81,7 +83,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
               _buildSearchBar(context),
@@ -92,14 +96,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 20),
               _buildPageViewBanner(),
               const SizedBox(height: 20),
+
+              // 📝 상황별 찾기 제목
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  "상황별 찾기",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF333333),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+
               _buildIssueIcons(),
               const SizedBox(height: 30),
+
               _buildSectionTitle('오늘의 소식'),
               _buildYoutubeNews(),
               const SizedBox(height: 30),
+
               _buildSectionTitle('알아두면 좋은 법률 정보'),
               _buildMergedLawInfoSection(),
               const SizedBox(height: 30),
+
               _buildSectionTitle('법정의무교육'),
               const SizedBox(height: 5),
               _buildYoutubePlaylistSection('PLRxCdWcfSSnpfw9auYADoTsVAGkQGZsd7', isEducation: true), // 법정의무교육
@@ -111,7 +133,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // PageView Banner
+// PageView Banner
   Widget _buildPageViewBanner() {
     return SizedBox(
       height: 120,
@@ -119,7 +141,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         controller: _pageController,
         itemCount: bannerData.length,
         itemBuilder: (context, index) {
-          return _buildBannerItem(bannerData[index]['image']!);
+          final banner = bannerData[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BannerDetailScreen(
+                    title: banner['title']!,
+                    imagePath: banner['image']!,  // 여기 imagePath로 수정
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Image.asset(
+                banner['image']!,
+                fit: BoxFit.cover,
+              ),
+            ),
+          );
         },
         onPageChanged: (index) {
           setState(() => _currentPage = index);
@@ -128,19 +181,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildBannerItem(String imageUrl) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Image.asset(
-        imageUrl,
-        fit: BoxFit.cover,
-      ),
-    );
-  }
+
 
   // 사업주 & 근로자 Buttons
   Widget _buildCategorySection() {
@@ -434,16 +475,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // Issue Icons
   Widget _buildIssueIcons() {
     final issues = [
-      {'icon': Icons.warning_amber_outlined, 'label': '부당해고'},
-      {'icon': Icons.gavel, 'label': '부당징계'},
-      {'icon': Icons.article, 'label': '근로계약'},
-      {'icon': Icons.work_outline, 'label': '근무조건'},
-      {'icon': Icons.block_outlined, 'label': '직장 내\n성희롱'},
-      {'icon': Icons.report_gmailerrorred_outlined, 'label': '직장 내\n차별'},
+      {'icon': Icons.warning_amber_outlined, 'label': '부당해고\n '},
+      {'icon': Icons.gavel, 'label': '부당징계\n '},
+      {'icon': Icons.article, 'label': '근로계약\n '},
+      {'icon': Icons.work_outline, 'label': '근무조건\n '},
+      {'icon': Icons.cancel_outlined, 'label': '직장 내\n성희롱'},
+      {'icon': Icons.do_disturb_on_outlined, 'label': '직장 내\n차별'},
       {'icon': Icons.mood_bad_outlined, 'label': '직장 내\n괴롭힘'},
-      {'icon': Icons.attach_money, 'label': '임금/퇴직금'},
-      {'icon': Icons.health_and_safety_outlined, 'label': '산업재해'},
-      {'icon': Icons.account_balance, 'label': '노동조합'},
+      {'icon': Icons.attach_money, 'label': '임금/퇴직금\n '},
+      {'icon': Icons.health_and_safety_outlined, 'label': '산업재해\n '},
+      {'icon': Icons.groups_outlined, 'label': '노동조합\n '},
     ];
 
     return Container(
@@ -509,3 +550,88 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+// Issue Icons
+Widget _buildIssueIcons() {
+  final issues = [
+    {'icon': Icons.warning_amber_outlined, 'label': '부당해고'},
+    {'icon': Icons.gavel_outlined, 'label': '부당징계'},
+    {'icon': Icons.description_outlined, 'label': '근로계약'},
+    {'icon': Icons.schedule_outlined, 'label': '근무조건'},
+    {'icon': Icons.block_outlined, 'label': '직장 내\n성희롱'},
+    {'icon': Icons.do_disturb_alt_outlined, 'label': '직장 내\n차별'},
+    {'icon': Icons.mood_bad_outlined, 'label': '직장 내\n괴롭힘'},
+    {'icon': Icons.money_off_csred_outlined, 'label': '임금/퇴직금'},
+    {'icon': Icons.health_and_safety_outlined, 'label': '산업재해'},
+    {'icon': Icons.groups_outlined, 'label': '노동조합'},
+  ];
+
+  return Container(
+    color: Colors.grey[100],
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    child: GridView.builder(
+      itemCount: issues.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 5,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        childAspectRatio: 0.8,
+      ),
+      itemBuilder: (context, index) {
+        final issue = issues[index];
+        final label = issue['label'] as String;
+
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  issue['icon'] as IconData,
+                  color: const Color(0xFF555555),
+                  size: 28,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 34,
+              child: Center(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF333333),
+                    height: 1.3,
+                  ),
+                  maxLines: 2,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
+
+
+
+

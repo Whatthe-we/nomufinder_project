@@ -11,6 +11,7 @@ class Reservation {
   final String type;
   final String userName;
   final String userPhone;
+  final DateTime createdAt;
   bool isReviewed;
 
   Reservation({
@@ -23,8 +24,9 @@ class Reservation {
     required this.type,
     required this.userName,
     required this.userPhone,
+    DateTime? createdAt,
     this.isReviewed = false,
-  });
+  }) : createdAt = createdAt ?? DateTime.now();
 
   factory Reservation.fromDoc(String id, Map<String, dynamic> json) {
     final rawDate = json['date'];
@@ -38,6 +40,17 @@ class Reservation {
       parsedDate = DateTime.now(); // 🔹 fallback
     }
 
+    final rawCreatedAt = json['createdAt'];
+    DateTime parsedCreatedAt;
+
+    if (rawCreatedAt is Timestamp) {
+      parsedCreatedAt = rawCreatedAt.toDate();
+    } else if (rawCreatedAt is String) {
+      parsedCreatedAt = DateTime.tryParse(rawCreatedAt) ?? DateTime.now();
+    } else {
+      parsedCreatedAt = DateTime.now();
+    }
+
     return Reservation(
       id: id,
       lawyerId: json['lawyerId'] ?? '',
@@ -48,10 +61,12 @@ class Reservation {
       type: json['type'] ?? '',
       userName: json['userName'] ?? '',
       userPhone: json['userPhone'] ?? '',
-      isReviewed: json['isReviewed'] ?? false, // 🔥 Firestore에 저장하는 경우 대비
+      createdAt: parsedCreatedAt,
+      isReviewed: json['isReviewed'] ?? false,
     );
   }
 }
+
 extension ReservationExtension on Reservation {
   Lawyer toLawyer() {
     return Lawyer(
