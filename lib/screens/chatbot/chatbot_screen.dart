@@ -67,6 +67,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final List<Map<String, String>> chatContext = []; // ✅ 문맥 누적 저장
   final TextEditingController _controller = TextEditingController();
   final ChatbotService chatbotService = ChatbotService();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -84,6 +85,17 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     });
     chatContext.add({'role': 'user', 'content': text});
     _controller.clear();
+
+    // ✅ 자동 스크롤
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
 
     final questionId = await chatbotService.sendQueryWithContext(chatContext); // ✅ 변경
 
@@ -124,7 +136,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               decoration: BoxDecoration(
                 color: bgColor,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(20),
+                  topRight: const Radius.circular(20),
+                  bottomLeft: Radius.circular(isUser ? 20 : 4),
+                  bottomRight: Radius.circular(isUser ? 4 : 20),
+                ),
               ),
               child: Text(
                 message.text,
@@ -153,10 +170,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              itemCount: messages.length,
-              itemBuilder: (context, index) => buildMessage(messages[index]),
+            child: Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: ListView.builder(
+                controller: _scrollController, // ✅ 여기 연결!
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                itemCount: messages.length,
+                itemBuilder: (context, index) => buildMessage(messages[index]),
+              ),
             ),
           ),
           Container(
@@ -169,14 +190,23 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                     controller: _controller,
                     decoration: const InputDecoration(
                       hintText: '고민을 입력하세요',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(18))),
+                      filled: true,
+                      fillColor: Color(0xFFF4F2F2),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(18)),
+                        borderSide: BorderSide(color: Color(0xFF90CAF9)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(18)),
+                        borderSide: BorderSide(color: Color(0xFF0024EE), width: 2), // ✅ 포커스 시 진한 파랑
+                      ),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.send, color: Color(0xFF5260EF)),
+                  icon: const Icon(Icons.send, color: Color(0xFF0024EE)),
                   onPressed: () => sendMessage(_controller.text),
                 ),
               ],
