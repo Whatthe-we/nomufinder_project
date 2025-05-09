@@ -113,6 +113,7 @@ class FirebaseService {
 
   /// ✅ 챗봇 기록 저장
   Future<void> saveChat({
+    required String userId,  // 🔄 userId 매개변수 추가
     required String question,
     required String answer,
     required DateTime timestamp,
