@@ -131,9 +131,35 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           child: Stack(
             children: [
+              // ✅ 추가
+              Positioned(
+                top: 120,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Text(
+                    'NOMU FINDER',
+                    style: TextStyle(
+                      color: Color(0xFF000FBA),
+                      fontSize: 34,
+                      fontFamily: 'Anybody',
+                      fontWeight: FontWeight.w700,
+                      fontStyle: FontStyle.italic,
+                      letterSpacing: -0.7,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.2),
+                          offset: Offset(0, 9),
+                          blurRadius: 14,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               // 상단 탭 (로그인 / 노무사)
               Positioned(
-                top: 126,
+                top: 226,
                 left: 40,
                 child: Container(
                   width: 160,
@@ -150,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               Positioned(
-                top: 126,
+                top: 226,
                 left: 200,
                 child: Container(
                   width: 160,
@@ -167,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // 이메일 입력
               Positioned(
                 left: 32,
-                top: 200,
+                top: 300,
                 right: 32,
                 child: TextField(
                   controller: _emailController,
@@ -189,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // 비밀번호 입력
               Positioned(
                 left: 32,
-                top: 260,
+                top: 360,
                 right: 32,
                 child: TextField(
                   controller: _passwordController,
@@ -212,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // 로그인 상태 유지 / 아이디 비번 찾기
               Positioned(
                 left: 42,
-                top: 330,
+                top: 430,
                 right: 42,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -267,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // 로그인 버튼
               Positioned(
                 left: 32,
-                top: 395,
+                top: 495,
                 right: 32,
                 child: ElevatedButton(
                   onPressed: _submitEmailAuth,
@@ -292,15 +318,30 @@ class _LoginScreenState extends State<LoginScreen> {
               Positioned(
                 left: 0,
                 right: 0,
-                top: 570,
+                top: 770,
                 child: GestureDetector(
                   onTap: () {
-                    context.push('/register'); // ✅ 회원가입 화면으로 이동
+                    context.push('/register'); // 회원가입 화면으로 이동
                   },
-                  child: const Center(
-                    child: Text(
-                      '회원가입',
-                      style: TextStyle(color: Color(0xFF3C4043), fontSize: 14, fontWeight: FontWeight.w500),
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      text: '계정이 없으신가요? ',
+                      style: const TextStyle(
+                        color: Color(0xFF9E9E9E),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: '회원가입',
+                          style: const TextStyle(
+                            color: Color(0xFF000FBA),
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -309,7 +350,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // Google 로그인
               Positioned(
                 left: 32,
-                top: 450,
+                top: 550,
                 right: 32,
                 child: ElevatedButton(
                   onPressed: _signInWithGoogle,

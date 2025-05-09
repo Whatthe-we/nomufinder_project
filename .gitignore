@@ -53,6 +53,7 @@ requirements.txt.lock
 rag_nomu_backend/.env*
 serviceAccountKey.json*
 rag_nomu_backend/serviceAccountKey.json
+nomufinder-*.json
 
 # 시스템/기타
 *.class

@@ -35,6 +35,7 @@ dependencies:
   firebase_auth: ^4.17.3
   cloud_firestore: ^4.13.2
   firebase_database: ^10.4.2
+  firebase_messaging: ^14.9.4
 
   # 🌍 지도 및 캘린더
   google_maps_flutter: ^2.3.0
@@ -62,7 +63,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.13.1
 
-flutter_icons:  # ✅ 아이콘 설정 추가됨
+flutter_icons:  # 아이콘 설정 추가됨
   android: true
   ios: true
   image_path: "assets/images/logo2.png"
@@ -80,6 +81,7 @@ flutter:
     - assets/images/banner4.png
     - assets/images/default_user.png
     - assets/images/google_logo.png
+    - assets/images/logo3.png
 
   fonts:
     - family: Open Sans

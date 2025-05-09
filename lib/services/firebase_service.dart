@@ -5,7 +5,7 @@ import '../viewmodels/input_viewmodel.dart';
 class FirebaseService {
   static final _firestore = FirebaseFirestore.instance;
 
-  /// ✅ 최초 로그인 시 사용자 문서 생성
+  /// 최초 로그인 시 사용자 문서 생성
   static Future<bool> checkAndCreateUserDocument({
     String? name,
     bool pushNotificationAgreed = false,
@@ -27,12 +27,12 @@ class FirebaseService {
         'surveyCompleted': false,
         'createdAt': FieldValue.serverTimestamp(),
       });
-      return true; // ✅ 최초 로그인
+      return true; // 최초 로그인
     }
-    return false; // ✅ 기존 사용자
+    return false; // 기존 사용자
   }
 
-  /// ✅ 온보딩 완료 처리
+  /// 온보딩 완료 처리
   static Future<void> updateIsFirstLoginFalse() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -62,7 +62,7 @@ class FirebaseService {
     }, SetOptions(merge: true));
   }
 
-  /// ✅ 사용자 프로필 정보 가져오기
+  /// 사용자 프로필 정보 가져오기
   static Future<Map<String, dynamic>?> getUserMeta() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
@@ -77,7 +77,7 @@ class FirebaseService {
     return snapshot.data();
   }
 
-  /// ✅ 설문 응답 저장 + 상태 갱신
+  /// 설문 응답 저장 + 상태 갱신
   static Future<void> saveSurvey(InputState state) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
@@ -99,7 +99,7 @@ class FirebaseService {
       'createdAt': FieldValue.serverTimestamp(),
     });
 
-    // 🔄 상태 갱신
+    // 상태 갱신
     await _firestore
         .collection('users')
         .doc(uid)
@@ -111,8 +111,9 @@ class FirebaseService {
     }, SetOptions(merge: true));
   }
 
-  /// ✅ 챗봇 기록 저장
+  /// 챗봇 기록 저장
   Future<void> saveChat({
+    required String userId,  // 🔄 userId 매개변수 추가
     required String question,
     required String answer,
     required DateTime timestamp,
@@ -127,7 +128,7 @@ class FirebaseService {
     });
   }
 
-  /// ✅ 챗봇 기록 불러오기
+  /// 챗봇 기록 불러오기
   Future<List<Map<String, String>>> loadChatHistory() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return [];

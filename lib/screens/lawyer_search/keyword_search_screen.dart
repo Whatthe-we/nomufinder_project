@@ -197,7 +197,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     "계약 연장 걍 안 해준다네요...",
     "노조 가입했더니 눈치 엄청 주네요",
     "상사가 외모 얘기 계속 해요",
-    "출근하다 교통사고 났는데 제가 돈내요?",
+    "출근하다 사고 났는데 내가 돈냄??",
   ];
   String currentPrompt = "";
   late Timer _timer;
@@ -393,12 +393,12 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 17),
               if (suggestions.isNotEmpty) ...[
+                const SizedBox(height: 12),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Text(
                       "추천 키워드",
                       style: const TextStyle(
@@ -409,67 +409,10 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 5),
-                SizedBox(
-                  height: 45,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: suggestions.length,
-                    separatorBuilder: (context, index) =>
-                    const SizedBox(width: 7),
-                    itemBuilder: (context, index) {
-                      final keyword = suggestions[index];
-                      final isHighlighted = index < 2; // 🔥 상위 2개 강조
 
-                      return GestureDetector(
-                        onTapDown: (_) {
-                          setState(() {
-                            tappedIndex = index;
-                          });
-                        },
-                        onTapUp: (_) {
-                          setState(() {
-                            tappedIndex = null;
-                          });
-                        },
-                        onTapCancel: () {
-                          setState(() {
-                            tappedIndex = null;
-                          });
-                        },
-                        onTap: () => _classifyAndNavigate(keyword),
-                        child: AnimatedScale(
-                          scale: tappedIndex == index ? 0.95 : 1.0,
-                          duration: const Duration(milliseconds: 150),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF1F3F5),
-                              borderRadius: BorderRadius.circular(30),
-                              border: isHighlighted
-                                  ? Border.all(color: Color(0xFF0024EE), width: 1, style: BorderStyle.solid) // 스타일은 dotted로 못 하지만, 흉내 가능
-                                  : null,
-                            ),
-                            child: Center(
-                              child: Text(
-                                keyword,
-                                style: TextStyle(
-                                  color: isHighlighted ? Colors.black87 : Colors.black87,
-                                  fontSize: 14,
-                                  fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height:7),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
@@ -479,6 +422,45 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                     style: TextStyle(fontSize: 12, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
+                ),
+                const SizedBox(height: 12), // 문구와 칩 간격
+
+                Wrap(
+                  spacing: 7,
+                  runSpacing: 10,
+                  children: suggestions.map((keyword) {
+                    final index = suggestions.indexOf(keyword);
+                    final isHighlighted = index < 2;
+
+                    return GestureDetector(
+                      onTapDown: (_) => setState(() => tappedIndex = index),
+                      onTapUp: (_) => setState(() => tappedIndex = null),
+                      onTapCancel: () => setState(() => tappedIndex = null),
+                      onTap: () => _classifyAndNavigate(keyword),
+                      child: AnimatedScale(
+                        scale: tappedIndex == index ? 0.95 : 1.0,
+                        duration: const Duration(milliseconds: 150),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F3F5),
+                            borderRadius: BorderRadius.circular(30),
+                            border: isHighlighted
+                                ? Border.all(color: Color(0xFF0024EE), width: 1)
+                                : null,
+                          ),
+                          child: Text(
+                            keyword,
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 14,
+                              fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ],
             ],

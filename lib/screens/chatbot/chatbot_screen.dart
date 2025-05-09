@@ -27,6 +27,16 @@ class ChatbotService {
     return newRef.key!;
   }
 
+  /// ✅ 추가!
+  Future<String> sendQueryWithContext(List<Map<String, String>> chatHistory) async {
+    final newRef = _questionsRef.push();
+    await newRef.set({
+      'chat_history': chatHistory,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+    return newRef.key!;
+  }
+
   void listenForAnswer({
     required String questionId,
     required void Function(String answer) onAnswer,
@@ -54,29 +64,36 @@ class ChatbotScreen extends StatefulWidget {
 
 class _ChatbotScreenState extends State<ChatbotScreen> {
   final List<ChatMessage> messages = [];
+  final List<Map<String, String>> chatContext = []; // ✅ 문맥 누적 저장
   final TextEditingController _controller = TextEditingController();
   final ChatbotService chatbotService = ChatbotService();
 
   @override
   void initState() {
     super.initState();
-    messages.add(ChatMessage(text: '안녕하세요.\n무엇을 도와드릴까요?', isUser: false));
+    final firstMessage = ChatMessage(text: '안녕하세요.\n무엇을 도와드릴까요?', isUser: false);
+    messages.add(firstMessage);
+    chatContext.add({'role': 'assistant', 'content': firstMessage.text});
   }
 
   void sendMessage(String text) async {
     if (text.trim().isEmpty) return;
+
     setState(() {
       messages.add(ChatMessage(text: text, isUser: true));
     });
+    chatContext.add({'role': 'user', 'content': text});
     _controller.clear();
 
-    final questionId = await chatbotService.sendQuery(text);
+    final questionId = await chatbotService.sendQueryWithContext(chatContext); // ✅ 변경
+
     chatbotService.listenForAnswer(
       questionId: questionId,
       onAnswer: (answer) {
         setState(() {
           messages.add(ChatMessage(text: answer, isUser: false));
         });
+        chatContext.add({'role': 'assistant', 'content': answer}); // ✅ 응답도 문맥에 추가
       },
     );
   }

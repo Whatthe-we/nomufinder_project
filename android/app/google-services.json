@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1058085475204-8vdfvfcpnqj58hb5i4hgdtkshdu3ocjd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.project_nomufinder",
+            "certificate_hash": "bd4fb3b2148d5495718b28997af743a3d9511cf9"
+          }
+        },
+        {
           "client_id": "1058085475204-e7hfdqn0mub2nbr17j8cvhbl7fkth566.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
