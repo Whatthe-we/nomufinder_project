@@ -18,15 +18,6 @@ class ChatbotService {
   final DatabaseReference _questionsRef = _customDb.ref('chat_questions');
   final DatabaseReference _answersRef = _customDb.ref('chat_answers');
 
-  Future<String> sendQuery(String query) async {
-    final newRef = _questionsRef.push();
-    await newRef.set({
-      'query': query,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
-    return newRef.key!;
-  }
-
   /// ✅ 추가!
   Future<String> sendQueryWithContext(List<Map<String, String>> chatHistory) async {
     final newRef = _questionsRef.push();
@@ -68,6 +59,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
   final ChatbotService chatbotService = ChatbotService();
   final ScrollController _scrollController = ScrollController();
+  bool isTyping = false;
+  String? _lastQuestionId;
 
   @override
   void initState() {
@@ -82,9 +75,18 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
     setState(() {
       messages.add(ChatMessage(text: text, isUser: true));
+      isTyping = true;
     });
     chatContext.add({'role': 'user', 'content': text});
     _controller.clear();
+
+    // ✅ 이곳에 로그 추가!
+    print("🔥 chatContext 현재 상태:");
+    for (var item in chatContext) {
+      print("${item['role']}: ${item['content']}");
+    }
+
+    _lastQuestionId = await chatbotService.sendQueryWithContext(chatContext); // ✅ 여기에 저장
 
     // ✅ 자동 스크롤
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -97,12 +99,11 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       }
     });
 
-    final questionId = await chatbotService.sendQueryWithContext(chatContext); // ✅ 변경
-
     chatbotService.listenForAnswer(
-      questionId: questionId,
+      questionId: _lastQuestionId!,
       onAnswer: (answer) {
         setState(() {
+          isTyping = false;
           messages.add(ChatMessage(text: answer, isUser: false));
         });
         chatContext.add({'role': 'assistant', 'content': answer}); // ✅ 응답도 문맥에 추가
@@ -110,10 +111,22 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     );
   }
 
+  @override
+  void dispose() {
+    // ✅ 대화 종료 시 Firebase 기록 삭제
+    if (_lastQuestionId != null) {
+      _customDb.ref('chat_questions/$_lastQuestionId').remove();
+      _customDb.ref('chat_answers/$_lastQuestionId').remove();
+    }
+    // ✅ 컨트롤러 정리 (메모리 누수 방지)
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   Widget buildMessage(ChatMessage message) {
     final isUser = message.isUser;
     final bgColor = isUser ? const Color(0xFF5260EF) : const Color(0xFF262628);
-    final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
     final avatar = isUser
         ? null
         : Padding(
@@ -159,13 +172,46 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     );
   }
 
+  Widget buildTypingMessage() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: CircleAvatar(
+              backgroundImage: AssetImage('assets/images/logo.png'),
+              radius: 22,
+            ),
+          ),
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              decoration: const BoxDecoration(
+                color: Color(0xFF262628),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(4),
+                ),
+              ),
+              child: const TypingIndicator(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        title: const CommonHeader(), // 공통 헤더
+        title: const CommonHeader(),
       ),
       body: Column(
         children: [
@@ -173,10 +219,16 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             child: Padding(
               padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
               child: ListView.builder(
-                controller: _scrollController, // ✅ 여기 연결!
+                controller: _scrollController,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                itemCount: messages.length,
-                itemBuilder: (context, index) => buildMessage(messages[index]),
+                itemCount: messages.length + (isTyping ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index < messages.length) {
+                    return buildMessage(messages[index]);
+                  } else {
+                    return buildTypingMessage();
+                  }
+                },
               ),
             ),
           ),
@@ -198,7 +250,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(18)),
-                        borderSide: BorderSide(color: Color(0xFF0024EE), width: 2), // ✅ 포커스 시 진한 파랑
+                        borderSide: BorderSide(color: Color(0xFF0024EE), width: 2),
                       ),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12),
                     ),
@@ -213,6 +265,59 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             ),
           )
         ],
+      ),
+    );
+  }
+}
+
+class TypingIndicator extends StatefulWidget {
+  const TypingIndicator({super.key});
+
+  @override
+  State<TypingIndicator> createState() => _TypingIndicatorState();
+}
+
+class _TypingIndicatorState extends State<TypingIndicator> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<int> _dotAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    )..repeat(reverse: false);
+
+    _dotAnimation = StepTween(begin: 1, end: 4).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.linear),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: AnimatedBuilder(
+        animation: _dotAnimation,
+        builder: (context, child) {
+          final count = _dotAnimation.value;
+          final dots = '.' * count;
+          return Text(
+            dots.padRight(4),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2.0,
+            ),
+          );
+        },
       ),
     );
   }
