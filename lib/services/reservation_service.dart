@@ -7,24 +7,37 @@ class ReservationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
-  // 🔔 하루 전 알림 스케줄링
+  // 🔔 하루 전 알림 스케줄링 (중복 제거)
   Future<void> scheduleReservationReminder(Reservation reservation) async {
     final now = DateTime.now();
     final reservationDate = reservation.date.subtract(const Duration(days: 1));
 
     if (reservationDate.isAfter(now)) {
-      // 🔔 하루 전에 알림 예약
       print('📅 예약 알림 스케줄링: ${reservation.lawyerName} - ${reservation.date}');
 
-      // 실제로는 FCM 메시지를 보내는 로직이 필요함
-      await _messaging.subscribeToTopic(reservation.id);
+      try {
+        // ✅ 바로 알림 (테스트용)
+        await _messaging.subscribeToTopic(reservation.id);
+        await _messaging.sendMessage(
+          to: '/topics/${reservation.id}',
+          data: {
+            'title': '예약 알림',
+            'body': '${reservation.lawyerName} 노무사와의 상담 예약이 하루 남았습니다.',
+          },
+        );
+        print('🚀 예약 알림을 위한 토픽 구독 및 메시지 전송 완료: ${reservation.id}');
+      } catch (e) {
+        print('❌ 토픽 구독 실패: $e');
+      }
     }
   }
 
   // 🔄 Firestore에서 예약 가져오기
   Future<List<Reservation>> getUpcomingReservations() async {
     final snapshot = await _firestore.collection('reservations').get();
-    return snapshot.docs.map((doc) => Reservation.fromDoc(doc.id, doc.data())).toList();
+    return snapshot.docs
+        .map((doc) => Reservation.fromDoc(doc.id, doc.data()))
+        .toList();
   }
 
   // 🔄 예약 저장
@@ -38,11 +51,11 @@ class ReservationService {
       'type': reservation.type,
       'userName': reservation.userName,
       'userPhone': reservation.userPhone,
-      'createdAt': reservation.createdAt.toIso8601String(),
+      'createdAt': reservation.date.toIso8601String(),
       'isReviewed': reservation.isReviewed,
     });
 
-    // 🔔 알림 예약 (하루 전)
+    // 🔔 예약 알림 스케줄링
     await scheduleReservationReminder(reservation);
   }
 

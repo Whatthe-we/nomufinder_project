@@ -11,9 +11,9 @@
 
     <application
         android:label="노무파인더"
+        android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"
         android:usesCleartextTraffic="true"
-        android:icon="@mipmap/ic_launcher"
         android:theme="@style/LaunchTheme">
 
         <!-- ✅ Google Maps API Key -->
@@ -44,6 +44,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize"
+            android:enableOnBackInvokedCallback="true"
             android:theme="@style/NormalTheme">
 
             <intent-filter>

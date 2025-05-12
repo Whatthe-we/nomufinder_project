@@ -21,16 +21,17 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // ✅ Firebase 초기화 (중복 초기화 방지)
-  if (Firebase.apps.isEmpty) {
-    try {
+  try {
+    if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
       print("✅ Firebase 초기화 성공");
-    } on FirebaseException catch (e) {
-      print("❌ Firebase 초기화 실패: ${e.message}");
-      if (e.code != 'duplicate-app') rethrow;
+    } else {
+      print("✅ Firebase 이미 초기화됨");
     }
+  } catch (e) {
+    print("❌ Firebase 초기화 실패: $e");
   }
 
   // .env 환경 변수 로드
