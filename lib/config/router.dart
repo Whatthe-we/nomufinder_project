@@ -22,6 +22,7 @@ import '../screens/reviews/my_reviews_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../services/firebase_service.dart';
 import '../screens/auth/register_screen.dart';
+import '../screens/auth/edit_profile_screen.dart'; // ✅ 추가
 
 class MyBottomNavigationBar extends StatelessWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
@@ -279,6 +280,11 @@ final router = GoRouter(
           ),
         ),
       ],
+    ),
+    GoRoute(  // ✅ 추가
+      path: '/edit-profile',
+      name: 'EditProfile',
+      builder: (context, state) => const EditProfileScreen(),
     ),
 
     // 4. 예약 관련 (ShellRoute 밖에 있음)

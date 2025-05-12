@@ -26,7 +26,7 @@ class CommonHeader extends StatelessWidget {
               print('[DEBUG] 로그인 안됨 → /login 이동');
               context.go('/login?redirect=%2Fmypage');
             } else {
-              context.push('/mypage');
+              context.go('/mypage'); // ✅ 여기 go() 사용
             }
           },
           child: Row(

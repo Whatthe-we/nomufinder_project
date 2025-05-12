@@ -8,13 +8,13 @@ class FirebaseService {
   /// 최초 로그인 시 사용자 문서 생성
   static Future<bool> checkAndCreateUserDocument({
     String? name,
+    String? phone,
     bool pushNotificationAgreed = false,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return false;
 
-    final docRef = _firestore.collection('users').doc(user.uid).collection(
-        'meta').doc('profile');
+    final docRef = _firestore.collection('users').doc(user.uid).collection('meta').doc('profile');
     final snapshot = await docRef.get();
 
     if (!snapshot.exists) {
@@ -22,6 +22,7 @@ class FirebaseService {
         'uid': user.uid,
         'email': user.email,
         'name': name ?? '',
+        'phone': phone ?? '',
         'pushNotificationAgreed': pushNotificationAgreed,
         'isFirstLogin': true,
         'surveyCompleted': false,
@@ -60,6 +61,78 @@ class FirebaseService {
       'isFirstLogin': false,
       'surveyCompleted': true,
     }, SetOptions(merge: true));
+  }
+
+  /// 내 정보 수정
+  static Future<void> updateUserProfile({
+    required String name,
+    required String phone,
+    required bool pushNotificationAgreed,
+  }) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('meta')
+        .doc('profile')
+        .set({
+      'name': name,
+      'phone': phone,
+      'pushNotificationAgreed': pushNotificationAgreed,
+    }, SetOptions(merge: true));
+  }
+
+  static Future<Map<String, dynamic>?> getLatestSurveyResponse() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return null;
+
+    final snapshots = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('survey_responses')
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .get();
+
+    if (snapshots.docs.isNotEmpty) {
+      return snapshots.docs.first.data();
+    } else {
+      return null;
+    }
+  }
+
+  static Future<void> updateLatestSurveyResponse(InputState state) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final snapshots = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('survey_responses')
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .get();
+
+    if (snapshots.docs.isNotEmpty) {
+      final docId = snapshots.docs.first.id;
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('survey_responses')
+          .doc(docId)
+          .update({
+        'gender': state.gender,
+        'age': state.age,
+        'employment': state.employment,
+        'industry': state.industry,
+        'companySize': state.companySize,
+        'purpose': state.purpose,
+        'selectedIssues': state.selectedIssues,
+        'infoNeeds': state.infoNeeds,
+      });
+    }
   }
 
   /// 사용자 프로필 정보 가져오기

@@ -67,7 +67,7 @@ class MyPageScreen extends StatelessWidget {
           // 3. 설정 섹션 확장
           _sectionTitle("설정"),
           _linkTile("내 정보 수정", Icons.person, () {
-            // TODO: 내 정보 수정
+            context.push('/edit-profile');
           }),
           _linkTile("언어 변경 (Language)", Icons.language, () {
             // TODO: 언어 변경
