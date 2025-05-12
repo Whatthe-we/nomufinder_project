@@ -6,19 +6,8 @@ import 'package:project_nomufinder/widgets/common_header.dart'; // 공통 헤더
 class ChatMessage {
   final String text;
   final bool isUser;
-  final bool isFollowUp; // ✅ 추가
-
-  ChatMessage({
-    required this.text,
-    required this.isUser,
-    this.isFollowUp = false,
-  });
+  ChatMessage({required this.text, required this.isUser});
 }
-
-bool isInFollowupFlow = false;
-String? currentFollowupContext = null;
-List<String> pendingFollowups = [];  // 후속 질문 리스트 저장
-int followupIndex = 0;               // 현재 몇 번째 후속 질문인지
 
 final FirebaseDatabase _customDb = FirebaseDatabase.instanceFor(
   app: Firebase.app(),
@@ -41,25 +30,19 @@ class ChatbotService {
 
   void listenForAnswer({
     required String questionId,
-    required void Function(Map<String, dynamic> answerJson) onAnswer,
+    required void Function(String answer, String? followup) onAnswer,
     void Function(String error)? onError,
   }) {
     final ref = _answersRef.child(questionId);
     ref.onValue.listen((event) {
-      final data = event.snapshot.value;
+      final data = event.snapshot.value as Map?;
       if (data == null) return;
-
-      final mapData = Map<String, dynamic>.from(data as Map);
-
-      // ✅ 핵심: content + mode 기반 응답도 허용
-      if (mapData.containsKey('content') && mapData.containsKey('mode')) {
-        print("✅ Firebase 응답 수신: $mapData");
-        onAnswer(mapData);
-      } else if (mapData.containsKey('answer')) {
-        // 이전 구조 호환
-        onAnswer(mapData);
-      } else if (mapData.containsKey('error')) {
-        onError?.call(mapData['error']);
+      if (data.containsKey('answer')) {
+        final answer = data['answer'] ?? '';
+        final followup = data['followup_question'] ?? '';
+        onAnswer(answer, followup);  // ✅ followup 전달
+      } else if (data.containsKey('error')) {
+        onError?.call(data['error']);
       }
     });
   }
@@ -67,6 +50,7 @@ class ChatbotService {
 
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({super.key});
+
   @override
   State<ChatbotScreen> createState() => _ChatbotScreenState();
 }
@@ -79,6 +63,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final ScrollController _scrollController = ScrollController();
   bool isTyping = false;
   String? _lastQuestionId;
+  bool hasAskedFollowup = false; // ✅ 후속질문 1회 제한용
 
   @override
   void initState() {
@@ -91,24 +76,28 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   void sendMessage(String text) async {
     if (text.trim().isEmpty) return;
 
-    if (handleFollowupFlow()) return;
-
     setState(() {
       messages.add(ChatMessage(text: text, isUser: true));
       isTyping = true;
     });
+    chatContext.add({'role': 'user', 'content': text});
 
     // ✅ 최근 6개만 유지
     const int MAX_HISTORY = 6;
     if (chatContext.length > MAX_HISTORY) {
       chatContext.removeRange(0, chatContext.length - MAX_HISTORY);
     }
-
     _controller.clear();
 
-    // ✅ 최초 또는 최종 답변 요청
-    _lastQuestionId = await chatbotService.sendQueryWithContext(chatContext);
+    // ✅ 이곳에 로그 추가!
+    print("🔥 chatContext 현재 상태:");
+    for (var item in chatContext) {
+      print("${item['role']}: ${item['content']}");
+    }
 
+    _lastQuestionId = await chatbotService.sendQueryWithContext(chatContext); // ✅ 여기에 저장
+
+    // ✅ 자동 스크롤
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -121,87 +110,22 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
     chatbotService.listenForAnswer(
       questionId: _lastQuestionId!,
-      onAnswer: (answerJson) {
-        final mode = answerJson['mode'];
-        final content = answerJson['content'];
-        if (content == null || content.toString().trim().isEmpty) {
-          print('⚠️ content가 비어 있습니다. answerJson: $answerJson');
-          return;
-        }
-        setState(() => isTyping = false);
-
-        if (mode == 'followup' && content is List) {
-          isInFollowupFlow = true;
-          followupIndex = 0;
-          pendingFollowups = List<String>.from(content.take(1));
-          showNextFollowUp();
-          return;
-        }
-
-        if (mode == 'answer') {
-          final answerText = content is String ? content : content.toString();
-          if (answerText.trim().isEmpty) {
-            print('⚠️ GPT 답변이 비어 있음: $answerText');
-            return;
+      onAnswer: (answer, followup) {
+        setState(() {
+          isTyping = false;
+          // ✅ 후속질문이 있고, 아직 후속질문을 한 적이 없다면
+          if (!hasAskedFollowup && followup != null && followup.isNotEmpty) {
+            messages.add(ChatMessage(text: followup, isUser: false));
+            chatContext.add({'role': 'assistant', 'content': followup});
+            hasAskedFollowup = true; // ✅ 플래그 업데이트
+          } else {
+            // ✅ 후속질문이 없거나 이미 후속질문을 한 경우 → 일반 응답 출력
+            messages.add(ChatMessage(text: answer, isUser: false));
+            chatContext.add({'role': 'assistant', 'content': answer});
           }
-          setState(() {
-            messages.add(ChatMessage(text: answerText, isUser: false));
-          });
-          chatContext.add({'role': 'assistant', 'content': answerText});
-          isInFollowupFlow = false;
-          followupIndex = 0;
-          pendingFollowups.clear();
-        }
+        });
       },
     );
-  }
-
-  // ✅ 여기가 핵심: sendMessage 바깥에 있어야 함!
-  bool handleFollowupFlow() {
-    if (isInFollowupFlow && followupIndex < pendingFollowups.length) {
-      final nextFollowup = pendingFollowups[followupIndex];
-      setState(() {
-        isTyping = false;
-        messages.add(ChatMessage(text: nextFollowup, isUser: false, isFollowUp: true));
-      });
-      chatContext.add({'role': 'assistant', 'content': nextFollowup});
-      followupIndex++;
-
-      if (followupIndex >= pendingFollowups.length) {
-        isInFollowupFlow = false;
-      }
-      return true;
-    }
-    return false;
-  }
-
-  void scrollToBottomRepeatedly({int times = 3, int delayMs = 100}) {
-    for (int i = 0; i < times; i++) {
-      Future.delayed(Duration(milliseconds: delayMs * i), () {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        }
-      });
-    }
-  }
-
-  void showNextFollowUp() {
-    if (followupIndex < pendingFollowups.length) {
-      final next = pendingFollowups[followupIndex].replaceFirst(RegExp(r'^-\s*'), '');
-      setState(() {
-        messages.add(ChatMessage(text: next, isUser: false, isFollowUp: true));
-      });
-      chatContext.add({'role': 'assistant', 'content': next});
-      followupIndex++;
-    } else {
-      isInFollowupFlow = false;
-      pendingFollowups.clear();
-      followupIndex = 0;
-    }
   }
 
   @override
