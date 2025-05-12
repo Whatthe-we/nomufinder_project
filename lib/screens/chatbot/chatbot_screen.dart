@@ -97,17 +97,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
     _lastQuestionId = await chatbotService.sendQueryWithContext(chatContext); // ✅ 여기에 저장
 
-    // ✅ 자동 스크롤
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-
     chatbotService.listenForAnswer(
       questionId: _lastQuestionId!,
       onAnswer: (answer, followup) {
@@ -122,6 +111,16 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             // ✅ 후속질문이 없거나 이미 후속질문을 한 경우 → 일반 응답 출력
             messages.add(ChatMessage(text: answer, isUser: false));
             chatContext.add({'role': 'assistant', 'content': answer});
+          }
+        });
+        // ✅ 답변 출력 이후 자동 스크롤
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
           }
         });
       },
