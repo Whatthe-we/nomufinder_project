@@ -79,6 +79,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
         type: _selectedType,
         userName: '홍길동',  // 🔄 실제 사용자 이름
         userPhone: '010-0000-0000',  // 🔄 실제 사용자 전화번호
+        createdAt: DateTime.now(), // ✅ 추가
       );
 
       // 🔥 Firestore에 예약 저장
@@ -159,6 +160,38 @@ class _ReservationScreenState extends State<ReservationScreen> {
                           _focusedDay = focused;
                         });
                       },
+                    ),
+                    const SizedBox(height: 20),
+                    // 🔥 시간 선택 버튼 추가
+                    GridView.count(
+                      crossAxisCount: 3,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 2.0,
+                      children: timeSlots.map((slot) {
+                        final isSelected = _selectedTime == slot;
+                        final dateKey = _selectedDay != null
+                            ? _selectedDay!.toIso8601String().substring(0, 10)
+                            : '';
+                        final isDisabled = _reservedDateTimes[dateKey]?.contains(slot) ?? false;
+
+                        return ChoiceChip(
+                          label: Text(slot),
+                          selected: isSelected,
+                          onSelected: isDisabled ? null : (_) => setState(() => _selectedTime = slot),
+                          selectedColor: const Color(0xFF0010B9),
+                          backgroundColor: isDisabled ? Colors.grey[400] : Colors.grey[200],
+                          labelStyle: TextStyle(
+                            color: isDisabled ? Colors.white : isSelected ? Colors.white : Colors.black,
+                            fontSize: 15,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        );
+                      }).toList(),
                     ),
                     const SizedBox(height: 20),
                   ],

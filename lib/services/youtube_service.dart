@@ -8,7 +8,7 @@ class YoutubeService {
   static final _apiKey = dotenv.env['YOUTUBE_API_KEY'] ?? '';
   static const _baseUrl = 'https://www.googleapis.com/youtube/v3/search';
 
-  static final List<String> _keywords = ['직장 뉴스', '노동 뉴스'];
+  static final List<String> _keywords = ['직장 뉴스','취업 뉴스','기업 뉴스','근무 뉴스'];
 
   static Future<List<YoutubeVideo>> fetchLaborNewsVideos() async {
     final keyword = (_keywords..shuffle()).first;
@@ -21,6 +21,7 @@ class YoutubeService {
           '&type=video'
           '&order=date'
           '&publishedAfter=$publishedAfter'
+          '&videoDuration=medium'  // ✅ 쇼츠 제외
           '&maxResults=10'
           '&key=$_apiKey'),
     );
@@ -37,7 +38,7 @@ class YoutubeService {
         'YTN',
         '연합뉴스',
         'MBN',
-        'TV조선',
+        'TVCHOSUN',
         '채널A',
         '한국경제TV',
       ].any((name) => video.channelTitle?.contains(name) ?? false))

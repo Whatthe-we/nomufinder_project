@@ -4,13 +4,13 @@ import 'package:project_nomufinder/services/lawyer_data_loader.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart'; // ✅ 수정
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:io';
 import 'package:go_router/go_router.dart';
 import 'package:project_nomufinder/config/router.dart';
 import 'config/providers.dart';
 import 'package:project_nomufinder/screens/auth/my_page_screen.dart';
-import 'firebase_options.dart'; // flutterfire CLI 생성 파일
+import 'firebase_options.dart';
 import 'package:project_nomufinder/viewmodels/auth_provider.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -20,17 +20,18 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase 초기화 (중복 초기화 방지)
-  if (Firebase.apps.isEmpty) {
-    try {
+  // ✅ Firebase 초기화 (중복 초기화 방지)
+  try {
+    if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
       print("✅ Firebase 초기화 성공");
-    } on FirebaseException catch (e) {
-      print("❌ Firebase 초기화 실패: ${e.message}");
-      if (e.code != 'duplicate-app') rethrow;
+    } else {
+      print("✅ Firebase 이미 초기화됨");
     }
+  } catch (e) {
+    print("❌ Firebase 초기화 실패: $e");
   }
 
   // .env 환경 변수 로드

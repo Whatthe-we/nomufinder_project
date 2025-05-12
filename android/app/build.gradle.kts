@@ -31,6 +31,9 @@ android {
         targetSdk = 35   // ✅ 함께 상향
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // ✅ FCM 기본 알림 채널 설정
+        resValue("string", "default_notification_channel_id", "high_importance_channel")
     }
 
     buildTypes {
@@ -52,6 +55,9 @@ dependencies {
 
     // ✅ Firestore SDK 추가
     implementation("com.google.firebase:firebase-firestore")
+
+    // ✅ Firebase Messaging (필수)
+    implementation("com.google.firebase:firebase-messaging")
 
     // (선택) Firebase Analytics 등 다른 기능을 쓰려면 여기에 추가 가능
     // implementation("com.google.firebase:firebase-analytics")
