@@ -23,50 +23,53 @@ import '../screens/auth/login_screen.dart';
 import '../services/firebase_service.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/auth/edit_profile_screen.dart'; // ✅ 추가
+import '../screens/favorites/post_detail_screen.dart'; // PostDetailScreen import
+import '../screens/favorites/post_list_provider.dart'; // postListProvider import
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // ref 사용을 위한 import
 
-class MyBottomNavigationBar extends StatelessWidget {
+class MyBottomNavigationBar extends StatefulWidget {
   const MyBottomNavigationBar({Key? key}) : super(key: key);
 
   @override
+  State<MyBottomNavigationBar> createState() => _MyBottomNavigationBarState();
+}
+
+class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index, BuildContext context) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    switch (index) {
+      case 0:
+        context.go('/home');
+        break;
+      case 1:
+        context.go('/search');
+        break;
+      case 2:
+        context.go('/chatbot');
+        break;
+      case 3:
+        context.go('/favorites');
+        break;
+      case 4:
+        context.go('/mypage');
+        break;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final router = GoRouter.of(context);
-    final location = router.routerDelegate.currentConfiguration.uri.toString();
-
-    final currentIndex = () {
-      if (location.startsWith('/home')) return 0;
-      if (location.startsWith('/search')) return 1;
-      if (location.startsWith('/chatbot')) return 2;
-      if (location.startsWith('/favorites')) return 3;
-      if (location.startsWith('/mypage')) return 4;
-      return 0;
-    }();
-
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      currentIndex: currentIndex,
-      selectedItemColor: Colors.grey[800],
+      currentIndex: _selectedIndex,
+      selectedItemColor: Colors.blue,
       unselectedItemColor: Colors.grey[800],
-      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
+      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, color: Colors.blue),
       unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
-      onTap: (index) {
-        switch (index) {
-          case 0:
-            context.go('/home');
-            break;
-          case 1:
-            context.go('/search');
-            break;
-          case 2:
-            context.go('/chatbot');
-            break;
-          case 3:
-            context.go('/favorites');
-            break;
-          case 4:
-            context.go('/mypage');
-            break;
-        }
-      },
+      onTap: (index) => _onItemTapped(index, context),
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
         BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
@@ -80,12 +83,10 @@ class MyBottomNavigationBar extends StatelessWidget {
 
 final router = GoRouter(
   initialLocation: '/splash',
-
   redirect: (context, state) async {
     if (state.fullPath == '/splash') return null;
     final user = FirebaseAuth.instance.currentUser;
 
-    // ✅ 로그인 안 한 경우 → 로그인 또는 회원가입 페이지
     const publicPaths = ['/login', '/register', '/onboarding'];
     if (user == null) {
       if (!publicPaths.contains(state.fullPath)) {
@@ -97,30 +98,24 @@ final router = GoRouter(
 
     final userMeta = await FirebaseService.getUserMeta();
 
-    // ✅ 최초 로그인 시 문서 없으면 → 온보딩으로 이동
     if (userMeta == null) return '/onboarding';
 
     final isFirstLogin = userMeta['isFirstLogin'] ?? true;
     final surveyCompleted = userMeta['surveyCompleted'] ?? false;
 
-    // ✅ 최초 로그인 플래그가 true → 온보딩
     if (isFirstLogin && state.fullPath != '/onboarding') {
       return '/onboarding';
     }
 
-    // ✅ 설문 미완료 → input 화면
     if (!surveyCompleted &&
         state.fullPath != '/input' &&
         state.fullPath != '/onboarding') {
       return '/input';
     }
 
-    // ✅ 모두 완료 → 현재 경로 유지
     return null;
   },
-
   routes: [
-    // ✅ 1. Splash, Login, Register, Input, Onboarding
     GoRoute(
       path: '/splash',
       name: 'Splash',
@@ -158,8 +153,6 @@ final router = GoRouter(
             FadeTransition(opacity: animation, child: child),
       ),
     ),
-
-    // 2. LawyerList
     GoRoute(
       path: '/lawyer_list',
       name: 'LawyerList',
@@ -181,8 +174,6 @@ final router = GoRouter(
         );
       },
     ),
-
-    // 3. ShellRoute (하단 바 포함되는 화면들)
     ShellRoute(
       builder: (context, state, child) {
         return Scaffold(
@@ -281,13 +272,11 @@ final router = GoRouter(
         ),
       ],
     ),
-    GoRoute(  // ✅ 추가
+    GoRoute(
       path: '/edit-profile',
       name: 'EditProfile',
       builder: (context, state) => const EditProfileScreen(),
     ),
-
-    // 4. 예약 관련 (ShellRoute 밖에 있음)
     GoRoute(
       path: '/reservation',
       builder: (context, state) {
@@ -317,6 +306,22 @@ final router = GoRouter(
           date: date,
           time: time ?? '',
           lawyer: lawyer!,
+        );
+      },
+    ),
+    // router.dart
+
+    GoRoute(
+          path: '/post/:postId', // :postId는 동적 파라미터
+          name: 'PostDetail',
+          builder: (context, state) {
+            final postId = state.pathParameters['postId']!;
+            // postListProvider에서 해당 ID의 post를 찾아서 PostDetailScreen에 전달
+            return Consumer(
+              builder: (context, ref, child) {
+                final post = ref.read(postListProvider).firstWhere((p) => p.id == postId);
+                return PostDetailScreen(post: post);
+              },
         );
       },
     ),
