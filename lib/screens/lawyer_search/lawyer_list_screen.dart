@@ -52,8 +52,6 @@ class _LawyerListScreenState extends ConsumerState<LawyerListScreen> {
       appBar: AppBar(
         title: Text(
           widget.title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis, // 🔄 줄바꿈 없이 말줄임표 처리
           style: const TextStyle(
             fontFamily: 'OpenSans',
             fontWeight: FontWeight.bold,

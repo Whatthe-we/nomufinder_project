@@ -16,6 +16,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        isCoreLibraryDesugaringEnabled = false  // 이 줄을 추가
     }
 
     kotlinOptions {
@@ -61,4 +62,6 @@ dependencies {
 
     // (선택) Firebase Analytics 등 다른 기능을 쓰려면 여기에 추가 가능
     // implementation("com.google.firebase:firebase-analytics")
+
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0")
 }

@@ -55,6 +55,7 @@ dependencies:
   url_launcher: ^6.2.5
   html_unescape: ^2.0.0 # 유튜브 관련 디코딩
   google_sign_in: ^6.1.4 # Google 로그인
+#  flutter_local_notifications: 16.3.2 # 이전 안정 버전
 
 
 dev_dependencies:

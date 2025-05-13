@@ -101,3 +101,95 @@ exports.sendCancellationEmail = functions.firestore
         throw new Error("메일 전송 실패");
       });
   });
+  const { google } = require('firebase-admin'); // Cloud Tasks 사용을 위해 추가 (이미 있다면 생략)
+
+  // ✅ 예약 24시간 전 알림 (Cloud Tasks 트리거)
+  exports.sendScheduledReservationReminder = functions.https.onRequest(async (req, res) => {
+    const { userId, reservationTime, userName } = req.body;
+    const parsedReservationTime = new Date(reservationTime);
+
+    await sendNotification(userId, parsedReservationTime, userName);
+    res.status(200).send('예약 알림 발송 완료');
+  });
+
+  // ✅ 예약 생성 시 24시간 전 알림 스케줄링
+  exports.sendReservationReminderOnCreate = functions.firestore
+    .document('reservations/{reservationId}')
+    .onCreate(async (snapshot, context) => {
+      const reservationData = snapshot.data();
+
+      if (!reservationData || !reservationData.date || !reservationData.userName || !reservationData.userId) {
+        console.log('필수 예약 정보가 없습니다.');
+        return null;
+      }
+
+      const reservationTime = reservationData.date.toDate();
+      const now = new Date();
+      const timeDifference = reservationTime.getTime() - now.getTime();
+      const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+
+      const userId = reservationData.userId;
+
+      if (timeDifference <= oneDayInMilliseconds) {
+        console.log('예약 시간이 24시간 이내이므로 즉시 알림을 보냅니다.');
+        return sendNotification(userId, reservationTime, reservationData.userName);
+      } else {
+        const reminderTime = new Date(reservationTime.getTime() - oneDayInMilliseconds);
+        const scheduleTime = `${reminderTime.getMinutes()} ${reminderTime.getHours()} ${reminderTime.getDate()} ${reminderTime.getMonth() + 1} *`;
+
+        console.log(`알림 예약: ${reminderTime.toLocaleString()} (Cron: ${scheduleTime})`);
+
+        const cloudTasks = google.cloud.tasks('v2');
+        const parent = cloudTasks.queuePath(functions.config().project.location, 'reservation-reminders');
+        const task = {
+          scheduleTime: {
+            seconds: reminderTime.getTime() / 1000,
+          },
+          httpRequest: {
+            httpMethod: 'POST',
+            url: `https://${functions.config().project.region}-${functions.config().project.name}.cloudfunctions.net/sendScheduledReservationReminder`,
+            body: Buffer.from(JSON.stringify({ userId: userId, reservationTime: reservationTime.toISOString(), userName: reservationData.userName })).toString('base64'),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            oidcToken: {
+              serviceAccountEmail: `${functions.config().project.name}@${functions.config().project.app}.iam.gserviceaccount.com`,
+            },
+          },
+        };
+
+        try {
+          const [response] = await cloudTasks.createTask({ parent: parent, task: task });
+          console.log('Cloud Task 생성 완료:', response);
+          return null;
+        } catch (error) {
+          console.error('Cloud Task 생성 실패:', error);
+          return null;
+        }
+      }
+    });
+
+  async function sendNotification(userId, reservationTime, userName) {
+    const userDoc = await admin.firestore().collection('users').doc(userId).get();
+    if (!userDoc.exists || !userDoc.data().fcmToken) {
+      console.log('해당 사용자의 FCM 토큰을 찾을 수 없습니다:', userId);
+      return null;
+    }
+
+    const fcmToken = userDoc.data().fcmToken;
+    const payload = {
+      notification: {
+        title: '예약 알림',
+        body: `${userName}님, ${reservationTime.toLocaleString()} 예약이 곧 시작됩니다.`,
+      },
+    };
+
+    try {
+      const response = await admin.messaging().sendToDevice(fcmToken, payload);
+      console.log('FCM 메시지 전송 성공:', response);
+      return null;
+    } catch (error) {
+      console.error('FCM 메시지 전송 실패:', error);
+      return null;
+    }
+  }

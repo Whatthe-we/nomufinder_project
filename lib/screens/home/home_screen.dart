@@ -51,6 +51,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
+  Future<bool> _onWillPop() async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('앱 종료 확인'),
+        content: const Text('정말로 앱을 종료하시겠습니까?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false), // false를 반환하면 앱 종료 안 함
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true), // true를 반환하면 앱 종료
+            child: const Text('종료'),
+          ),
+        ],
+      ),
+    ) ?? false; // showDialog가 null을 반환할 경우 (예: 다이얼로그 외부를 탭한 경우) false 반환
+  }
+
   @override
   void initState() {
     super.initState();
@@ -72,30 +92,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const CommonHeader(),
-        toolbarHeight: 56,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              _buildSearchBar(context),
-              const SizedBox(height: 20),
-              _buildCategorySection(),
-              const SizedBox(height: 20),
-              _buildQuickConsultation(context),
-              const SizedBox(height: 20),
-              _buildPageViewBanner(),
-              const SizedBox(height: 20),
+    return WillPopScope( // WillPopScope로 감싸기
+        onWillPop: _onWillPop,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            title: const CommonHeader(),
+            toolbarHeight: 56,
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  _buildSearchBar(context),
+                  const SizedBox(height: 20),
+                  _buildCategorySection(),
+                  const SizedBox(height: 20),
+                  _buildQuickConsultation(context),
+                  const SizedBox(height: 20),
+                  _buildPageViewBanner(),
+                  const SizedBox(height: 20),
+
 
               // 📝 상황별 찾기 제목
               Padding(
@@ -130,6 +153,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
+        )
     );
   }
 
