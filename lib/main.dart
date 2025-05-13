@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:project_nomufinder/services/lawyer_data_loader.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'dart:io';
 import 'package:go_router/go_router.dart';
 import 'package:project_nomufinder/config/router.dart';
 import 'config/providers.dart';
-import 'package:project_nomufinder/screens/auth/my_page_screen.dart';
 import 'firebase_options.dart';
 import 'package:project_nomufinder/viewmodels/auth_provider.dart';
 
@@ -34,28 +31,37 @@ Future<void> main() async {
     print("❌ Firebase 초기화 실패: $e");
   }
 
-  // .env 환경 변수 로드
+  // ✅ .env 환경 변수 로드
   await dotenv.load(fileName: ".env");
 
-  // JSON 데이터 로드 (노무사 데이터 등)
+  // ✅ JSON 데이터 로드 (노무사 데이터 등)
   await loadLawyerData();
 
-  // ✅ FCM 초기화
+  // ✅ FCM 초기화 및 권한 요청
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   NotificationSettings settings = await messaging.requestPermission(
     alert: true,
     badge: true,
     sound: true,
   );
-
   print('🛠️ 권한 설정: ${settings.authorizationStatus}');
 
-  // ✅ 토큰 가져오기
+  // ✅ FCM 토큰 가져오기
   String? token = await messaging.getToken();
   print('🔥 FCM 토큰: $token');
 
   // ✅ 백그라운드 메시지 핸들러 등록
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // ✅ 포그라운드 메시지 리스너 등록
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('💬 포그라운드 메시지 수신!');
+    print('Message data: ${message.data}');
+    if (message.notification != null) {
+      print('💬 알림 내용: ${message.notification}');
+      // TODO: UI 업데이트 또는 알림 표시 (예: 스낵바, 다이얼로그 등)
+    }
+  });
 
   runApp(const ProviderScope(child: MyApp()));
 }
