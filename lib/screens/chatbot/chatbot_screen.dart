@@ -80,6 +80,16 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       messages.add(ChatMessage(text: text, isUser: true));
       isTyping = true;
     });
+    // ✅ 유저 입력 직후 스크롤 아래로 이동
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
     chatContext.add({'role': 'user', 'content': text});
 
     // ✅ 최근 6개만 유지
