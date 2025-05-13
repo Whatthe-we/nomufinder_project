@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // ✅ 공통 HTML 템플릿 함수
-function createHtmlContent({ userName, date, time, type, isCanceled = false }) {
+function createHtmlContent({ userName, date, time, type, phone, isCanceled = false }) {
   const title = isCanceled ? "예약 취소 알림" : "새로운 상담 예약 알림";
   const color = isCanceled ? "#D32F2F" : "#1976D2";
   const highlight = isCanceled ? "❗ 해당 예약이 취소되었습니다." : "📩 새로운 예약이 접수되었습니다.";
@@ -33,6 +33,10 @@ function createHtmlContent({ userName, date, time, type, isCanceled = false }) {
         <tr>
           <td style="padding: 8px;"><strong>📅 일시</strong></td>
           <td style="padding: 8px;">${date} ${time}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px;"><strong>📱 연락처</strong></td>
+          <td style="padding: 8px;">${phone}</td>
         </tr>
         <tr>
           <td style="padding: 8px;"><strong>💬 방식</strong></td>
@@ -62,6 +66,7 @@ exports.sendReservationEmail = functions.firestore
         date: data.date,
         time: data.time,
         type: data.type,
+        phone: data.phone, // ✅ 추가
         isCanceled: false,
       }),
     };
@@ -90,6 +95,7 @@ exports.sendCancellationEmail = functions.firestore
         date: data.date,
         time: data.time,
         type: data.type,
+        phone: data.phone, // ✅ 추가
         isCanceled: true,
       }),
     };

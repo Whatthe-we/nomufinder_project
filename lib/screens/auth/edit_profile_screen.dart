@@ -157,19 +157,99 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   Scrollable.ensureVisible(_genderKey.currentContext!);
                 });
               }),
-              _buildDropdown(key: _ageKey, label: '연령대', value: age, items: ['10대', '20대', '30대', '40대', '50대', '60대 이상'], onChanged: (val) => setState(() => age = val ?? '')),
-              _buildDropdown(key: _employmentKey, label: '고용형태', value: employment, items: [
-                '정규직', '계약직/파견직', '아르바이트/단기근로', '자영업/프리랜서', '구직중', '은퇴', '기타'
-              ], onChanged: (val) => setState(() => employment = val ?? '')),
-              _buildDropdown(key: _industryKey, label: '업종', value: industry, items: [
-                '서비스업 (음식점, 판매, 운송 등)', '제조업/생산직', '사무/관리직', 'IT/기술직', '건설/노무직', '교육/연구직', '보건/의료/사회복지', '프리랜서/플랫폼 노동자', '기타 ( )', '해당 없음'
-              ], onChanged: (val) => setState(() => industry = val ?? '')),
-              _buildDropdown(key: _companySizeKey, label: '사업장 규모', value: companySize, items: [
-                '5인 미만', '5인 이상 ~ 30인 미만', '30인 이상 ~ 100인 미만', '100인 이상', '잘 모름 / 해당 없음'
-              ], onChanged: (val) => setState(() => companySize = val ?? '')),
-              _buildDropdown(key: _purposeKey, label: '이용 목적', value: purpose, items: [
-                '현재 겪고 있는 노무 문제 해결', '평소 궁금했던 노무 상식이나 정보 얻기', '혹시 모를 상황에 대비하기 위해', '전문가(노무사)를 찾거나 연결되기 위해', '기타 ( )'
-              ], onChanged: (val) => setState(() => purpose = val ?? '')),
+              _buildDropdown(
+                key: _ageKey,
+                label: '연령대',
+                value: age,
+                items: ['10대', '20대', '30대', '40대', '50대', '60대 이상'],
+                onChanged: (val) => setState(() => age = val ?? ''),
+              ),
+
+              _buildDropdown(
+                key: _employmentKey,
+                label: '고용 형태',
+                value: employment,
+                items: [
+                  '정규직', '계약직/파견직', '아르바이트/단기근로',
+                  '자영업/프리랜서', '구직중', '은퇴', '기타',
+                ],
+                onChanged: (val) => setState(() => employment = val ?? ''),
+              ),
+
+              // ✅ [겪고 있는 문제] 복수 선택 항목
+              _buildDropdown(
+                key: GlobalKey(), // 필요한 경우 구분용
+                label: '겪고 있는 문제',
+                value: selectedIssues.isNotEmpty ? selectedIssues.first : '',
+                items: [
+                  '임금 체불 (급여, 주휴수당, 퇴직금 등)',
+                  '부당 해고 또는 권고사직 압박',
+                  '근로계약서 미작성 또는 불리한 내용',
+                  '초과 근무 및 수당 미지급',
+                  '직장 내 괴롭힘 또는 성희롱',
+                  '연차/휴가 사용의 어려움',
+                  '산업재해(산재) 관련 문제',
+                  '고용 차별 (성별, 나이 등)',
+                  '기타 ( )',
+                  '해당 없음',
+                ],
+                onChanged: (val) => setState(() => selectedIssues = val != null ? [val] : []),
+              ),
+
+              // ✅ [원하는 정보] 복수 선택 항목
+              _buildDropdown(
+                key: GlobalKey(),
+                label: '원하는 정보',
+                value: infoNeeds.isNotEmpty ? infoNeeds.first : '',
+                items: [
+                  '내 권리가 무엇인지 확인(급여,휴가 등)',
+                  '법적 절차나 대응 방법 안내',
+                  '나와 비슷한 다른 사람들의 사례 검색',
+                  '전문가의 구체적인 조언 또는 의견',
+                  '분쟁 예방을 위한 사전 정보',
+                  '필요한 서류 양식 또는 작성 도움',
+                  '관련 기관(노동청 등) 정보 또는 연결',
+                ],
+                onChanged: (val) => setState(() => infoNeeds = val != null ? [val] : []),
+              ),
+
+              _buildDropdown(
+                key: _industryKey,
+                label: '업종',
+                value: industry,
+                items: [
+                  '서비스업 (음식점, 판매, 운송 등)', '제조업/생산직', '사무/관리직',
+                  'IT/기술직', '건설/노무직', '교육/연구직', '보건/의료/사회복지',
+                  '프리랜서/플랫폼 노동자', '기타 ( )', '해당 없음',
+                ],
+                onChanged: (val) => setState(() => industry = val ?? ''),
+              ),
+
+              _buildDropdown(
+                key: _companySizeKey,
+                label: '사업장 규모',
+                value: companySize,
+                items: [
+                  '5인 미만', '5인 이상 ~ 30인 미만', '30인 이상 ~ 100인 미만',
+                  '100인 이상', '잘 모름 / 해당 없음',
+                ],
+                onChanged: (val) => setState(() => companySize = val ?? ''),
+              ),
+
+              // ✅ [이용 목적] 복수 선택 항목
+              _buildDropdown(
+                key: _purposeKey,
+                label: '이용 목적',
+                value: purpose,
+                items: [
+                  '현재 겪고 있는 노무 문제 해결',
+                  '평소 궁금했던 노무 상식이나 정보 얻기',
+                  '혹시 모를 상황에 대비하기 위해',
+                  '전문가(노무사)를 찾거나 연결되기 위해',
+                  '기타 ( )',
+                ],
+                onChanged: (val) => setState(() => purpose = val ?? ''),
+              ),
               const SizedBox(height: 80),
             ],
           ),
