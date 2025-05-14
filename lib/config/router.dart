@@ -81,249 +81,273 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
   }
 }
 
-final router = GoRouter(
-  initialLocation: '/splash',
-  redirect: (context, state) async {
-    if (state.fullPath == '/splash') return null;
-    final user = FirebaseAuth.instance.currentUser;
+GoRouter createRouter() {
+  return GoRouter(
+    initialLocation: '/splash',
+    redirect: (context, state) async {
+      // ✅ FirebaseAuth가 main()에서 초기화된 후 호출됨
+      final user = FirebaseAuth.instance.currentUser;
 
-    const publicPaths = ['/login', '/register', '/onboarding'];
-    if (user == null) {
-      if (!publicPaths.contains(state.fullPath)) {
-        return '/login';
-      } else {
-        return null;
+      const publicPaths = ['/login', '/register', '/onboarding'];
+      if (user == null) {
+        if (!publicPaths.contains(state.fullPath)) {
+          return '/login';
+        } else {
+          return null;
+        }
       }
-    }
 
-    final userMeta = await FirebaseService.getUserMeta();
+      final userMeta = await FirebaseService.getUserMeta();
 
-    if (userMeta == null) return '/onboarding';
+      if (userMeta == null) return '/onboarding';
 
-    final isFirstLogin = userMeta['isFirstLogin'] ?? true;
-    final surveyCompleted = userMeta['surveyCompleted'] ?? false;
+      final isFirstLogin = userMeta['isFirstLogin'] ?? true;
+      final surveyCompleted = userMeta['surveyCompleted'] ?? false;
 
-    if (isFirstLogin && state.fullPath != '/onboarding') {
-      return '/onboarding';
-    }
+      if (isFirstLogin && state.fullPath != '/onboarding') {
+        return '/onboarding';
+      }
 
-    if (!surveyCompleted &&
-        state.fullPath != '/input' &&
-        state.fullPath != '/onboarding') {
-      return '/input';
-    }
+      if (!surveyCompleted &&
+          state.fullPath != '/input' &&
+          state.fullPath != '/onboarding') {
+        return '/input';
+      }
 
-    return null;
-  },
-  routes: [
-    GoRoute(
-      path: '/splash',
-      name: 'Splash',
-      builder: (context, state) => const SplashScreen(),
-    ),
-    GoRoute(
-      path: '/login',
-      name: 'Login',
-      builder: (context, state) => const LoginScreen(),
-    ),
-    GoRoute(
-      path: '/register',
-      name: 'Register',
-      builder: (context, state) => const RegisterScreen(),
-    ),
-    GoRoute(
-      path: '/input',
-      name: 'Input',
-      pageBuilder: (context, state) => CustomTransitionPage(
-        key: state.pageKey,
-        child: const InputScreen(),
-        transitionDuration: const Duration(milliseconds: 500),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            FadeTransition(opacity: animation, child: child),
+      return null;
+    },
+    routes: [
+      GoRoute(
+        path: '/splash',
+        name: 'Splash',
+        builder: (context, state) => const SplashScreen(),
       ),
-    ),
-    GoRoute(
-      path: '/onboarding',
-      name: 'Onboarding',
-      pageBuilder: (context, state) => CustomTransitionPage(
-        key: state.pageKey,
-        child: const OnboardingScreen(),
-        transitionDuration: const Duration(milliseconds: 500),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            FadeTransition(opacity: animation, child: child),
+      GoRoute(
+        path: '/login',
+        name: 'Login',
+        builder: (context, state) => const LoginScreen(),
       ),
-    ),
-    GoRoute(
-      path: '/lawyer_list',
-      name: 'LawyerList',
-      pageBuilder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>?;
-        final title = extra?['title'] as String? ?? '노무사 목록';
-        final category = extra?['category'] as String?;
-        final lawyers = (extra?['lawyers'] as List?)?.cast<Lawyer>() ?? [];
+      GoRoute(
+        path: '/register',
+        name: 'Register',
+        builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/input',
+        name: 'Input',
+        pageBuilder: (context, state) =>
+            CustomTransitionPage(
+              key: state.pageKey,
+              child: const InputScreen(),
+              transitionDuration: const Duration(milliseconds: 500),
+              transitionsBuilder: (context, animation, secondaryAnimation,
+                  child) =>
+                  FadeTransition(opacity: animation, child: child),
+            ),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        name: 'Onboarding',
+        pageBuilder: (context, state) =>
+            CustomTransitionPage(
+              key: state.pageKey,
+              child: const OnboardingScreen(),
+              transitionDuration: const Duration(milliseconds: 500),
+              transitionsBuilder: (context, animation, secondaryAnimation,
+                  child) =>
+                  FadeTransition(opacity: animation, child: child),
+            ),
+      ),
+      GoRoute(
+        path: '/lawyer_list',
+        name: 'LawyerList',
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final title = extra?['title'] as String? ?? '노무사 목록';
+          final category = extra?['category'] as String?;
+          final lawyers = (extra?['lawyers'] as List?)?.cast<Lawyer>() ?? [];
 
-        return CustomTransitionPage(
-          key: state.pageKey,
-          child: LawyerListScreen(
-            title: title,
-            category: category,
-          ),
-          transitionDuration: const Duration(milliseconds: 500),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-              FadeTransition(opacity: animation, child: child),
-        );
-      },
-    ),
-    ShellRoute(
-      builder: (context, state, child) {
-        return Scaffold(
-          body: child,
-          bottomNavigationBar: const MyBottomNavigationBar(),
-        );
-      },
-      routes: [
-        GoRoute(
-          path: '/home',
-          name: 'Home',
-          pageBuilder: (context, state) => CustomTransitionPage(
+          return CustomTransitionPage(
             key: state.pageKey,
-            child: const HomeScreen(),
+            child: LawyerListScreen(
+              title: title,
+              category: category,
+            ),
             transitionDuration: const Duration(milliseconds: 500),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            transitionsBuilder: (context, animation, secondaryAnimation,
+                child) =>
                 FadeTransition(opacity: animation, child: child),
+          );
+        },
+      ),
+      ShellRoute(
+        builder: (context, state, child) {
+          return Scaffold(
+            body: child,
+            bottomNavigationBar: const MyBottomNavigationBar(),
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '/home',
+            name: 'Home',
+            pageBuilder: (context, state) =>
+                CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const HomeScreen(),
+                  transitionDuration: const Duration(milliseconds: 500),
+                  transitionsBuilder: (context, animation, secondaryAnimation,
+                      child) =>
+                      FadeTransition(opacity: animation, child: child),
+                ),
           ),
-        ),
-        GoRoute(
-          path: '/worker',
-          name: 'Worker',
-          pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
-            child: const WorkerScreen(),
-            transitionDuration: const Duration(milliseconds: 500),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                FadeTransition(opacity: animation, child: child),
+          GoRoute(
+            path: '/worker',
+            name: 'Worker',
+            pageBuilder: (context, state) =>
+                CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const WorkerScreen(),
+                  transitionDuration: const Duration(milliseconds: 500),
+                  transitionsBuilder: (context, animation, secondaryAnimation,
+                      child) =>
+                      FadeTransition(opacity: animation, child: child),
+                ),
           ),
-        ),
-        GoRoute(
-          path: '/search',
-          name: 'Search',
-          pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
-            child: const KeywordSearchScreen(),
-            transitionDuration: const Duration(milliseconds: 500),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                FadeTransition(opacity: animation, child: child),
+          GoRoute(
+            path: '/search',
+            name: 'Search',
+            pageBuilder: (context, state) =>
+                CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const KeywordSearchScreen(),
+                  transitionDuration: const Duration(milliseconds: 500),
+                  transitionsBuilder: (context, animation, secondaryAnimation,
+                      child) =>
+                      FadeTransition(opacity: animation, child: child),
+                ),
           ),
-        ),
-        GoRoute(
-          path: '/chatbot',
-          name: 'Chatbot',
-          pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
-            child: const ChatbotScreen(),
-            transitionDuration: const Duration(milliseconds: 500),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                FadeTransition(opacity: animation, child: child),
+          GoRoute(
+            path: '/chatbot',
+            name: 'Chatbot',
+            pageBuilder: (context, state) =>
+                CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const ChatbotScreen(),
+                  transitionDuration: const Duration(milliseconds: 500),
+                  transitionsBuilder: (context, animation, secondaryAnimation,
+                      child) =>
+                      FadeTransition(opacity: animation, child: child),
+                ),
           ),
-        ),
-        GoRoute(
-          path: '/favorites',
-          name: 'Favorites',
-          pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
-            child: const FavoritesScreen(),
-            transitionDuration: const Duration(milliseconds: 500),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                FadeTransition(opacity: animation, child: child),
+          GoRoute(
+            path: '/favorites',
+            name: 'Favorites',
+            pageBuilder: (context, state) =>
+                CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const FavoritesScreen(),
+                  transitionDuration: const Duration(milliseconds: 500),
+                  transitionsBuilder: (context, animation, secondaryAnimation,
+                      child) =>
+                      FadeTransition(opacity: animation, child: child),
+                ),
           ),
-        ),
-        GoRoute(
-          path: '/mypage',
-          name: 'MyPage',
-          pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
-            child: const MyPageScreen(),
-            transitionDuration: const Duration(milliseconds: 500),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                FadeTransition(opacity: animation, child: child),
+          GoRoute(
+            path: '/mypage',
+            name: 'MyPage',
+            pageBuilder: (context, state) =>
+                CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const MyPageScreen(),
+                  transitionDuration: const Duration(milliseconds: 500),
+                  transitionsBuilder: (context, animation, secondaryAnimation,
+                      child) =>
+                      FadeTransition(opacity: animation, child: child),
+                ),
           ),
-        ),
-        GoRoute(
-          path: '/my-reservations',
-          name: 'MyReservations',
-          pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
-            child: const MyReservationsScreen(),
-            transitionDuration: const Duration(milliseconds: 500),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                FadeTransition(opacity: animation, child: child),
+          GoRoute(
+            path: '/my-reservations',
+            name: 'MyReservations',
+            pageBuilder: (context, state) =>
+                CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const MyReservationsScreen(),
+                  transitionDuration: const Duration(milliseconds: 500),
+                  transitionsBuilder: (context, animation, secondaryAnimation,
+                      child) =>
+                      FadeTransition(opacity: animation, child: child),
+                ),
           ),
-        ),
-        GoRoute(
-          path: '/my-reviews',
-          name: 'MyReviews',
-          pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
-            child: const MyReviewsScreen(),
-            transitionDuration: const Duration(milliseconds: 500),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                FadeTransition(opacity: animation, child: child),
+          GoRoute(
+            path: '/my-reviews',
+            name: 'MyReviews',
+            pageBuilder: (context, state) =>
+                CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const MyReviewsScreen(),
+                  transitionDuration: const Duration(milliseconds: 500),
+                  transitionsBuilder: (context, animation, secondaryAnimation,
+                      child) =>
+                      FadeTransition(opacity: animation, child: child),
+                ),
           ),
-        ),
-      ],
-    ),
-    GoRoute(
-      path: '/edit-profile',
-      name: 'EditProfile',
-      builder: (context, state) => const EditProfileScreen(),
-    ),
-    GoRoute(
-      path: '/reservation',
-      builder: (context, state) {
-        final lawyer = state.extra as Lawyer;
-        return ReservationScreen(lawyer: lawyer);
-      },
-    ),
-    GoRoute(
-      path: '/review-create',
-      builder: (context, state) {
-        final lawyer = state.extra as Lawyer;
-        return ReviewCreateScreen(lawyer: lawyer);
-      },
-    ),
-    GoRoute(
-      path: '/reservation_success',
-      builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>?;
-        final dynamic dateRaw = extra?['date'];
-        final date = dateRaw is DateTime ? dateRaw : DateTime.parse(dateRaw);
-        final time = extra?['time'] as String?;
-        final lawyerMap = extra?['lawyer'];
+        ],
+      ),
+      GoRoute(
+        path: '/edit-profile',
+        name: 'EditProfile',
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/reservation',
+        builder: (context, state) {
+          final lawyer = state.extra as Lawyer;
+          return ReservationScreen(lawyer: lawyer);
+        },
+      ),
+      GoRoute(
+        path: '/review-create',
+        builder: (context, state) {
+          final lawyer = state.extra as Lawyer;
+          return ReviewCreateScreen(lawyer: lawyer);
+        },
+      ),
+      GoRoute(
+        path: '/reservation_success',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final dynamic dateRaw = extra?['date'];
+          final date = dateRaw is DateTime ? dateRaw : DateTime.parse(dateRaw);
+          final time = extra?['time'] as String?;
+          final lawyerMap = extra?['lawyer'];
 
-        final lawyer = lawyerMap != null ? Lawyer.fromJson(lawyerMap) : null;
+          final lawyer = lawyerMap != null ? Lawyer.fromJson(lawyerMap) : null;
 
-        return ReservationSuccessScreen(
-          date: date,
-          time: time ?? '',
-          lawyer: lawyer!,
-        );
-      },
-    ),
-    // router.dart
+          return ReservationSuccessScreen(
+            date: date,
+            time: time ?? '',
+            lawyer: lawyer!,
+          );
+        },
+      ),
+      // router.dart
 
-    GoRoute(
-          path: '/post/:postId', // :postId는 동적 파라미터
-          name: 'PostDetail',
-          builder: (context, state) {
-            final postId = state.pathParameters['postId']!;
-            // postListProvider에서 해당 ID의 post를 찾아서 PostDetailScreen에 전달
-            return Consumer(
-              builder: (context, ref, child) {
-                final post = ref.read(postListProvider).firstWhere((p) => p.id == postId);
-                return PostDetailScreen(post: post);
-              },
-        );
-      },
-    ),
-  ],
-);
+      GoRoute(
+        path: '/post/:postId', // :postId는 동적 파라미터
+        name: 'PostDetail',
+        builder: (context, state) {
+          final postId = state.pathParameters['postId']!;
+          // postListProvider에서 해당 ID의 post를 찾아서 PostDetailScreen에 전달
+          return Consumer(
+            builder: (context, ref, child) {
+              final post = ref.read(postListProvider).firstWhere((p) =>
+              p.id == postId);
+              return PostDetailScreen(post: post);
+            },
+          );
+        },
+      ),
+    ],
+  );
+}
