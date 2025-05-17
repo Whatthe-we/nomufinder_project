@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://github.com/mycalls/applimode-examples/blob/main/assets/am-campaign-head-v2.png?raw=true">
+  <img src="https://github.com/사용자명/저장소명/blob/main/assets/images/Nomufinder_1.png?raw=true" width="800">
 </p>
 
 
