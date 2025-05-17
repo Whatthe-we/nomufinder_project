@@ -129,6 +129,7 @@ firebase deploy --only functions
 * [Riverpod](https://riverpod.dev/) _ 수정 필요
 
 ---
-* ## 라이선스
+
+## 라이선스
 
 MIT License © 2025 NomuFinder Team
