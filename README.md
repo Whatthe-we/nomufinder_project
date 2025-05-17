@@ -132,4 +132,4 @@ firebase deploy --only functions
 
 ## 라이선스
 
-MIT License © 2025 NomuFinder Team
+MIT License © 2025 NOMAD Team
