@@ -13,15 +13,34 @@
 * 노무사를 직접 찾아 상담하고 예약하는 과정이 복잡하고 불편하다.
   
 
-그래서 우리 **🤠 NOMAD 팀**은 AI 기반 노동 상담 플랫폼 ‘노무파인더’를 개발하였습니다.
+이러한 문제를 해결하기 위해,<br>**🤠 NOMAD 팀**은 AI 기반 노동 상담 플랫폼 ‘노무파인더’를 개발하였습니다.
 
-노무파인더는 **사용자의 상황을 AI가 먼저 파악**한 뒤, 그에 가장 적합한 **공인노무사(CPLA)를 연결**해주는 모바일 앱입니다.
+노무파인더는 **사용자의 상황을 AI가 먼저 파악**하고, 그에 가장 적합한 **공인노무사(CPLA)를 연결**해주는 모바일 플랫폼입니다.
 
 _ 영상 수정 필요
 <p align="center">
     <img src="https://github.com/mycalls/applimode-examples/blob/main/assets/am-preview-480p-10f-240829.gif?raw=true" width="320">
 </p>
 
+---
+
+## 사용자 흐름 (User Flow)
+1. **고민 입력**  
+   사용자는 자연어 문장으로 상황을 입력합니다.
+
+2. **AI 분류 및 키워드 추천**  
+   GPT가 문장을 분석해 카테고리를 분류하고, 관련 키워드를 자동 추천합니다.
+
+3. **노무사 리스트 조회 및 필터링**  
+   필터(지역, 성별 등)를 적용하여 적절한 노무사를 탐색합니다.
+
+4. **상담 예약 진행**  
+   날짜, 시간, 방식(전화 / 영상 / 방문)을 선택하고 예약합니다.<br>  
+   예약 결과는 이메일로 자동 안내됩니다.
+
+5. **챗봇 상담 (선택)**  
+   추가 상담이 필요할 경우, RAG 기반 챗봇을 통해 보충 질문이 가능합니다.
+   
 ---
 
 ## 주요 기능
@@ -40,7 +59,7 @@ _ 영상 수정 필요
 
 | 항목 | 기술 |
 |------|-----------|
-|    Frontend    |    Flutter, Riverpod, GoRouter    |
+| Frontend |    Flutter, Riverpod, GoRouter    |
 | Backend | FastAPI, Firebase (Firestore, Realtime DB, Functions) |
 | Auth & Push | Firebase Auth, FCM |
 | AI | OpenAI GPT, LangChain, Gemini (Google AI) |
