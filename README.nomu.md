@@ -36,9 +36,9 @@ AI가 사용자의 상황을 이해하고, 맞춤형 노무사를 매칭해주�
 
 ## 기술 스택
 
-| 항목 | 사용 기술 |
+| 항목 | 기술 |
 |------|-----------|
-| Frontend | Flutter, Riverpod, GoRouter |
+|    Frontend    |    Flutter, Riverpod, GoRouter    |
 | Backend | FastAPI, Firebase (Firestore, Realtime DB, Functions) |
 | Auth & Push | Firebase Auth, FCM |
 | AI | OpenAI GPT, LangChain, Gemini (Google AI) |
@@ -106,3 +106,8 @@ firebase deploy --only functions
 노무파인더 개발에 많은 도움을 준 다음 프로젝트에 특별히 감사드립니다.
 * [CODE WITH ANDREA](https://codewithandrea.com/) _ 수정 필요
 * [Riverpod](https://riverpod.dev/) _ 수정 필요
+
+---
+* ## 라이선스
+
+MIT License © 2025 NomuFinder Team
