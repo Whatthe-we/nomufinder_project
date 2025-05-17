@@ -1,7 +1,6 @@
 <p align="center">
-  <img src="https://github.com/사용자명/저장소명/blob/main/assets/images/Nomufinder_1.png?raw=true" width="800">
+  <img src="https://github.com/Whatthe-we/nomufinder_project/blob/main/assets/images/README_1.png?raw=true" width="800">
 </p>
-
 
 # 노무파인더 (NomuFinder)
 
