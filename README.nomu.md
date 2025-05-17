@@ -14,8 +14,8 @@
 
 그래서 ,
 
-우리는 AI와 공인노무사(CPLA)가 함께 돕는 AI 기반 노동 상담 플랫폼 **노무파인더**를 제작하였습니다.  
-AI가 사용자의 상황을 이해하고, 맞춤형 노무사를 매칭해주는 앱입니다.
+우리 NOMAD 팀은 AI와 공인노무사(CPLA)가 함께 돕는 AI 기반 노동 상담 플랫폼 **노무파인더**를 제작하였습니다.  
+**노무파인더**는 AI가 사용자의 상황을 이해하고, 맞춤형 노무사를 매칭해주는 앱입니다.
 
 <p align="center">
     <img src="https://github.com/mycalls/applimode-examples/blob/main/assets/am-preview-480p-10f-240829.gif?raw=true" width="320">
