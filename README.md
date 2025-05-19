@@ -17,7 +17,7 @@
 
 _ 영상 수정 필요
 <p align="center">
-  <img src="https://github.com/Whatthe-we/nomufinder_project/blob/main/assets/images/README_2.jpg?raw=true" width="800">
+  <img src="https://github.com/Whatthe-we/nomufinder_project/blob/main/assets/images/README_2.gif?raw=true" width="200">
 </p>
 
 ---
