@@ -75,7 +75,7 @@
 ![3차 TEST](./images/최종_3차_final_test_f1_comparison.png)
 
 > 대부분의 카테고리에서 Few-shot 방식이 Zero-shot보다 더 높은 F1 Score를 기록하였으며,  
-> 특히 `기업자문`, `컨설팅`과 같은 구분이 어려운 항목에서 **뚜렷한 성능 차이**를 보였습니다.
+> 특히 `기업자문`, `컨설팅`과 같은 구분이 어려운 항목에서 **뚜렷한 성능 차이**를 보임
 
 ---
 
@@ -93,7 +93,7 @@
 - `evaluate_classification.py`: Accuracy, Macro F1 Score, Category별 F1 Score 계산 스크립트
 - 'final_test.py' : 최종 TEST 스크립트
 - `test_set.json`: 최종 TEST용 Few-shot 예시 데이터
-- 📄 [결과 보고서 보기](./[NOMAD]Few_shot_experiments.pdf)
+- 📄 [결과 보고서 보기](./experiments/[NOMAD]Few_shot_experiments.pdf)
 
 ---
 
