@@ -1,0 +1,134 @@
+[
+  {
+    "model": "Few-shot",
+    "text": "이유도 모르고 정직 당함 ;;",
+    "true_label": "부당징계",
+    "predicted_label": "부당해고"
+  },
+  {
+    "model": "Few-shot",
+    "text": "계약 만료되고 바로 재계약 거절하면 문제됨?",
+    "true_label": "부당해고",
+    "predicted_label": "근로계약"
+  },
+  {
+    "model": "Few-shot",
+    "text": "근로계약 내용과 실제 근로조건이 달라요",
+    "true_label": "근로계약",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "계약서에는 주5일 근무인데 실제로는 주6일 일합니다",
+    "true_label": "근로계약",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "집단 따돌림을 당하고 있어요",
+    "true_label": "직장내괴롭힘",
+    "predicted_label": "직장내차별"
+  },
+  {
+    "model": "Few-shot",
+    "text": "따돌림 신고 들어왔는데 뭐부터 해야 함?",
+    "true_label": "직장내괴롭힘",
+    "predicted_label": "직장내차별"
+  },
+  {
+    "model": "Few-shot",
+    "text": "출휴 갔다 왔더니 자리 바뀌어 있음;;",
+    "true_label": "직장내차별",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "비정규직이라 연차 얘기 꺼내기도 눈치 보여요",
+    "true_label": "직장내차별",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "육아휴직 복귀 후 불이익을 당했어요",
+    "true_label": "직장내차별",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "출휴 복귀자 자리 바꿔도 문제 없죠?",
+    "true_label": "직장내차별",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "비정규직도 연차 줘야 함?",
+    "true_label": "직장내차별",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "육아휴직 후 다른 부서로 배치해도 되나요?",
+    "true_label": "직장내차별",
+    "predicted_label": "근로계약"
+  },
+  {
+    "model": "Few-shot",
+    "text": "정년퇴직자 재고용 의무가 있나요?",
+    "true_label": "직장내차별",
+    "predicted_label": "근로계약"
+  },
+  {
+    "model": "Few-shot",
+    "text": "장애인 의무고용 비율 미달 시 불이익은?",
+    "true_label": "직장내차별",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "하루만 나오고 결근했는데 돈 줘야 함??",
+    "true_label": "임금/퇴직금",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "근로감독 대비 준비할 수 있는 게 뭔가요?",
+    "true_label": "기업자문",
+    "predicted_label": "근로계약"
+  },
+  {
+    "model": "Few-shot",
+    "text": "정리해고 하려면 절차 진짜 다 밟아야 해요?",
+    "true_label": "기업자문",
+    "predicted_label": "부당해고"
+  },
+  {
+    "model": "Few-shot",
+    "text": "신규 입사자 교육 자료를 사내 규정으로 준비하려 합니다",
+    "true_label": "기업자문",
+    "predicted_label": "근로계약"
+  },
+  {
+    "model": "Few-shot",
+    "text": "인사평가 외주 줄까 하는데 어디다 맡겨야 하나요?",
+    "true_label": "컨설팅",
+    "predicted_label": "기업자문"
+  },
+  {
+    "model": "Few-shot",
+    "text": "요즘 ESG 컨설팅 이런 거 다 해야 됨?",
+    "true_label": "컨설팅",
+    "predicted_label": "기업자문"
+  },
+  {
+    "model": "Few-shot",
+    "text": "임금피크제 도입을 고민하고 있습니다",
+    "true_label": "컨설팅",
+    "predicted_label": "근로계약"
+  },
+  {
+    "model": "Few-shot",
+    "text": "4대보험 이런 것도 같이 처리돼요?",
+    "true_label": "급여아웃소싱",
+    "predicted_label": "근로계약"
+  }
+]
