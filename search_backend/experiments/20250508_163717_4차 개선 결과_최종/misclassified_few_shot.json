@@ -1,0 +1,56 @@
+[
+  {
+    "model": "Few-shot",
+    "text": "계약 만료되고 바로 재계약 거절하면 문제됨?",
+    "true_label": "부당해고",
+    "predicted_label": "근로계약"
+  },
+  {
+    "model": "Few-shot",
+    "text": "근로계약 내용과 실제 근로조건이 달라요",
+    "true_label": "근로계약",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "계약서에는 주5일 근무인데 실제로는 주6일 일합니다",
+    "true_label": "근로계약",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "비정규직도 연차 줘야 함?",
+    "true_label": "직장내차별",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "수습인데 최저도 안 줌 ㅋㅋ 말이 됨?",
+    "true_label": "임금/퇴직금",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "하루만 나오고 결근했는데 돈 줘야 함??",
+    "true_label": "임금/퇴직금",
+    "predicted_label": "근무조건"
+  },
+  {
+    "model": "Few-shot",
+    "text": "파업해도 월급 줘야 함?? 진심?",
+    "true_label": "노동조합",
+    "predicted_label": "분류 실패"
+  },
+  {
+    "model": "Few-shot",
+    "text": "정리해고 하려면 절차 진짜 다 밟아야 해요?",
+    "true_label": "기업자문",
+    "predicted_label": "부당해고"
+  },
+  {
+    "model": "Few-shot",
+    "text": "급여자료 제공 방식은 어떻게 되나요?",
+    "true_label": "급여아웃소싱",
+    "predicted_label": "기업자문"
+  }
+]
