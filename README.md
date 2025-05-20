@@ -170,11 +170,6 @@ firebase deploy --only functions
 
 ---
 
-## 감사의 말
-노무파인더 개발에 많은 도움을 준 다음 프로젝트에 특별히 감사드립니다.
-
----
-
 ## 라이선스
 
 MIT License © 2025 NOMAD Team (Eunsol Lee, Myeongji Ko, Yujin Choi)
