@@ -127,4 +127,4 @@ firebase deploy --only functions
 
 ## 라이선스
 
-MIT License © 2025 NOMAD Team (Eusnol Lee, Myeongji Ko, Yujin Choi)
+MIT License © 2025 NOMAD Team (Eunsol Lee, Myeongji Ko, Yujin Choi)
