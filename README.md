@@ -86,6 +86,69 @@ nomufinder/
 ├── pubspec.yaml           # Flutter 의존성 정의
 └── README.md
 ```
+---
+
+<p align="center">
+  <img src="https://github.com/Whatthe-we/nomufinder_project/blob/main/assets/images/rag1.gif?raw=true" width="800">
+</p>
+
+## RAG Process
+###RAG System의 전체 흐름
+
+✅ 1. 유저 질문 입력
+사용자가 질문(또는 진술)을 입력하면, 이 정보는 Firebase의 /chat_questions 경로에 저장됩니다.
+
+✅ 2. FastAPI Listener 동작
+FastAPI 서버가 Firebase를 실시간으로 감지하고 새로운 질문이 들어오면 이를 가져와 처리합니다.
+
+✅ 3. 질문 분류
+입력된 문장이 "진술인지 질문인지"를 판별하기 위해
+classify_need_for_question 함수를 통해 문장 유형을 분류합니다.
+
+진술: ex) "나는 퇴사했어요"
+
+질문: ex) "퇴사하면 퇴직금 받을 수 있나요?"
+
+✅ 4. 분류 결과에 따른 처리
+진술일 경우:
+
+후속 질문을 생성합니다. (예: “퇴사한 시기는 언제인가요?”)
+
+이렇게 생성된 질문이 Query 구성 단계로 넘어갑니다.
+
+질문일 경우:
+
+질문을 그대로 유지하여 Query 구성 단계로 바로 넘어갑니다.
+
+✅ 5. Query 구성
+사용자의 입력 또는 생성된 후속 질문을 기반으로 RAG 시스템에서 사용할 Query를 구성합니다.
+
+✅ 6. RAG Pipeline 실행
+Query를 기반으로 다음 과정을 순차적으로 진행합니다:
+
+FAISS Index (Chunking + Embedding)
+
+미리 준비된 문서를 쪼개고 임베딩하여 벡터 인덱스를 구성해둔 상태입니다.
+
+Hybrid Retriever (FAISS + BM25)
+
+쿼리를 기반으로 하이브리드 검색(벡터 기반 + 키워드 기반)을 수행하여 관련 문맥(Context)을 반환합니다.
+
+LLM (GPT-4.1)
+
+검색된 문맥을 기반으로 GPT-4.1 모델이 답변을 생성합니다.
+
+RAG Chain
+
+전체 검색-생성 과정을 하나의 체인으로 구성하여 최종 응답을 생성합니다.
+
+✅ 7. 응답 결과 저장
+생성된 응답 결과는 다시 Firebase의 /chat_answers 경로에 저장됩니다.
+
+✅ 8. 사용자에게 응답 전달
+사용자는 챗봇 인터페이스를 통해 최종 응답을 확인할 수 있습니다.
+
+
 
 ---
 
