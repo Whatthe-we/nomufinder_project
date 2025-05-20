@@ -16,7 +16,7 @@
 노무파인더는 **사용자의 상황을 AI가 먼저 파악**하고, 그에 가장 적합한 **공인노무사(CPLA)를 연결**해주는 모바일 플랫폼입니다.
 
 <p align="center">
-  <img src="https://github.com/Whatthe-we/nomufinder_project/blob/main/assets/images/README_2.gif?raw=true" width="300">
+  <img src="https://github.com/Whatthe-we/nomufinder_project/blob/main/assets/images/README_2.gif?raw=true" width="250">
 </p>
 
 ---
