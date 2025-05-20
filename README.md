@@ -87,12 +87,12 @@ nomufinder/
 └── README.md
 ```
 ---
-
+## RAG System
 <p align="center">
   <img src="https://github.com/Whatthe-we/nomufinder_project/blob/main/assets/images/rag1.png?raw=true" width="800">
 </p>
 
-## RAG System
+## RAG 전체 흐름
 
 ✅ 1. 유저 질문 입력
 사용자가 질문(또는 진술)을 입력하면, 이 정보는 Firebase의 /chat_questions 경로에 저장됩니다.
