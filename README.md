@@ -93,7 +93,7 @@ nomufinder/
   <img src="https://github.com/Whatthe-we/nomufinder_project/blob/main/assets/images/rag1.png?raw=true" width="800">
 </p>
 
-## RAG 전체 흐름
+## RAG Process
 
 1️⃣ 사용자 질문 또는 진술 입력
 사용자가 챗봇에 텍스트(질문 또는 진술)를 입력하면, 해당 데이터는 Firebase의 /chat_questions 경로에 저장됩니다.
