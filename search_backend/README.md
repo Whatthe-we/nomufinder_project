@@ -3,7 +3,7 @@
 ## 1. 실험 개요
 - 사용자 자연어 입력을 기반으로 GPT가 노동 문제 유형을 분류하는 AI 분류기 구현
 - Zero-shot보다 높은 분류 정확도를 위해 **Few-shot Prompting** 기법을 적용
-- 문체 유형(business / worker / casual) 및 복합 쟁점 구분을 고려한 프롬프트 구성
+- 문제 유형(business / worker / casual) 및 복합 쟁점 구분을 고려한 프롬프트 구성
 - 예시 문장 튜닝 및 키워드 매칭을 통한 정밀도 향상
 
 ---
